@@ -21,25 +21,42 @@ Repositório minimalista para criação de agentes de IA inteligentes e versáte
 
 ## 🚀 Instalação Rápida
 
-### Opção 1: Configuração Automática (Recomendado)
+### ⚡ Opção 1: Com UV (Recomendado - Ultra Rápido!)
+
+```bash
+# Instalação completa em um comando
+uv sync
+
+# Executar exemplo
+uv run python examples/basic_example.py
+```
+
+> 🎯 **UV é 10-100x mais rápido que pip!** [Saiba mais](docs/UV_SETUP.md)
+
+### Opção 2: Configuração Automática (com pip)
 
 ```bash
 # Configuração completa em um comando
-python quick_setup.py
+python scripts/uv_setup.py
 ```
 
-### Opção 2: Configuração Manual
+### Opção 3: Configuração Manual
 
 ```bash
-# 1. Instalar dependências
+# 1. Criar ambiente virtual
+python -m venv .venv
+
+# 2. Ativar (Windows: .\.venv\Scripts\Activate.ps1 | Linux/Mac: source .venv/bin/activate)
+.\.venv\Scripts\Activate.ps1
+
+# 3. Instalar dependências
 pip install -r requirements.txt
 
-# 2. Configurar ambiente
-copy .env.template .env
-# Edite o arquivo .env com suas configurações
+# 4. Configurar ambiente
+copy config_template.json .env
 
-# 3. Validar instalação
-python validate_env.py
+# 5. Validar instalação
+python scripts/validate_env.py
 ```
 
 ## ⚙️ Configuração
