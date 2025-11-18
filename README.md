@@ -13,7 +13,17 @@ Repositório minimalista para criação de agentes de IA inteligentes e versáte
 
 ## ✨ Características Principais
 
-- 🤖 **Agente de IA Versátil**: Suporte a qualquer provedor de IA
+### 🆕 Versão 2.0 - Multi-Agent Orchestration
+
+- 👥 **Multi-Agent Crews**: Coordene equipes de agentes especializados
+- 🎭 **Roles & Goals**: Agentes com personalidade e especialização definidas
+- 📋 **Structured Tasks**: Sistema completo de orquestração de tarefas
+- 🔄 **Process Types**: Sequential e Hierarchical workflows
+- 🔧 **Tools Ecosystem**: Integrações com web search, file ops, e mais
+- 🤖 **Backward Compatible**: Mantém compatibilidade com API v1.x
+
+### Core Features
+
 - 🔗 **Protocolo A2A**: Comunicação entre agentes
 - 🧠 **Protocolo MCP**: Gerenciamento avançado de contexto
 - 📝 **Funcionalidades Integradas**: Chat, análise, tradução e mais
@@ -190,6 +200,54 @@ python scripts/validate_env.py --save-report
 
 ## 📖 Uso Super Simples
 
+### 🆕 Modo Crew (v2.0) - Multi-Agent
+
+```python
+from mangaba import Agent, Task, Crew, Process
+
+# Criar agentes especializados
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find and analyze information",
+    backstory="Expert researcher with analytical skills",
+    verbose=True
+)
+
+writer = Agent(
+    role="Content Writer", 
+    goal="Create engaging content",
+    backstory="Professional writer with tech expertise"
+)
+
+# Definir tarefas
+research_task = Task(
+    description="Research AI trends in {year}",
+    expected_output="List of 10 key trends",
+    agent=researcher
+)
+
+write_task = Task(
+    description="Write a report about the findings",
+    expected_output="Comprehensive report",
+    agent=writer,
+    context=[research_task],
+    output_file="report.md"
+)
+
+# Criar e executar crew
+crew = Crew(
+    agents=[researcher, writer],
+    tasks=[research_task, write_task],
+    process=Process.SEQUENTIAL,
+    verbose=True
+)
+
+result = crew.kickoff(inputs={"year": "2025"})
+print(result.final_output)
+```
+
+### 📱 Modo Simples (v1.x - compatível)
+
 ```python
 from mangaba_ai import MangabaAgent
 
@@ -201,7 +259,48 @@ resposta = agent.chat("Olá! Como você pode me ajudar?")
 print(resposta)
 ```
 
+> 💡 **Novo projeto?** Use a API v2.0 com Agents/Tasks/Crews  
+> 💡 **Migrando?** A API v1.x continua funcionando perfeitamente!
+
 ## 🎯 Exemplos Práticos
+
+### 🆕 Crew com Processo Hierárquico
+
+```python
+from mangaba import Agent, Task, Crew, Process
+
+# Manager (primeiro agente)
+manager = Agent(
+    role="Project Manager",
+    goal="Coordinate and ensure quality",
+    backstory="Experienced PM with great leadership",
+    allow_delegation=True
+)
+
+# Workers
+developer = Agent(
+    role="Developer",
+    goal="Write quality code",
+    backstory="Senior Python developer"
+)
+
+# Tasks
+dev_task = Task(
+    description="Develop authentication system",
+    expected_output="Working code with tests",
+    agent=developer
+)
+
+# Hierarchical crew (manager delega e revisa)
+crew = Crew(
+    agents=[manager, developer],
+    tasks=[dev_task],
+    process=Process.HIERARCHICAL,
+    verbose=True
+)
+
+result = crew.kickoff()
+```
 
 ### Chat Básico com Contexto MCP
 ```python
@@ -481,14 +580,16 @@ mangaba_ai/
 ### Com UV:
 ```bash
 .\uv run python check_setup.py              # Validação rápida
-.\uv run python examples/basic_example.py   # Exemplo básico
+.\uv run python examples/basic_example.py   # Exemplo v1.x
+.\uv run python examples/crew_example.py    # 🆕 Exemplo v2.0 Crew
 .\uv run python -m pytest tests/            # Executar testes
 ```
 
 ### Com pip (após ativar .venv):
 ```bash
 python check_setup.py                       # Validação rápida
-python examples/basic_example.py            # Exemplo básico
+python examples/basic_example.py            # Exemplo v1.x
+python examples/crew_example.py             # 🆕 Exemplo v2.0 Crew
 python scripts/quick_setup.py               # Setup automático
 python -m pytest tests/                     # Executar testes
 ```
