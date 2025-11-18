@@ -396,6 +396,6 @@ uv run python examples/basic_example.py
 
 **Bem-vindo à era moderna do Python! 🐍✨**
 
-*Versão: 1.0.1*  
+*Versão: 1.0.2*  
 *Data: Novembro 2025*  
 *Status: ✅ Completo e Testado*

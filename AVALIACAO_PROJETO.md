@@ -2,7 +2,7 @@
 
 **Data**: Novembro 2025  
 **Status**: ✅ Completo  
-**Versão**: 1.0.1
+**Versão**: 1.0.2
 
 ---
 
@@ -82,7 +82,7 @@ requires = ["hatchling"]
 
 [project]
 name = "mangaba"
-version = "1.0.1"
+version = "1.0.2"
 requires-python = ">=3.8"
 dependencies = [
     "google-generativeai>=0.3.0",

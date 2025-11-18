@@ -4,7 +4,7 @@
 
 PROJETO: Mangaba AI
 STATUS: ✅ COMPLETO E TESTADO
-VERSÃO: 1.0.1
+VERSÃO: 1.0.2
 DATA: Novembro 2025
 TEMPO DE TRABALHO: ~2 horas
 
@@ -327,7 +327,7 @@ OPÇÃO 3: COMECE COM GUIA (5 minutos)
 
 🥭 MANGABA AI - MODERNIZADO E PRONTO PARA USAR! 🚀
 
-Versão: 1.0.1
+Versão: 1.0.2
 Data: Novembro 2025
 Status: ✅ COMPLETO
 

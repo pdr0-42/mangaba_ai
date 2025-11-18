@@ -313,5 +313,5 @@ uv run python examples/basic_example.py
 **🎊 Parabéns! Seu projeto está modernizado! 🎊**
 
 *Gerado em: Novembro 2025*  
-*Versão: 1.0.1*  
+*Versão: 1.0.2*  
 *Status: ✅ Completo e Testado*

@@ -411,4 +411,4 @@ OU
 
 **🗺️ Mapa de recursos completo criado!**
 
-*Versão: 1.0.1 | Data: Novembro 2025 | Status: ✅ Completo*
+*Versão: 1.0.2 | Data: Novembro 2025 | Status: ✅ Completo*

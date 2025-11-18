@@ -13,6 +13,20 @@ O projeto Mangaba AI agora oferece **suporte completo e igualitário** para ambo
 
 ---
 
+## 🚀 Instalação direta via PyPI
+
+Se o objetivo for apenas **usar a biblioteca** (sem clonar o repositório), basta instalar o pacote publicado:
+
+```bash
+pip install mangaba          # via pip tradicional
+uv pip install mangaba       # via UV, com compatibilidade total
+python -c "from mangaba_ai import MangabaAgent; print(MangabaAgent)"
+```
+
+Assim garantimos o mesmo fluxo em todos os guias e a correção chega aos usuários imediatamente após o release 1.0.2.
+
+---
+
 ## 📦 Arquivos Criados
 
 ### 1. **.env.example** (67 linhas)

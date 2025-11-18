@@ -12,6 +12,17 @@ Guia lado a lado para comandos equivalentes. Use como consulta rápida!
 | **Ativar (Linux/Mac)** | `source .venv/bin/activate` | `source .venv/bin/activate` |
 | **Instalar projeto** | `uv sync` | `pip install -r requirements.txt` |
 
+### 💡 Uso direto via PyPI
+Quer apenas consumir o agente Mangaba em outro projeto? Ambos os gerenciadores usam o mesmo comando:
+
+```bash
+pip install mangaba
+uv pip install mangaba
+python -c "from mangaba_ai import MangabaAgent; print(MangabaAgent)"
+```
+
+Isso garante que a correção do módulo `mangaba_ai` chegue imediatamente independentemente do gerenciador escolhido.
+
 ## 🔧 Gerenciamento de Pacotes
 
 | Tarefa | UV | pip |

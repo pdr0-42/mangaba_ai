@@ -1,6 +1,6 @@
 # 📊 AUDITORIA COMPLETA - MANGABA AI
 **Data:** 17 de Novembro de 2025
-**Versão do Projeto:** 1.0.1
+**Versão do Projeto:** 1.0.2
 **Auditor:** GitHub Copilot (Claude Sonnet 4.5)
 
 ---
@@ -326,7 +326,7 @@ Problemas de Sintaxe: 0
 
 | Prática | Status | Comentário |
 |---------|--------|------------|
-| Versionamento Semântico | ✅ | v1.0.1 |
+| Versionamento Semântico | ✅ | v1.0.2 |
 | README completo | ✅ | Muito bem documentado |
 | LICENSE presente | ✅ | MIT License |
 | .gitignore configurado | ✅ | Completo |

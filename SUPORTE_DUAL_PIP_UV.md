@@ -12,6 +12,17 @@ O projeto Mangaba AI agora oferece **suporte completo e igualitário** para dois
 
 **Nenhum dos dois é obrigatório** - o usuário pode escolher livremente o que preferir!
 
+### 💡 Instalação direta via PyPI
+Para quem só quer consumir o agente em outro projeto:
+
+```bash
+pip install mangaba
+uv pip install mangaba
+python -c "from mangaba_ai import MangabaAgent; print(MangabaAgent)"
+```
+
+Esse fluxo funciona igualmente com pip ou UV e já inclui o pacote `mangaba` publicado a partir da versão 1.0.2.
+
 ## 🎯 Motivação
 
 Permitir que desenvolvedores escolham a ferramenta com a qual se sentem mais confortáveis, sem forçar adoção de tecnologias específicas. Ambos os gerenciadores são igualmente suportados e documentados.

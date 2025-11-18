@@ -283,7 +283,7 @@ Recursos criados/atualizados:
 
 ## 📈 Versioning e Changelog
 
-- **Versão do Projeto**: 1.0.1
+- **Versão do Projeto**: 1.0.2
 - **Data de Atualização**: Novembro 2025
 - **Mudanças**: Migração para UV + pyproject.toml
 - **Status**: ✅ Estável e produção-ready

@@ -16,7 +16,7 @@ Seu projeto Mangaba AI foi modernizado com sucesso para usar UV,
 o gerenciador de pacotes Python ultra-rápido (10-100x mais rápido que pip).
 
 Status: ✅ COMPLETO E TESTADO
-Versão: 1.0.1
+Versão: 1.0.2
 Data: Novembro 2025
 """)
     

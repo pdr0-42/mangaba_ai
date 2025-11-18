@@ -21,7 +21,23 @@ Repositório minimalista para criação de agentes de IA inteligentes e versáte
 
 ## 🚀 Instalação Rápida
 
-Escolha entre **UV** (ultra-rápido) ou **pip** (tradicional):
+Precisa apenas usar a biblioteca diretamente? Ela já está publicada no PyPI e pode ser instalada tanto com **pip** quanto com **UV**:
+
+```bash
+# pip tradicional
+pip install mangaba
+
+# usando UV (mesmo comando do pip, porém turbo)
+uv pip install mangaba
+
+# teste rápido após a instalação
+python -c "from mangaba_ai import MangabaAgent; print(MangabaAgent)"
+```
+
+> ✅ Esses comandos funcionam em qualquer ambiente virtual ou no sistema.  
+> ✅ `uv pip install mangaba` também aceita `--extra`/`--index` iguais ao pip.
+
+Se quiser clonar o repositório para contribuir, rode os passos abaixo e escolha entre **UV** (ultra-rápido) ou **pip** (tradicional):
 
 ### ⚡ Opção A: Com UV (10-100x mais rápido!)
 

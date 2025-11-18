@@ -73,6 +73,17 @@ uv sync
 uv run python examples/basic_example.py
 ```
 
+### 💡 Só quer usar a biblioteca rapidamente?
+Você não precisa clonar o repositório para experimentar o agente:
+
+```bash
+pip install mangaba          # pip tradicional
+uv pip install mangaba       # alternativa ultra-rápida
+python -c "from mangaba_ai import MangabaAgent; print(MangabaAgent)"
+```
+
+> Esse fluxo funciona em qualquer ambiente virtual (ou mesmo fora dele) e já traz o módulo `mangaba_ai` pronto para uso.
+
 ---
 
 ## 📚 Leitura Recomendada (por ordem de importância)
@@ -400,6 +411,6 @@ Você agora tem tudo que precisa para:
 
 **🥭 Mangaba AI - Modernizado e Pronto! 🚀**
 
-*Versão: 1.0.1*  
+*Versão: 1.0.2*  
 *Data: Novembro 2025*  
 *Status: ✅ COMPLETO*

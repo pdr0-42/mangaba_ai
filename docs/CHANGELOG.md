@@ -5,6 +5,15 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-11-16
+
+### Adicionado
+- Instruções oficiais para instalar o pacote direto do PyPI usando `pip` ou `uv`.
+
+### Corrigido
+- Publicação do módulo `mangaba_ai` como pacote raiz (agora `pip install mangaba` expõe `MangabaAgent` corretamente).
+- Versão alinhada entre `pyproject.toml`, `setup.py` e `__version__`.
+
 ## [1.0.0] - 2024-12-19
 
 ### Adicionado

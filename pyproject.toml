@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mangaba"
-version = "1.0.1"
+version = "1.0.2"
 description = "Agente de IA inteligente e versátil com protocolos A2A (Agent-to-Agent) e MCP (Model Context Protocol)"
 readme = "README.md"
 license = {text = "MIT"}

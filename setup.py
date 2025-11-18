@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="mangaba",
-    version="1.0.1dev",
+    version="1.0.2",
     author="Mangaba AI Team",
     author_email="contato@mangaba.ai",
     description="Agente de IA inteligente e versátil",
