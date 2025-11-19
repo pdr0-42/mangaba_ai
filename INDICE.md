@@ -1,19 +1,5 @@
 # 📋 Índice do Repositório Mangaba AI
 
-## 🚀 Início Rápido
-
-### Para Iniciantes
-1. 📖 [Curso Básico](docs/CURSO_BASICO.md) - **Comece aqui!**
-2. 🔧 [Guia de Configuração](docs/SETUP.md)
-3. 🧪 [Teste Rápido](#teste-rapido)
-
-### Para Desenvolvedores
-1. 📁 [Estrutura do Projeto](ESTRUTURA.md)
-2. 🌐 [Protocolos](docs/PROTOCOLS.md)
-3. 🔧 [Scripts](docs/SCRIPTS.md)
-
-# 📋 Índice do Repositório Mangaba AI
-
 ## 🌟 **PORTAL PRINCIPAL**
 
 ### 📖 **[WIKI AVANÇADA COMPLETA](docs/WIKI.md)**
@@ -25,9 +11,10 @@
 
 ### Para Iniciantes
 1. 🌟 **[Portal da Wiki](docs/WIKI.md)** - **Comece aqui!**
-2. 🎓 **[Curso Básico](docs/CURSO_BASICO.md)** - Tutorial completo
-3. ⚙️ **[Configuração](docs/SETUP.md)** - Setup passo-a-passo
-4. ❓ **[FAQ](docs/FAQ.md)** - Perguntas frequentes
+2. 📖 **[README](README.md)** - Visão geral do projeto
+3. 🎓 **[Curso Básico](docs/CURSO_BASICO.md)** - Tutorial completo
+4. ⚙️ **[Configuração](docs/SETUP.md)** - Setup passo-a-passo
+5. ❓ **[FAQ](docs/FAQ.md)** - Perguntas frequentes
 
 ### Para Desenvolvedores
 1. 📁 **[Estrutura do Projeto](ESTRUTURA.md)** - Organização
@@ -35,11 +22,21 @@
 3. ⭐ **[Melhores Práticas](docs/MELHORES_PRATICAS.md)** - Boas práticas
 4. 🤝 **[Contribuição](docs/CONTRIBUICAO.md)** - Como contribuir
 
-## 📚 Wiki Avançada Completa
+### Quick Starts
+1. ⚡ **[Quick Start UV](QUICKSTART_UV.md)** - Instalação rápida com UV
+2. 🎯 **[Quick Start V2](QUICKSTART_V2.md)** - Novidades da versão 2.0
+3. 📊 **[Avaliação do Projeto](AVALIACAO_PROJETO.md)** - Análise técnica
+
+## 📚 Documentação Completa
 
 | Documento | Descrição | Público | Tempo |
 |-----------|-----------|---------|-------|
 | 🌟 **[WIKI.md](docs/WIKI.md)** | **Portal principal da wiki** | Todos | 5-10 min |
+| 📖 **[README.md](README.md)** | Visão geral e instalação | Todos | 10-15 min |
+| ⚡ **[QUICKSTART_UV.md](QUICKSTART_UV.md)** | Início rápido com UV | Todos | 5 min |
+| 🎯 **[QUICKSTART_V2.md](QUICKSTART_V2.md)** | Novidades versão 2.0 | Todos | 10 min |
+| 📊 **[AVALIACAO_PROJETO.md](AVALIACAO_PROJETO.md)** | Análise técnica do projeto | Desenvolvedores | 15-20 min |
+| 📁 **[ESTRUTURA.md](ESTRUTURA.md)** | Organização do repositório | Desenvolvedores | 10-15 min |
 | 🎓 **[CURSO_BASICO.md](docs/CURSO_BASICO.md)** | Curso completo para iniciantes | Iniciantes | 30-45 min |
 | ⚙️ **[SETUP.md](docs/SETUP.md)** | Guia detalhado de configuração | Todos | 15-20 min |
 | 🌐 **[PROTOCOLS.md](docs/PROTOCOLS.md)** | Documentação técnica A2A/MCP | Desenvolvedores | 45-60 min |
@@ -49,7 +46,6 @@
 | 📝 **[GLOSSARIO.md](docs/GLOSSARIO.md)** | Definições de termos técnicos | Todos | Consulta |
 | 🔧 **[SCRIPTS.md](docs/SCRIPTS.md)** | Documentação dos scripts | Usuários | 15-20 min |
 | 📊 **[CHANGELOG.md](docs/CHANGELOG.md)** | Histórico de mudanças | Todos | Consulta |
-| 📁 **[ESTRUTURA.md](ESTRUTURA.md)** | Organização do repositório | Desenvolvedores | 10-15 min |
 
 ## 🔧 Scripts Disponíveis
 
@@ -104,8 +100,14 @@ python examples/basic_example.py
 
 ```
 mangaba_ai/
-├── 🌟 docs/WIKI.md           # Portal principal da wiki
-├── 📚 docs/                  # Wiki avançada completa
+├── 🌟 README.md              # Visão geral e instalação
+├── ⚡ QUICKSTART_UV.md       # Início rápido com UV
+├── 🎯 QUICKSTART_V2.md       # Novidades v2.0
+├── 📊 AVALIACAO_PROJETO.md   # Análise técnica
+├── 📁 ESTRUTURA.md           # Organização
+├── 📋 INDICE.md              # Este arquivo
+├── 📚 docs/                  # Documentação completa
+│   ├── WIKI.md               # Portal principal
 │   ├── CURSO_BASICO.md       # Curso para iniciantes
 │   ├── SETUP.md              # Guia de configuração
 │   ├── PROTOCOLS.md          # Documentação A2A/MCP
@@ -120,24 +122,25 @@ mangaba_ai/
 ├── 🌐 protocols/             # Protocolos de comunicação
 ├── 🛠️ utils/                 # Utilitários
 ├── 🧪 tests/                 # Testes automatizados
-└── 📋 INDICE.md              # Este arquivo
+└── 🤖 mangaba/               # Código principal v2.0
 ```
 
 ## 🎯 Fluxos de Trabalho
 
 ### 🆕 Primeiro Uso
 1. 🌟 **[Portal da Wiki](docs/WIKI.md)** - Visão geral e navegação
-2. 🎓 **[Curso Básico](docs/CURSO_BASICO.md)** - Aprenda os conceitos
-3. ⚙️ **[Configuração](docs/SETUP.md)** - Configure seu ambiente
-4. 🧪 **[Validação](scripts/validate_env.py)** - Teste a instalação
-5. 📖 **[Exemplo Básico](examples/basic_example.py)** - Primeiro teste
+2. 📖 **[README](README.md)** - Entender o projeto
+3. ⚡ **[Quick Start UV](QUICKSTART_UV.md)** - Instalar rapidamente
+4. 🎓 **[Curso Básico](docs/CURSO_BASICO.md)** - Aprender os conceitos
+5. 🧪 **[Validação](scripts/validate_env.py)** - Testar a instalação
 
 ### 🔧 Desenvolvimento
 1. 📁 **[Estrutura](ESTRUTURA.md)** - Organização do projeto
 2. 🌐 **[Protocolos](docs/PROTOCOLS.md)** - A2A e MCP
-3. ⭐ **[Melhores Práticas](docs/MELHORES_PRATICAS.md)** - Boas práticas
-4. 🤝 **[Contribuição](docs/CONTRIBUICAO.md)** - Como contribuir
-5. 🧪 **[Testes](tests/)** - Executar testes
+3. 🎯 **[V2.0 Features](QUICKSTART_V2.md)** - Novas funcionalidades
+4. ⭐ **[Melhores Práticas](docs/MELHORES_PRATICAS.md)** - Boas práticas
+5. 🤝 **[Contribuição](docs/CONTRIBUICAO.md)** - Como contribuir
+6. 🧪 **[Testes](tests/)** - Executar testes
 
 ### 🐛 Solução de Problemas
 1. ❓ **[FAQ](docs/FAQ.md)** - Dúvidas comuns
