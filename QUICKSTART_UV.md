@@ -68,7 +68,7 @@ copy config_template.json .env
 |-----------|-----------|
 | [docs/UV_SETUP.md](docs/UV_SETUP.md) | Para aprender UV em detalhes |
 | [docs/MIGRACAO_PIP_UV.md](docs/MIGRACAO_PIP_UV.md) | Se vem de pip/outro projeto |
-| [ATUALIZAÇÃO_UV_RESUMO.md](ATUALIZAÇÃO_UV_RESUMO.md) | Resumo das mudanças |
+| [SUMARIO_EXECUTIVO.md](SUMARIO_EXECUTIVO.md) | Resumo executivo das mudanças |
 | [AVALIACAO_PROJETO.md](AVALIACAO_PROJETO.md) | Para entender o projeto |
 
 ---
@@ -138,9 +138,8 @@ mangaba_ai/
 ├── 📁 docs/
 │   ├── UV_SETUP.md          # Guia UV
 │   ├── MIGRACAO_PIP_UV.md  # Migração
+│   ├── WIKI.md             # Portal da documentação avançada
 │   └── ...
-│
-└── 📚 wiki/                 # Documentação avançada
 ```
 
 ---

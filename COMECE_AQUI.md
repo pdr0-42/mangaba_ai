@@ -24,8 +24,8 @@ Seu projeto **Mangaba AI** foi **modernizado com UV** com sucesso! ✨
    ✅ docs/MIGRACAO_PIP_UV.md - Pip→UV
    ✅ docs/CI_CD_UV.md - GitHub Actions
    ✅ docs/INDICE_UV.md - Índice completo
+   ✅ docs/WIKI.md - Portal da documentação avançada
    ✅ AVALIACAO_PROJETO.md - Análise técnica
-   ✅ PAINEL_ATUALIZACAO.md - Dashboard visual
    ✅ MAPA_RECURSOS.md - Navegação
 
 🔧 SCRIPTS AUTOMÁTICOS
@@ -302,14 +302,12 @@ uv run python examples/basic_example.py  # Testar
 
 ## 📋 Arquivos Criados/Modificados
 
-### ✅ Novos (9 arquivos)
+### ✅ Novos Principais
 
 **Raiz:**
 - ✅ `pyproject.toml` - Configuração moderna
 - ✅ `SUMARIO_EXECUTIVO.md` - Executive summary
 - ✅ `QUICKSTART_UV.md` - Quick start 5 min
-- ✅ `ATUALIZAÇÃO_UV_RESUMO.md` - Resumo mudanças
-- ✅ `PAINEL_ATUALIZACAO.md` - Dashboard visual
 - ✅ `MAPA_RECURSOS.md` - Navegação
 
 **Pasta docs/:**

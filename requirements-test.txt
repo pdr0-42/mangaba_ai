@@ -1,37 +1,4 @@
-# Dependências para testes do projeto Mangaba AI
-
-# Framework de testes
-pytest>=7.4.0
-pytest-cov>=4.1.0
-pytest-mock>=3.11.1
-pytest-asyncio>=0.21.1
-pytest-xdist>=3.3.1
-
-# Cobertura de código
-coverage>=7.2.0
-
-# Mocks e fixtures
-responses>=0.23.0
-factory-boy>=3.3.0
-faker>=19.0.0
-
-# Testes de performance
-pytest-benchmark>=4.0.0
-memory-profiler>=0.61.0
-
-# Utilitários de teste
-freezegun>=1.2.2
-parameterized>=0.9.0
-
-# Linting e formatação (para CI/CD)
-flake8>=6.0.0
-black>=23.0.0
-isort>=5.12.0
-mypy>=1.5.0
-
-# Relatórios
-pytest-html>=3.2.0
-pytest-json-report>=1.5.0
-
-# Integração com CI/CD
-pytest-github-actions-annotate-failures>=0.2.0
+# Dependências de desenvolvimento/teste são definidas como extras em pyproject.toml.
+# Execute: pip install -r requirements-test.txt
+# …ou diretamente: pip install -e ".[dev,test]"
+-e .[dev,test]

@@ -118,7 +118,7 @@ uv sync
 
 ## 📁 Estrutura de Arquivos
 
-### Novos Arquivos (8)
+### Novos Arquivos Principais
 
 ```
 ✅ pyproject.toml              # Configuração moderna
@@ -129,7 +129,6 @@ uv sync
 ✅ scripts/uv_setup.py        # Setup automático
 ✅ AVALIACAO_PROJETO.md       # Avaliação técnica
 ✅ QUICKSTART_UV.md           # Quick start 5min
-✅ PAINEL_ATUALIZACAO.md      # Este sumário
 ```
 
 ### Mantidos (compatibilidade)

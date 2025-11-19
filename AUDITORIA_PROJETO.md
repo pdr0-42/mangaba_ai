@@ -36,8 +36,7 @@ mangaba_ai/
 ├── 📁 scripts/          ✅ Scripts de automação
 ├── 📁 tests/            ✅ Suite de testes completa
 ├── 📁 utils/            ✅ Utilitários (logger)
-├── 📁 docs/             ✅ Documentação abrangente
-└── 📁 wiki/             ✅ Wiki avançada
+└── 📁 docs/             ✅ Documentação abrangente (inclui WIKI.md)
 ```
 
 ### Estatísticas de Código

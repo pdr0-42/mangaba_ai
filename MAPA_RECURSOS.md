@@ -27,17 +27,17 @@
    ├─ Timeline de implementação
    └─ ROI e recomendações
    
-📄 PAINEL_ATUALIZACAO.md
-   ├─ Dashboard visual da atualização
-   ├─ Estatísticas e benefícios
-   ├─ Comparativo antes/depois
-   └─ Checklist de verificação
+📄 COMECE_AQUI.md
+   ├─ Guia rápido pós-modernização
+   ├─ Lista dos arquivos entregues
+   ├─ Próximos passos sugeridos
+   └─ Links essenciais reunidos
    
-📄 ATUALIZAÇÃO_UV_RESUMO.md
-   ├─ Resumo das tarefas completas
-   ├─ Instruções de uso
-   ├─ Links importantes
-   └─ Próximos passos opcionais
+📄 MAPA_RECURSOS.md
+   ├─ Visão consolidada dos materiais
+   ├─ Caminhos sugeridos por perfil
+   ├─ Tabela de recursos e prazos
+   └─ Links rápidos para tudo
 ```
 
 ### ⚡ Quick Start (Comece em 5 Min!)
@@ -217,8 +217,8 @@
 2. Leia: AVALIACAO_PROJETO.md (20 min)
    └─ Tenha: Análise técnica completa
 
-3. Veja: PAINEL_ATUALIZACAO.md (5 min)
-   └─ Tenha: Dashboard visual
+3. Consulte: MAPA_RECURSOS.md (5 min)
+   └─ Tenha: Visão consolidada
 
 4. Consulte: Próximos passos
    └─ Decida: Roadmap futuro
@@ -229,8 +229,8 @@
 1. Use: SUMARIO_EXECUTIVO.md
    └─ Slide: Overview e benefícios
 
-2. Use: PAINEL_ATUALIZACAO.md
-   └─ Slide: Dashboard visual
+2. Use: MAPA_RECURSOS.md
+   └─ Slide: Navegação visual
 
 3. Use: docs/MIGRACAO_PIP_UV.md → Tabela
    └─ Slide: Comparativo antes/depois
@@ -274,8 +274,8 @@
 
 ### Análises (Entenda)
 - 📊 [AVALIACAO_PROJETO.md](AVALIACAO_PROJETO.md) - Avaliação técnica
-- 📊 [PAINEL_ATUALIZACAO.md](PAINEL_ATUALIZACAO.md) - Dashboard visual
-- 📊 [ATUALIZAÇÃO_UV_RESUMO.md](ATUALIZAÇÃO_UV_RESUMO.md) - Resumo das mudanças
+- 📚 [docs/WIKI.md](docs/WIKI.md) - Portal completo
+- 🗺️ [MAPA_RECURSOS.md](MAPA_RECURSOS.md) - Visão consolidada
 
 ### Referência (Consulte)
 - 🗂️ [docs/INDICE_UV.md](docs/INDICE_UV.md) - Índice central
@@ -363,7 +363,7 @@ ESTE TRIMESTRE
 │                                     │
 │ 4️⃣  ARQUITETO / PM                  │
 │    → SUMARIO_EXECUTIVO.md           │
-│    → PAINEL_ATUALIZACAO.md          │
+│    → MAPA_RECURSOS.md               │
 │                                     │
 │ 5️⃣  VENDO TUDO                      │
 │    → Leia nesta ordem:              │
