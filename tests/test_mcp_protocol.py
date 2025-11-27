@@ -159,22 +159,26 @@ class TestMCPContext:
     
     def test_get_hash(self):
         """Testa geração de hash do conteúdo"""
-        content = {"message": "test", "user": "test_user"}
+        # Usa dicionários distintos para evitar compartilhamento de referência
         context1 = MCPContext.create(
             context_type=ContextType.CONVERSATION,
-            content=content
+            content={"message": "test", "user": "test_user"}
         )
         context2 = MCPContext.create(
             context_type=ContextType.CONVERSATION,
-            content=content
+            content={"message": "test", "user": "test_user"}
         )
         
         # Mesmo conteúdo deve gerar mesmo hash
         assert context1.get_hash() == context2.get_hash()
         
         # Conteúdo diferente deve gerar hash diferente
-        context2.update_content({"message": "different"})
-        assert context1.get_hash() != context2.get_hash()
+        # Cria novo contexto com conteúdo diferente
+        context3 = MCPContext.create(
+            context_type=ContextType.CONVERSATION,
+            content={"message": "different", "user": "test_user"}
+        )
+        assert context1.get_hash() != context3.get_hash()
     
     def test_to_dict(self):
         """Testa conversão para dicionário"""

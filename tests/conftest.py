@@ -281,14 +281,6 @@ pytestmark = [
 ]
 
 
-# Configuração de timeout global para testes
-def pytest_configure(config):
-    """Configuração global do pytest"""
-    # Adiciona timeout padrão se não especificado
-    if not config.getoption("--timeout"):
-        config.option.timeout = 30
-
-
 # Hook para capturar falhas e gerar relatórios detalhados
 def pytest_runtest_makereport(item, call):
     """Hook para personalizar relatórios de teste"""

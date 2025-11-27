@@ -324,15 +324,20 @@ class TestA2AAgent:
         other_agent = A2AAgent("other_agent")
         agent.connect_to(other_agent)
         
-        with patch.object(agent.a2a_protocol, 'send_message') as mock_send:
-            message = agent.send_request(
-                "other_agent",
-                "test_action",
-                {"param": "value"}
-            )
-            
-            mock_send.assert_called_once()
-            assert message.message_type == MessageType.REQUEST
+        # Não podemos mockar send_message e depois verificar o retorno,
+        # pois send_request retorna o resultado de send_message
+        result = agent.send_request(
+            "other_agent",
+            "test_action",
+            {"param": "value"}
+        )
+        
+        # send_request retorna True se a mensagem foi enviada com sucesso
+        assert result is True
+        # Verifica se a mensagem foi registrada no histórico
+        assert len(agent.a2a_protocol.message_history) > 0
+        last_message = agent.a2a_protocol.message_history[-1]
+        assert last_message.message_type == MessageType.REQUEST
     
     def test_notify_all(self, agent):
         """Testa notificação para todos os agentes"""
