@@ -11,7 +11,7 @@ from mangaba.tools.base import BaseTool
 from mangaba.tools.web_search import SerperSearchTool, DuckDuckGoSearchTool
 from mangaba.tools.file_tools import FileReaderTool, FileWriterTool, DirectoryListTool
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __all__ = [
     "Agent",
     "Task",
