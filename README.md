@@ -9,7 +9,7 @@ Repositório minimalista para criação de agentes de IA inteligentes e versáte
 
 > 📚 **[WIKI AVANÇADA](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/WIKI.md)** - Documentação completa em português brasileiro
 
-> 📋 **[ÍNDICE COMPLETO](https://github.com/mangaba-ai/mangaba-ai/blob/main/INDICE.md)** - Navegação rápida por todo o repositório
+> 📋 **[ÍNDICE COMPLETO](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/README.md)** - Navegação rápida por toda a documentação
 
 ## ✨ Características Principais
 

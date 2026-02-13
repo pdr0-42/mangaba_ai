@@ -11,8 +11,9 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - 🔗 Conversão de todos os links relativos para URLs absolutas do GitHub no README.md
 - ✅ Links agora funcionam corretamente tanto no GitHub quanto no PyPI
 - 📚 Links para documentação (WIKI.md, CURSO_BASICO.md, FAQ.md, etc.)
-- 📁 Links para arquivos (ESTRUTURA.md, INDICE.md)
+- 📁 Links para arquivos (ESTRUTURA.md, docs/README.md)
 - 🔧 Links para scripts (validate_env.py, quick_setup.py, etc.)
+- 📋 Link "ÍNDICE COMPLETO" corrigido para apontar para docs/README.md
 
 ### Melhorado
 - 🌐 Experiência do usuário ao acessar https://pypi.org/project/mangaba/
