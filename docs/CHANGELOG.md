@@ -5,6 +5,19 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2026-02-13
+
+### Corrigido
+- 🔗 Conversão de todos os links relativos para URLs absolutas do GitHub no README.md
+- ✅ Links agora funcionam corretamente tanto no GitHub quanto no PyPI
+- 📚 Links para documentação (WIKI.md, CURSO_BASICO.md, FAQ.md, etc.)
+- 📁 Links para arquivos (ESTRUTURA.md, INDICE.md)
+- 🔧 Links para scripts (validate_env.py, quick_setup.py, etc.)
+
+### Melhorado
+- 🌐 Experiência do usuário ao acessar https://pypi.org/project/mangaba/
+- 📖 Acessibilidade da documentação através do PyPI
+
 ## [1.0.2] - 2025-11-16
 
 ### Adicionado

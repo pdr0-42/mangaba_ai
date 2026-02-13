@@ -7,9 +7,9 @@
 
 Repositório minimalista para criação de agentes de IA inteligentes e versáteis com protocolos **A2A** (Agent-to-Agent) e **MCP** (Model Context Protocol).
 
-> 📚 **[WIKI AVANÇADA](docs/WIKI.md)** - Documentação completa em português brasileiro
+> 📚 **[WIKI AVANÇADA](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/WIKI.md)** - Documentação completa em português brasileiro
 
-> 📋 **[ÍNDICE COMPLETO](INDICE.md)** - Navegação rápida por todo o repositório
+> 📋 **[ÍNDICE COMPLETO](https://github.com/mangaba-ai/mangaba-ai/blob/main/INDICE.md)** - Navegação rápida por todo o repositório
 
 ## ✨ Características Principais
 
@@ -62,7 +62,7 @@ uv sync
 uv run python examples/basic_example.py
 ```
 
-> 💡 **Novo em UV?** [Guia completo de UV](docs/UV_SETUP.md) • [Migração pip para UV](docs/MIGRACAO_PIP_UV.md)
+> 💡 **Novo em UV?** [Guia completo de UV](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/UV_SETUP.md) • [Migração pip para UV](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/MIGRACAO_PIP_UV.md)
 
 ### 🐍 Opção B: Com pip (tradicional)
 
@@ -563,13 +563,13 @@ MODEL=modelo-multimodal   # Para diferentes tipos de entrada
 
 ## 🚀 Scripts Disponíveis
 
-> 🔧 **Todos os scripts estão organizados na pasta [scripts/](scripts/)**
+> 🔧 **Todos os scripts estão organizados na pasta [scripts/](https://github.com/mangaba-ai/mangaba-ai/tree/main/scripts)**
 
-- [`validate_env.py`](scripts/validate_env.py) - Valida configuração do ambiente
-- [`quick_setup.py`](scripts/quick_setup.py) - Configuração rápida automatizada
-- [`example_env_usage.py`](scripts/example_env_usage.py) - Exemplo de uso das configurações
-- [`exemplo_curso_basico.py`](scripts/exemplo_curso_basico.py) - Exemplos práticos do curso básico
-- [`setup_env.py`](scripts/setup_env.py) - Configuração manual detalhada
+- [`validate_env.py`](https://github.com/mangaba-ai/mangaba-ai/blob/main/scripts/validate_env.py) - Valida configuração do ambiente
+- [`quick_setup.py`](https://github.com/mangaba-ai/mangaba-ai/blob/main/scripts/quick_setup.py) - Configuração rápida automatizada
+- [`example_env_usage.py`](https://github.com/mangaba-ai/mangaba-ai/blob/main/scripts/example_env_usage.py) - Exemplo de uso das configurações
+- [`exemplo_curso_basico.py`](https://github.com/mangaba-ai/mangaba-ai/blob/main/scripts/exemplo_curso_basico.py) - Exemplos práticos do curso básico
+- [`setup_env.py`](https://github.com/mangaba-ai/mangaba-ai/blob/main/scripts/setup_env.py) - Configuração manual detalhada
 
 ## 📁 Estrutura do Projeto
 
@@ -605,7 +605,7 @@ mangaba_ai/
 └── README.md                   # 📖 Este arquivo
 ```
 
-> 📋 **Para detalhes completos da estrutura, consulte [ESTRUTURA.md](ESTRUTURA.md)**
+> 📋 **Para detalhes completos da estrutura, consulte [ESTRUTURA.md](https://github.com/mangaba-ai/mangaba-ai/blob/main/ESTRUTURA.md)**
 
 ## 🧪 Testar Rapidamente
 
@@ -636,38 +636,38 @@ python test_correcoes.py                    # Testar correções
 
 ## 📚 Wiki Avançada e Documentação
 
-### 🌟 **[📖 WIKI COMPLETA](docs/WIKI.md) - Portal Principal da Documentação**
+### 🌟 **[📖 WIKI COMPLETA](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/WIKI.md) - Portal Principal da Documentação**
 
 A **Wiki Avançada** do Mangaba AI oferece documentação abrangente em português brasileiro para todos os níveis:
 
 #### 🎓 **Para Iniciantes**
-- [🚀 Visão Geral do Projeto](docs/WIKI.md#-visão-geral-do-projeto) - O que é e para que serve
-- [🎓 Curso Básico Completo](docs/CURSO_BASICO.md) - Tutorial passo-a-passo  
-- [⚙️ Instalação e Configuração](docs/SETUP.md) - Guia detalhado de setup
-- [❓ FAQ - Perguntas Frequentes](docs/FAQ.md) - Dúvidas comuns e soluções
+- [🚀 Visão Geral do Projeto](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/WIKI.md#-visão-geral-do-projeto) - O que é e para que serve
+- [🎓 Curso Básico Completo](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/CURSO_BASICO.md) - Tutorial passo-a-passo  
+- [⚙️ Instalação e Configuração](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/SETUP.md) - Guia detalhado de setup
+- [❓ FAQ - Perguntas Frequentes](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/FAQ.md) - Dúvidas comuns e soluções
 
 #### 👨‍💻 **Para Desenvolvedores**
-- [🌐 Protocolos A2A e MCP](docs/PROTOCOLS.md) - Documentação técnica completa
-- [⭐ Melhores Práticas](docs/MELHORES_PRATICAS.md) - Guia de boas práticas
-- [🤝 Como Contribuir](docs/CONTRIBUICAO.md) - Diretrizes de contribuição
-- [📝 Glossário de Termos](docs/GLOSSARIO.md) - Definições técnicas
+- [🌐 Protocolos A2A e MCP](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/PROTOCOLS.md) - Documentação técnica completa
+- [⭐ Melhores Práticas](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/MELHORES_PRATICAS.md) - Guia de boas práticas
+- [🤝 Como Contribuir](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/CONTRIBUICAO.md) - Diretrizes de contribuição
+- [📝 Glossário de Termos](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/GLOSSARIO.md) - Definições técnicas
 
 #### 🛠️ **Recursos Técnicos**
-- [🔧 Scripts e Automação](docs/SCRIPTS.md) - Documentação dos scripts
-- [📊 Histórico de Mudanças](docs/CHANGELOG.md) - Changelog completo
-- [📁 Estrutura do Projeto](ESTRUTURA.md) - Organização do repositório
+- [🔧 Scripts e Automação](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/SCRIPTS.md) - Documentação dos scripts
+- [📊 Histórico de Mudanças](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/CHANGELOG.md) - Changelog completo
+- [📁 Estrutura do Projeto](https://github.com/mangaba-ai/mangaba-ai/blob/main/ESTRUTURA.md) - Organização do repositório
 
-> 🎯 **Comece pela [Wiki Principal](docs/WIKI.md)** - É seu portal de entrada para toda a documentação!
+> 🎯 **Comece pela [Wiki Principal](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/WIKI.md)** - É seu portal de entrada para toda a documentação!
 
 ## 🤝 Contribuição
 
-Agradecemos seu interesse em contribuir! Consulte nosso **[Guia Completo de Contribuição](docs/CONTRIBUICAO.md)** para informações detalhadas.
+Agradecemos seu interesse em contribuir! Consulte nosso **[Guia Completo de Contribuição](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/CONTRIBUICAO.md)** para informações detalhadas.
 
 ### 🚀 **Primeiros Passos**
-1. 📚 Leia as [Diretrizes de Contribuição](docs/CONTRIBUICAO.md)
+1. 📚 Leia as [Diretrizes de Contribuição](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/CONTRIBUICAO.md)
 2. 🍴 Faça fork do projeto
 3. 🔧 Configure o ambiente de desenvolvimento
-4. ⭐ Siga as [Melhores Práticas](docs/MELHORES_PRATICAS.md)
+4. ⭐ Siga as [Melhores Práticas](https://github.com/mangaba-ai/mangaba-ai/blob/main/docs/MELHORES_PRATICAS.md)
 5. 🧪 Execute os testes
 6. 📤 Abra um Pull Request
 
