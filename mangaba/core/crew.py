@@ -1,67 +1,72 @@
 """
-Crew implementation for multi-agent orchestration
+Crew v3.0 — multi-agent orchestration with all process types.
 """
 
-from enum import Enum
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+from __future__ import annotations
+
+import asyncio
+import logging
+import time
 import uuid
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from mangaba.core.agent import Agent
 from mangaba.core.task import Task, TaskOutput
-from utils.logger import get_logger
+from mangaba.core.events import EventBus, Event, EventType
+from mangaba.core.exceptions import CrewError
+
+log = logging.getLogger(__name__)
 
 
 class Process(Enum):
-    """Processos de execução disponíveis para Crews"""
-    SEQUENTIAL = "sequential"      # Tarefas executadas em sequência
-    HIERARCHICAL = "hierarchical"  # Com gerente delegando tarefas
-    PARALLEL = "parallel"          # Tarefas executadas em paralelo (futuro)
-    CONSENSUAL = "consensual"      # Decisões por consenso (futuro)
+    SEQUENTIAL = "sequential"
+    HIERARCHICAL = "hierarchical"
+    PARALLEL = "parallel"
+    CONSENSUAL = "consensual"
 
 
 class CrewOutput:
-    """Resultado da execução de um Crew"""
-    
+    """Result of a crew execution, including metrics."""
+
     def __init__(
         self,
         tasks_outputs: List[TaskOutput],
         process: Process,
         duration: float,
-        crew_id: str
-    ):
+        crew_id: str,
+    ) -> None:
         self.tasks_outputs = tasks_outputs
         self.process = process
         self.duration = duration
         self.crew_id = crew_id
+        from datetime import datetime
         self.timestamp = datetime.now().isoformat()
-    
+
     @property
     def final_output(self) -> str:
-        """Retorna o output da última task executada"""
         if self.tasks_outputs:
             return self.tasks_outputs[-1].result
         return ""
-    
+
     def __str__(self) -> str:
         return self.final_output
 
 
 class Crew:
-    """
-    Coordena a execução de múltiplos agentes trabalhando em conjunto.
-    
-    Exemplo:
+    """Orchestrate multiple agents working on multiple tasks.
+
+    Example::
+
         crew = Crew(
             agents=[researcher, analyst, writer],
             tasks=[research_task, analyze_task, write_task],
             process=Process.SEQUENTIAL,
-            verbose=True
+            verbose=True,
         )
-        
         result = crew.kickoff(inputs={"topic": "AI trends"})
     """
-    
+
     def __init__(
         self,
         agents: List[Agent],
@@ -69,205 +74,179 @@ class Crew:
         process: Process = Process.SEQUENTIAL,
         verbose: bool = False,
         max_rpm: Optional[int] = None,
-        crew_id: Optional[str] = None
-    ):
-        """
-        Inicializa um Crew.
-        
-        Args:
-            agents: Lista de agentes disponíveis
-            tasks: Lista de tasks a executar
-            process: Processo de execução (SEQUENTIAL ou HIERARCHICAL)
-            verbose: Se True, imprime logs detalhados
-            max_rpm: Taxa máxima de requisições por minuto (rate limiting)
-            crew_id: ID único do crew (gerado automaticamente se None)
-        """
+        memory: Optional[Any] = None,
+        crew_id: Optional[str] = None,
+    ) -> None:
         if not agents:
-            raise ValueError("Crew must have at least one agent")
+            raise CrewError("Crew must have at least one agent")
         if not tasks:
-            raise ValueError("Crew must have at least one task")
-        
+            raise CrewError("Crew must have at least one task")
+
         self.crew_id = crew_id or f"crew_{uuid.uuid4().hex[:8]}"
         self.agents = agents
         self.tasks = tasks
         self.process = process
         self.verbose = verbose
         self.max_rpm = max_rpm
-        
-        self.logger = get_logger(f"Crew[{self.crew_id}]")
-        
-        # Validações
+        self.memory = memory
+
         self._validate_setup()
-        
-        # Conecta agentes via A2A
         self._connect_agents()
-        
+
         if self.verbose:
-            self.logger.info(f"✅ Crew initialized")
-            self.logger.info(f"   Agents: {len(self.agents)}")
-            self.logger.info(f"   Tasks: {len(self.tasks)}")
-            self.logger.info(f"   Process: {self.process.value}")
-    
-    def _validate_setup(self):
-        """Valida a configuração do crew"""
-        # Verifica se todas as tasks têm agentes atribuídos
-        for task in self.tasks:
-            if not task.agent:
-                raise ValueError(f"Task '{task.description[:50]}...' has no agent assigned")
-            
-            # Verifica se o agente está na lista
-            if task.agent not in self.agents:
-                raise ValueError(
-                    f"Task agent '{task.agent.role}' is not in the crew's agent list"
-                )
-        
-        # Verifica dependências de contexto
-        for task in self.tasks:
-            for context_task in task.context:
-                if context_task not in self.tasks:
-                    raise ValueError(
-                        f"Task has dependency on a task not in the crew"
-                    )
-    
-    def _connect_agents(self):
-        """Conecta todos os agentes via protocolo A2A"""
-        for i, agent1 in enumerate(self.agents):
-            for agent2 in self.agents[i+1:]:
-                agent1.connect_to(agent2)
-                
-        if self.verbose:
-            self.logger.info(f"🔗 Connected {len(self.agents)} agents via A2A")
-    
+            log.info("Crew %s: %d agents, %d tasks, process=%s", self.crew_id, len(agents), len(tasks), process.value)
+
+    # ── public API ─────────────────────────────────────────────────────
+
     def kickoff(self, inputs: Optional[Dict[str, Any]] = None) -> CrewOutput:
-        """
-        Inicia a execução do crew.
-        
-        Args:
-            inputs: Dicionário com variáveis para substituir nas tasks
-        
-        Returns:
-            CrewOutput com resultados de todas as tasks
-        """
-        start_time = datetime.now()
-        
-        if self.verbose:
-            self.logger.info(f"🚀 Starting crew execution with {self.process.value} process")
-        
+        """Start the crew execution."""
+        start = time.monotonic()
+
+        EventBus.emit(Event(
+            event_type=EventType.CREW_START,
+            source_id=self.crew_id,
+            data={"process": self.process.value, "agents": len(self.agents), "tasks": len(self.tasks)},
+        ))
+
         try:
             if self.process == Process.SEQUENTIAL:
                 outputs = self._run_sequential(inputs or {})
             elif self.process == Process.HIERARCHICAL:
                 outputs = self._run_hierarchical(inputs or {})
+            elif self.process == Process.PARALLEL:
+                outputs = self._run_parallel(inputs or {})
+            elif self.process == Process.CONSENSUAL:
+                outputs = self._run_consensual(inputs or {})
             else:
-                raise NotImplementedError(f"Process {self.process.value} not yet implemented")
-            
-            duration = (datetime.now() - start_time).total_seconds()
-            
-            crew_output = CrewOutput(
-                tasks_outputs=outputs,
-                process=self.process,
-                duration=duration,
-                crew_id=self.crew_id
-            )
-            
-            if self.verbose:
-                self.logger.info(f"✅ Crew execution completed in {duration:.2f}s")
-            
-            return crew_output
-            
-        except Exception as e:
-            self.logger.error(f"❌ Crew execution failed: {e}")
+                raise CrewError(f"Unknown process: {self.process}")
+
+            duration = time.monotonic() - start
+            result = CrewOutput(tasks_outputs=outputs, process=self.process, duration=duration, crew_id=self.crew_id)
+
+            EventBus.emit(Event(
+                event_type=EventType.CREW_END,
+                source_id=self.crew_id,
+                data={"duration": duration, "tasks_completed": len(outputs)},
+            ))
+            return result
+
+        except Exception as exc:
+            EventBus.emit(Event(event_type=EventType.CREW_ERROR, source_id=self.crew_id, data={"error": str(exc)}))
             raise
-    
+
+    # ── process implementations ────────────────────────────────────────
+
     def _run_sequential(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
-        """
-        Executa tasks em sequência.
-        """
-        outputs = []
-        
+        outputs: List[TaskOutput] = []
         for i, task in enumerate(self.tasks, 1):
             if self.verbose:
-                self.logger.info(f"📝 Executing task {i}/{len(self.tasks)}: {task.description[:60]}...")
-            
-            try:
-                output = task.execute(inputs)
-                outputs.append(output)
-                
-                # Adiciona output ao contexto para próximas tasks
-                # (já gerenciado pelo sistema de contexto das tasks)
-                
-            except Exception as e:
-                self.logger.error(f"❌ Task {i} failed: {e}")
-                raise
-        
+                log.info("[%d/%d] %s → %s", i, len(self.tasks), task.agent.role, task.description[:60])
+            output = task.execute(inputs)
+            outputs.append(output)
         return outputs
-    
+
     def _run_hierarchical(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
-        """
-        Executa com processo hierárquico (com gerente).
-        
-        O primeiro agente atua como gerente, delegando tasks aos demais.
-        """
         if len(self.agents) < 2:
-            raise ValueError("Hierarchical process requires at least 2 agents (1 manager + workers)")
-        
+            raise CrewError("Hierarchical process needs >= 2 agents (1 manager + workers)")
+
         manager = self.agents[0]
-        workers = self.agents[1:]
-        
-        if self.verbose:
-            self.logger.info(f"👔 Manager: {manager.role}")
-            self.logger.info(f"👷 Workers: {[w.role for w in workers]}")
-        
-        outputs = []
-        
-        # Manager planeja e delega
+        outputs: List[TaskOutput] = []
+
         for i, task in enumerate(self.tasks, 1):
             if self.verbose:
-                self.logger.info(f"📋 Manager delegating task {i}/{len(self.tasks)}")
-            
-            # Manager revisa a task e delega
-            delegation_prompt = f"""
-            As the manager, review and potentially refine this task before delegation:
-            
-            Task: {task.description}
-            Expected Output: {task.expected_output}
-            Assigned Worker: {task.agent.role}
-            
-            Provide refined instructions for the worker to execute this task effectively.
-            """
-            
-            refined_instructions = manager.execute_task(delegation_prompt)
-            
-            # Worker executa com instruções refinadas
-            worker_prompt = f"{refined_instructions}\n\nOriginal task: {task.description}"
-            
+                log.info("[%d/%d] Manager %s delegates to %s", i, len(self.tasks), manager.role, task.agent.role)
+
+            # Manager refines instructions
+            delegation_prompt = (
+                f"You are the manager. Refine these instructions for your worker.\n"
+                f"Worker role: {task.agent.role}\n"
+                f"Task: {task.description}\nExpected output: {task.expected_output}\n"
+                f"Provide clear, actionable instructions."
+            )
+            refined = manager.execute_task(delegation_prompt)
+
+            # Worker executes with refined instructions
             original_desc = task.description
-            task.description = worker_prompt
-            
+            task.description = f"{refined}\n\nOriginal task: {original_desc}"
             try:
                 output = task.execute(inputs)
-                outputs.append(output)
-                
-                # Manager revisa o resultado
-                review_prompt = f"""
-                Review the worker's output for this task:
-                
-                Task: {original_desc}
-                Worker: {task.agent.role}
-                Output: {output.result}
-                
-                Is this satisfactory? Provide approval or request revisions.
-                """
-                
-                review = manager.execute_task(review_prompt)
-                
-                if self.verbose:
-                    self.logger.info(f"👔 Manager review: {review[:100]}...")
-                
             finally:
                 task.description = original_desc
-        
+
+            # Manager reviews
+            review_prompt = (
+                f"Review this worker output.\nTask: {original_desc}\n"
+                f"Output: {output.result[:2000]}\n"
+                f"Provide approval or revision notes."
+            )
+            manager.execute_task(review_prompt)
+
+            outputs.append(output)
         return outputs
-    
+
+    def _run_parallel(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
+        """Execute independent tasks concurrently using asyncio."""
+
+        async def _run() -> List[TaskOutput]:
+            coros = [task.aexecute(inputs) for task in self.tasks]
+            return list(await asyncio.gather(*coros))
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            # Already in an event loop — fall back to sequential
+            return self._run_sequential(inputs)
+
+        return asyncio.run(_run())
+
+    def _run_consensual(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
+        """All agents independently execute each task; results are merged."""
+        outputs: List[TaskOutput] = []
+
+        for task in self.tasks:
+            agent_results: List[str] = []
+            for agent in self.agents:
+                original_agent = task.agent
+                task.agent = agent
+                try:
+                    out = task.execute(inputs)
+                    agent_results.append(f"[{agent.role}]: {out.result}")
+                finally:
+                    task.agent = original_agent
+
+            # Use first agent to synthesise consensus
+            synthesis_prompt = (
+                "Multiple experts provided their analysis. Synthesise a consensus.\n\n"
+                + "\n---\n".join(agent_results)
+            )
+            consensus = self.agents[0].execute_task(synthesis_prompt)
+            outputs.append(TaskOutput(
+                description=task.description,
+                result=consensus,
+                agent="consensus",
+                success=True,
+            ))
+        return outputs
+
+    # ── internal ───────────────────────────────────────────────────────
+
+    def _validate_setup(self) -> None:
+        for task in self.tasks:
+            if not task.agent:
+                raise CrewError(f"Task '{task.description[:50]}...' has no agent assigned")
+            if task.agent not in self.agents:
+                raise CrewError(f"Task agent '{task.agent.role}' not in crew's agent list")
+            for dep in task.context:
+                if dep not in self.tasks:
+                    raise CrewError("Task has a dependency on a task that is not in this crew")
+
+    def _connect_agents(self) -> None:
+        for i, a1 in enumerate(self.agents):
+            for a2 in self.agents[i + 1 :]:
+                a1.connect_to(a2)
+
     def __repr__(self) -> str:
         return f"Crew(agents={len(self.agents)}, tasks={len(self.tasks)}, process={self.process.value})"

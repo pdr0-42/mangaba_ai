@@ -1,0 +1,112 @@
+"""
+Output parsers for Mangaba AI v3.0
+
+Parse raw LLM text output into structured Python objects.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Type
+
+from pydantic import BaseModel
+
+
+class BaseOutputParser(ABC):
+    """Abstract parser that converts raw text into a structured value."""
+
+    @abstractmethod
+    def parse(self, text: str) -> Any:
+        ...
+
+    def get_format_instructions(self) -> str:
+        """Return instructions to include in the prompt so the LLM formats
+        its output correctly."""
+        return ""
+
+
+class JSONOutputParser(BaseOutputParser):
+    """Extract the first JSON object or array from the text."""
+
+    def parse(self, text: str) -> Any:
+        # Try to find JSON block
+        for pattern in [r'```json\s*([\s\S]*?)```', r'```([\s\S]*?)```']:
+            m = re.search(pattern, text)
+            if m:
+                return json.loads(m.group(1).strip())
+        # Fallback: find first { or [
+        for start_char, end_char in [("{", "}"), ("[", "]")]:
+            start = text.find(start_char)
+            end = text.rfind(end_char)
+            if start >= 0 and end > start:
+                return json.loads(text[start : end + 1])
+        raise ValueError("No JSON found in output")
+
+    def get_format_instructions(self) -> str:
+        return "Respond with a valid JSON object."
+
+
+class PydanticOutputParser(BaseOutputParser):
+    """Parse output into a Pydantic model instance."""
+
+    def __init__(self, model: Type[BaseModel]) -> None:
+        self.model = model
+
+    def parse(self, text: str) -> BaseModel:
+        json_parser = JSONOutputParser()
+        data = json_parser.parse(text)
+        if isinstance(data, dict):
+            return self.model(**data)
+        raise ValueError(f"Expected a JSON object for {self.model.__name__}, got {type(data).__name__}")
+
+    def get_format_instructions(self) -> str:
+        schema = self.model.model_json_schema()
+        return (
+            f"Respond with a JSON object matching this schema:\n"
+            f"```json\n{json.dumps(schema, indent=2)}\n```"
+        )
+
+
+class ListOutputParser(BaseOutputParser):
+    """Extract a list of items from the text (numbered or bulleted)."""
+
+    def parse(self, text: str) -> List[str]:
+        lines = text.strip().splitlines()
+        items: List[str] = []
+        for line in lines:
+            cleaned = re.sub(r'^[\s]*[-*•\d.)\]]+[\s]*', '', line).strip()
+            if cleaned:
+                items.append(cleaned)
+        return items
+
+    def get_format_instructions(self) -> str:
+        return "Respond with a numbered list, one item per line."
+
+
+class MarkdownOutputParser(BaseOutputParser):
+    """Split markdown text into sections by headings."""
+
+    def parse(self, text: str) -> Dict[str, str]:
+        sections: Dict[str, str] = {}
+        current_heading = "intro"
+        buffer: List[str] = []
+
+        for line in text.splitlines():
+            heading_match = re.match(r'^(#{1,6})\s+(.*)', line)
+            if heading_match:
+                # Save previous section
+                if buffer:
+                    sections[current_heading] = "\n".join(buffer).strip()
+                current_heading = heading_match.group(2).strip()
+                buffer = []
+            else:
+                buffer.append(line)
+
+        if buffer:
+            sections[current_heading] = "\n".join(buffer).strip()
+        return sections
+
+    def get_format_instructions(self) -> str:
+        return "Respond in Markdown format with clear section headings."

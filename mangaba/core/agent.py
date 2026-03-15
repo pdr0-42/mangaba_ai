@@ -1,269 +1,252 @@
 """
-Agent implementation with role, goal, and backstory support
+Agent v3.0 — ReAct reasoning, memory, planning, guardrails.
 """
 
-import uuid
-from typing import Optional, List, Dict, Any, TYPE_CHECKING
-from datetime import datetime
+from __future__ import annotations
 
-from config import config
-from utils.logger import get_logger
-from protocols.a2a import A2AAgent, A2AMessage, MessageType
-from protocols.mcp import MCPProtocol, MCPContext, ContextType, ContextPriority
-from mangaba.core.llm import create_llm_client
+import logging
+import uuid
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
+
+from mangaba.core.types import AgentState, AgentStatus, LLMConfig, MemoryConfig
+from mangaba.core.exceptions import AgentError
+from mangaba.core.events import EventBus, Event, EventType
+from mangaba.core.reasoning import ReActEngine
 
 if TYPE_CHECKING:
     from mangaba.tools.base import BaseTool
+    from mangaba.core.guardrails import BaseGuardrail
+    from mangaba.core.output_parsers import BaseOutputParser
+    from mangaba.memory.base import BaseMemory
+
+log = logging.getLogger(__name__)
 
 
-class Agent(A2AAgent):
-    """
-    Agente de IA com role, goal e backstory para especialização.
-    
-    Exemplo:
+class Agent:
+    """Intelligent agent with ReAct reasoning, memory, and tool use.
+
+    Example::
+
         agent = Agent(
             role="Senior Data Analyst",
             goal="Analyze market trends and provide insights",
-            backstory="You are an expert in financial markets with 15 years of experience",
-            tools=[WebSearchTool(), DataAnalysisTool()],
-            verbose=True
+            backstory="Expert in financial markets with 15 years of experience",
+            tools=[SearchTool(), CalculatorTool()],
+            verbose=True,
         )
+        result = agent.execute_task("Analyze Q4 revenue trends")
     """
-    
+
     def __init__(
         self,
         role: str,
         goal: str,
         backstory: str,
-        tools: Optional[List['BaseTool']] = None,
-        llm: Optional[str] = None,
+        tools: Optional[List[BaseTool]] = None,
+        llm: Optional[Any] = None,  # LLMClient or provider string
+        llm_config: Optional[LLMConfig] = None,
         api_key: Optional[str] = None,
         verbose: bool = False,
-        memory: bool = True,
-        max_iterations: int = 10,
+        memory: Optional[BaseMemory] = None,
+        memory_config: Optional[MemoryConfig] = None,
+        max_iterations: int = 15,
+        max_retry_on_error: int = 3,
         allow_delegation: bool = True,
-        agent_id: Optional[str] = None
-    ):
-        """
-        Inicializa um agente especializado.
-        
-        Args:
-            role: Papel do agente (ex: "Senior Data Analyst")
-            goal: Objetivo do agente (ex: "Analyze market trends")
-            backstory: História/contexto do agente (ex: "You are an expert...")
-            tools: Lista de ferramentas disponíveis para o agente
-            llm: Nome do modelo LLM a usar (padrão: config.model)
-            api_key: Chave API (padrão: config.api_key)
-            verbose: Se True, imprime logs detalhados
-            memory: Se True, habilita protocolo MCP
-            max_iterations: Número máximo de iterações para tarefas
-            allow_delegation: Se True, permite delegar tarefas para outros agentes
-            agent_id: ID único do agente (gerado automaticamente se None)
-        """
-        # Validações
+        step_callback: Optional[Callable] = None,
+        guardrails: Optional[List[BaseGuardrail]] = None,
+        output_parser: Optional[BaseOutputParser] = None,
+        agent_id: Optional[str] = None,
+    ) -> None:
         if not role or not role.strip():
             raise ValueError("Role cannot be empty")
         if not goal or not goal.strip():
             raise ValueError("Goal cannot be empty")
         if not backstory or not backstory.strip():
             raise ValueError("Backstory cannot be empty")
-        
-        # Configuração básica
+
         self.role = role.strip()
         self.goal = goal.strip()
         self.backstory = backstory.strip()
-        self.tools = tools or []
+        self.tools: List[BaseTool] = list(tools or [])
         self.verbose = verbose
         self.max_iterations = max_iterations
+        self.max_retry_on_error = max_retry_on_error
         self.allow_delegation = allow_delegation
-        
-        # ID do agente
+        self.step_callback = step_callback
+        self.guardrails = guardrails or []
+        self.output_parser = output_parser
+        self.memory = memory
+        self.memory_config = memory_config or MemoryConfig()
+
         self.agent_id = agent_id or f"agent_{role.lower().replace(' ', '_')}_{uuid.uuid4().hex[:8]}"
-        
-        # Inicializa A2A
-        super().__init__(self.agent_id)
-        
-        # Configuração do LLM
-        self.api_key = api_key or config.api_key
-        self.model_name = llm or config.model
-        self.provider = getattr(config, "provider", "google")
-        self.llm = create_llm_client(
-            provider=self.provider,
-            api_key=self.api_key,
-            model=self.model_name,
-            temperature=getattr(config, "temperature", 0.7),
-            max_output_tokens=getattr(config, "max_output_tokens", 1024),
-            system_prompt=getattr(config, "system_prompt", None),
+
+        # ── LLM setup ────────────────────────────────────────────────
+        if llm is not None and not isinstance(llm, str):
+            # Already an LLMClient instance
+            self.llm = llm
+        else:
+            self.llm = self._create_llm(llm, llm_config, api_key)
+
+        # ── Memory (auto-create short-term if nothing provided) ──────
+        if self.memory is None and self.memory_config.short_term:
+            from mangaba.memory.short_term import ShortTermMemory
+            self.memory = ShortTermMemory(max_items=self.memory_config.max_short_term_items)
+
+        # ── ReAct engine ─────────────────────────────────────────────
+        self._react = ReActEngine(
+            llm=self.llm,
+            tools=self.tools,
+            max_iterations=self.max_iterations,
+            verbose=self.verbose,
         )
-        
-        # Protocolo MCP (Memory)
-        self.memory_enabled = memory
-        if self.memory_enabled:
-            self.mcp = MCPProtocol()
-            self.current_session_id = self.mcp.create_session(f"session_{self.agent_id}")
-        
-        # Logger
-        self.logger = get_logger(f"Agent[{self.role}]")
-        
+
+        # ── State ────────────────────────────────────────────────────
+        self.state = AgentState(agent_id=self.agent_id)
+
+        # ── Connected agents (for delegation) ────────────────────────
+        self._peers: Dict[str, Agent] = {}
+
         if self.verbose:
-            self.logger.info(f"✅ Agent initialized - Role: {self.role}")
-            self.logger.info(f"   Goal: {self.goal}")
-            self.logger.info(f"   Tools: {len(self.tools)} available")
-        
-        # Configura handlers A2A
-        self._setup_handlers()
-    
-    def _build_system_prompt(self) -> str:
-        """
-        Constrói o prompt do sistema baseado em role, goal e backstory.
-        """
-        prompt = f"""You are: {self.role}
+            log.info("Agent initialized — role=%s tools=%d", self.role, len(self.tools))
 
-Your goal is: {self.goal}
+    # ── public API ─────────────────────────────────────────────────────
 
-Background: {self.backstory}
-"""
-        
-        # Adiciona informações sobre ferramentas disponíveis
-        if self.tools:
-            tools_desc = "\n".join([f"- {tool.name}: {tool.description}" for tool in self.tools])
-            prompt += f"\n\nAvailable tools:\n{tools_desc}"
-        
-        # Adiciona informações sobre delegação
-        if self.allow_delegation:
-            prompt += "\n\nYou can delegate tasks to other specialized agents when needed."
-        
-        return prompt
-    
     def execute_task(self, task_description: str, context: Optional[str] = None) -> str:
-        """
-        Executa uma tarefa usando o agente.
-        
-        Args:
-            task_description: Descrição da tarefa
-            context: Contexto adicional (opcional)
-        
-        Returns:
-            Resultado da execução da tarefa
-        """
-        # Constrói o prompt completo
+        """Execute a task using the ReAct loop with tool/function calling."""
+        EventBus.emit(Event(
+            event_type=EventType.AGENT_START,
+            source_id=self.agent_id,
+            data={"role": self.role, "task": task_description[:200]},
+        ))
+
         system_prompt = self._build_system_prompt()
-        
-        full_prompt = f"{system_prompt}\n\n"
-        
+        user_prompt = self._build_user_prompt(task_description, context)
+
+        # Inject relevant memories
+        memory_context = self._get_memory_context(task_description)
+
+        last_error: Optional[Exception] = None
+        for attempt in range(1, self.max_retry_on_error + 1):
+            try:
+                response = self._react.run(
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    context=memory_context or None,
+                    state=self.state,
+                )
+
+                result_text = response.text
+
+                # Guardrails
+                result_text = self._apply_guardrails(result_text)
+
+                # Output parser
+                if self.output_parser:
+                    result_text = self.output_parser.parse(result_text)
+
+                # Store in memory
+                if self.memory:
+                    self.memory.add(
+                        f"Task: {task_description}\nResult: {result_text[:500]}",
+                        metadata={"agent": self.role, "type": "task_result"},
+                    )
+
+                EventBus.emit(Event(
+                    event_type=EventType.AGENT_END,
+                    source_id=self.agent_id,
+                    data={"result_preview": str(result_text)[:200]},
+                ))
+                return str(result_text)
+
+            except Exception as exc:
+                last_error = exc
+                if attempt < self.max_retry_on_error:
+                    log.warning("Agent retry %d/%d: %s", attempt, self.max_retry_on_error, exc)
+                    continue
+                break
+
+        EventBus.emit(Event(
+            event_type=EventType.AGENT_ERROR,
+            source_id=self.agent_id,
+            data={"error": str(last_error)},
+        ))
+        raise AgentError(f"Task failed after {self.max_retry_on_error} attempts: {last_error}", cause=last_error)
+
+    def connect_to(self, other: Agent) -> None:
+        """Register another agent as a peer for delegation."""
+        self._peers[other.agent_id] = other
+        other._peers[self.agent_id] = self
+
+    def delegate(self, peer_id: str, task_description: str, context: Optional[str] = None) -> str:
+        """Delegate a task to a connected peer agent."""
+        peer = self._peers.get(peer_id)
+        if peer is None:
+            raise AgentError(f"No peer agent with id '{peer_id}'")
+        return peer.execute_task(task_description, context)
+
+    # ── prompt building ────────────────────────────────────────────────
+
+    def _build_system_prompt(self) -> str:
+        parts = [
+            f"You are: {self.role}",
+            f"Your goal is: {self.goal}",
+            f"Background: {self.backstory}",
+        ]
+        if self.allow_delegation and self._peers:
+            peers_desc = ", ".join(f"{p.role}" for p in self._peers.values())
+            parts.append(f"\nYou can delegate to these agents: {peers_desc}")
+        return "\n\n".join(parts)
+
+    def _build_user_prompt(self, task_description: str, context: Optional[str]) -> str:
+        parts = []
         if context:
-            full_prompt += f"Context:\n{context}\n\n"
-        
-        full_prompt += f"Task:\n{task_description}\n\nPlease complete this task according to your role and goal."
-        
-        # Adiciona contexto MCP se habilitado
-        if self.memory_enabled:
-            # Salva tarefa no contexto
-            task_context = MCPContext.create(
-                context_type=ContextType.TASK,
-                content={
-                    "task": task_description,
-                    "agent_role": self.role,
-                    "timestamp": datetime.now().isoformat()
-                },
-                priority=ContextPriority.HIGH,
-                tags=["task", "execution"]
-            )
-            self.mcp.add_context(task_context, self.current_session_id)
-            
-            # Busca contexto relevante
-            relevant = self.mcp.get_relevant_contexts(task_description, max_results=3)
-            if relevant:
-                context_info = "\n".join([str(ctx.content) for ctx in relevant])
-                full_prompt += f"\n\nRelevant context from memory:\n{context_info}"
-        
-        if self.verbose:
-            self.logger.info(f"🎯 Executing task: {task_description[:100]}...")
-        
+            parts.append(f"Context:\n{context}")
+        parts.append(f"Task:\n{task_description}")
+        parts.append("Complete this task according to your role and goal.")
+        return "\n\n".join(parts)
+
+    def _get_memory_context(self, query: str) -> str:
+        if self.memory is None:
+            return ""
+        return self.memory.get_relevant(query, max_results=5)
+
+    def _apply_guardrails(self, text: str) -> str:
+        for g in self.guardrails:
+            text = g.validate(text)
+        return text
+
+    # ── LLM factory ────────────────────────────────────────────────────
+
+    @staticmethod
+    def _create_llm(provider_str: Optional[str], llm_config: Optional[LLMConfig], api_key: Optional[str]) -> Any:
+        """Build an LLMClient from config or fall back to global config."""
+        from mangaba.core.llm import create_llm_client
         try:
-            # Executa com ferramentas se disponíveis
-            result = self._execute_with_tools(full_prompt, task_description)
-            
-            # Salva resultado no contexto
-            if self.memory_enabled:
-                result_context = MCPContext.create(
-                    context_type=ContextType.TASK,
-                    content={
-                        "task": task_description,
-                        "result": result,
-                        "agent_role": self.role,
-                        "timestamp": datetime.now().isoformat()
-                    },
-                    priority=ContextPriority.HIGH,
-                    tags=["task_result", "execution"]
-                )
-                self.mcp.add_context(result_context, self.current_session_id)
-            
-            if self.verbose:
-                self.logger.info(f"✅ Task completed: {result[:100]}...")
-            
-            return result
-            
-        except Exception as e:
-            self.logger.error(f"❌ Error executing task: {e}")
-            raise
-    
-    def _execute_with_tools(self, prompt: str, task: str) -> str:
-        """
-        Executa a tarefa usando ferramentas se necessário.
-        """
-        # Por enquanto, execução básica sem ferramentas
-        # TODO: Implementar lógica de seleção e uso de ferramentas
-        
-        return self.llm.generate_text(prompt)
-    
-    def _setup_handlers(self):
-        """Configura handlers A2A específicos"""
-        self.a2a_protocol.register_handler(MessageType.REQUEST, self._handle_agent_request)
-        self.a2a_protocol.register_handler(MessageType.RESPONSE, self._handle_agent_response)
-    
-    def _handle_agent_request(self, message: A2AMessage):
-        """Handler para requisições de outros agentes"""
-        action = message.content.get("action")
-        params = message.content.get("params", {})
-        
-        if self.verbose:
-            self.logger.info(f"📨 Received request: {action} from {message.sender_id}")
-        
-        try:
-            if action == "execute_task":
-                result = self.execute_task(
-                    params.get("task_description", ""),
-                    params.get("context")
-                )
-            else:
-                result = f"Unknown action: {action}"
-            
-            response = self.a2a_protocol.create_response(message, result, True)
-            self.a2a_protocol.send_message(response)
-            
-        except Exception as e:
-            response = self.a2a_protocol.create_response(message, str(e), False)
-            self.a2a_protocol.send_message(response)
-    
-    def _handle_agent_response(self, message: A2AMessage):
-        """Handler para respostas de outros agentes"""
-        if self.verbose:
-            self.logger.info(f"📬 Received response from {message.sender_id}")
-        
-        # Salva no contexto se memory habilitado
-        if self.memory_enabled:
-            response_context = MCPContext.create(
-                context_type=ContextType.CONVERSATION,
-                content={
-                    "from_agent": message.sender_id,
-                    "response": message.content,
-                    "correlation_id": message.correlation_id
-                },
-                priority=ContextPriority.MEDIUM,
-                tags=["agent_response", "collaboration"]
-            )
-            self.mcp.add_context(response_context, self.current_session_id)
-    
+            from config import config as global_cfg
+        except ImportError:
+            global_cfg = None  # type: ignore[assignment]
+
+        cfg = llm_config or LLMConfig()
+
+        prov = provider_str or cfg.provider
+        if global_cfg:
+            prov = prov or getattr(global_cfg, "provider", "google")
+        key = api_key or cfg.api_key
+        if not key and global_cfg:
+            key = getattr(global_cfg, "api_key", None)
+        model = cfg.model
+        if not model and global_cfg:
+            model = getattr(global_cfg, "model", None)
+        if not model:
+            model = "gemini-2.5-flash"
+
+        return create_llm_client(
+            provider=prov,
+            api_key=key or "",
+            model=model,
+            temperature=cfg.temperature,
+            max_output_tokens=cfg.max_tokens,
+        )
+
     def __repr__(self) -> str:
-        return f"Agent(role='{self.role}', goal='{self.goal[:50]}...', tools={len(self.tools)})"
+        return f"Agent(role='{self.role}', tools={len(self.tools)}, id='{self.agent_id}')"
