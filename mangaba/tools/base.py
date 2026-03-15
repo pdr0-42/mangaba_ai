@@ -1,44 +1,134 @@
 """
-Base Tool class for agent tools
+Tool system for Mangaba AI v3.0
+
+Professional tool abstraction with Pydantic-based input validation,
+automatic JSON schema generation for LLM function calling, and
+support for both sync and async execution.
 """
 
+from __future__ import annotations
+
+import inspect
+import json
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional, Type
+
+from pydantic import BaseModel, Field
+
+from mangaba.core.events import EventBus, Event, EventType
+
+
+class EmptyInput(BaseModel):
+    """Default input schema when a tool takes no structured input."""
+    pass
 
 
 class BaseTool(ABC):
     """
-    Classe base para ferramentas que podem ser usadas por agentes.
-    
-    Exemplo:
-        class WebSearchTool(BaseTool):
+    Base class for all Mangaba tools.
+
+    Subclasses must:
+    - Set ``name`` and ``description`` as class attributes
+    - Optionally set ``args_schema`` to a Pydantic model describing inputs
+    - Implement ``_run(**kwargs)``
+
+    Example::
+
+        class SearchTool(BaseTool):
             name = "web_search"
-            description = "Search the web for information"
-            
-            def _run(self, query: str) -> str:
-                # Implementação da busca
-                return search_results
+            description = "Search the web for current information"
+            args_schema = SearchInput  # Pydantic model
+
+            def _run(self, query: str, max_results: int = 5) -> str:
+                ...
     """
-    
+
     name: str = "base_tool"
-    description: str = "Base tool class"
-    
-    def run(self, *args, **kwargs) -> Any:
-        """
-        Executa a ferramenta com validação.
-        """
+    description: str = "Base tool"
+    args_schema: Optional[Type[BaseModel]] = None
+    return_direct: bool = False
+
+    # -- public API ----------------------------------------------------------
+
+    def run(self, **kwargs: Any) -> Any:
+        """Validate inputs and execute the tool."""
+        validated = self._validate_input(kwargs)
+        EventBus.emit(Event(
+            event_type=EventType.TOOL_START,
+            data={"tool": self.name, "args": {k: str(v)[:200] for k, v in validated.items()}},
+        ))
         try:
-            return self._run(*args, **kwargs)
-        except Exception as e:
-            return f"Error executing {self.name}: {str(e)}"
-    
+            result = self._run(**validated)
+            EventBus.emit(Event(
+                event_type=EventType.TOOL_END,
+                data={"tool": self.name, "result_preview": str(result)[:200]},
+            ))
+            return result
+        except Exception as exc:
+            EventBus.emit(Event(
+                event_type=EventType.TOOL_ERROR,
+                data={"tool": self.name, "error": str(exc)},
+            ))
+            raise
+
     @abstractmethod
-    def _run(self, *args, **kwargs) -> Any:
-        """
-        Implementação específica da ferramenta.
-        Deve ser sobrescrita pelas subclasses.
-        """
-        raise NotImplementedError("Tool must implement _run method")
-    
+    def _run(self, **kwargs: Any) -> Any:
+        """Tool-specific implementation. Override in subclasses."""
+        ...
+
+    # -- schema / function calling helpers -----------------------------------
+
+    def get_function_schema(self) -> Dict[str, Any]:
+        """Return a JSON-schema representation for LLM function calling."""
+        if self.args_schema is not None:
+            params = self.args_schema.model_json_schema()
+            # Remove the title to keep it concise
+            params.pop("title", None)
+        else:
+            # Auto-detect from _run signature
+            params = self._schema_from_signature()
+        return {
+            "name": self.name,
+            "description": self.description,
+            "parameters": params,
+        }
+
+    # -- internal ------------------------------------------------------------
+
+    def _validate_input(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate kwargs against args_schema if defined."""
+        if self.args_schema is not None:
+            validated = self.args_schema(**kwargs)
+            return validated.model_dump()
+        return kwargs
+
+    def _schema_from_signature(self) -> Dict[str, Any]:
+        """Infer a JSON schema from the ``_run`` method signature."""
+        sig = inspect.signature(self._run)
+        properties: Dict[str, Any] = {}
+        required = []
+
+        type_map = {
+            str: "string", int: "integer", float: "number",
+            bool: "boolean", list: "array", dict: "object",
+        }
+
+        for param_name, param in sig.parameters.items():
+            if param_name in ("self", "kwargs", "args"):
+                continue
+            annotation = param.annotation
+            json_type = type_map.get(annotation, "string") if annotation != inspect.Parameter.empty else "string"
+            prop: Dict[str, Any] = {"type": json_type}
+            if param.default is not inspect.Parameter.empty:
+                prop["default"] = param.default
+            else:
+                required.append(param_name)
+            properties[param_name] = prop
+
+        schema: Dict[str, Any] = {"type": "object", "properties": properties}
+        if required:
+            schema["required"] = required
+        return schema
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name='{self.name}')"
