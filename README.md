@@ -5,680 +5,266 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/usuario/mangaba-ai/actions)
 
-Repositório minimalista para criação de agentes de IA inteligentes e versáteis com protocolos **A2A** (Agent-to-Agent) e **MCP** (Model Context Protocol).
+**Framework profissional de orquestração multi-agente** com ReAct reasoning, function calling nativo, RAG, memória persistente e suporte a 4 provedores LLM.
 
-> 📚 **[WIKI AVANÇADA](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/WIKI.md)** - Documentação completa em português brasileiro
+> Alternativa leve e completa a CrewAI + LangChain em um único pacote.
 
-> 📋 **[ÍNDICE COMPLETO](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/README.md)** - Navegação rápida por toda a documentação
+## ✨ Destaques v3.0
 
-## ✨ Características Principais
+- 🧠 **ReAct Reasoning** — Loop Thought→Action→Observation com function calling nativo
+- 🤖 **4 Provedores LLM** — Google Gemini, OpenAI GPT, Anthropic Claude, HuggingFace
+- 👥 **4 Processos de Crew** — Sequential, Hierarchical, Parallel (asyncio), Consensual
+- 🔧 **Tool System** — `@tool` decorator, Pydantic schemas, JSON schema automático para LLM
+- 📚 **RAG Pipeline** — Document loaders, text splitters, embeddings, vector store, retriever
+- 💾 **Memória** — Curto prazo (sliding window), longo prazo (SQLite), entidades
+- 🛡️ **Guardrails** — Validação de tamanho, filtro de conteúdo, schema validation
+- 📊 **Observabilidade** — EventBus com 22+ tipos de evento, callbacks console/arquivo
+- 🔄 **Workflow Engine** — Pipelines com stages sequenciais, paralelos e condicionais
+- ⚡ **Cache & Retry** — Cache LRU + disco (SQLite), retry com backoff exponencial
 
-### 🆕 Versão 2.0 - Multi-Agent Orchestration
-
-- 👥 **Multi-Agent Crews**: Coordene equipes de agentes especializados
-- 🎭 **Roles & Goals**: Agentes com personalidade e especialização definidas
-- 📋 **Structured Tasks**: Sistema completo de orquestração de tarefas
-- 🔄 **Process Types**: Sequential e Hierarchical workflows
-- 🔧 **Tools Ecosystem**: Integrações com web search, file ops, e mais
-- 🤖 **Backward Compatible**: Mantém compatibilidade com API v1.x
-
-### Core Features
-
-- 🔗 **Protocolo A2A**: Comunicação entre agentes
-- 🧠 **Protocolo MCP**: Gerenciamento avançado de contexto
-- 📝 **Funcionalidades Integradas**: Chat, análise, tradução e mais
-- 🌐 **Multi-LLM Real**: Google Gemini, OpenAI GPT, Anthropic Claude e Hugging Face
-- ⚡ **Configuração Simples**: Apenas 2 passos para começar
-
-## 🚀 Instalação Rápida
-
-Precisa apenas usar a biblioteca diretamente? Ela já está publicada no PyPI e pode ser instalada tanto com **pip** quanto com **UV**:
+## 🚀 Instalação
 
 ```bash
-# pip tradicional
 pip install mangaba
 
-# usando UV (mesmo comando do pip, porém turbo)
-uv pip install mangaba
+# Com RAG e embeddings
+pip install mangaba[all]
 
-# teste rápido após a instalação
-python -c "from mangaba_ai import MangabaAgent; print(MangabaAgent)"
+# Desenvolvimento
+pip install mangaba[dev]
 ```
 
-> ✅ Esses comandos funcionam em qualquer ambiente virtual ou no sistema.  
-> ✅ `uv pip install mangaba` também aceita `--extra`/`--index` iguais ao pip.
+## ⚡ Quick Start
 
-Se quiser clonar o repositório para contribuir, rode os passos abaixo e escolha entre **UV** (ultra-rápido) ou **pip** (tradicional):
-
-### ⚡ Opção A: Com UV (10-100x mais rápido!)
-
-```bash
-# Windows
-.\uv sync
-.\uv run python examples/basic_example.py
-
-# Linux/Mac
-uv sync
-uv run python examples/basic_example.py
-```
-
-> 💡 **Novo em UV?** [Guia completo de UV](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/UV_SETUP.md) • [Migração pip para UV](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/MIGRACAO_PIP_UV.md)
-
-### 🐍 Opção B: Com pip (tradicional)
-
-```bash
-# 1. Criar e ativar ambiente virtual
-python -m venv .venv
-
-# Windows
-.\.venv\Scripts\Activate.ps1
-
-# Linux/Mac
-source .venv/bin/activate
-
-# 2. Instalar dependências
-pip install -r requirements.txt
-
-# 3. Executar exemplo
-python examples/basic_example.py
-```
-
-### 🤖 Opção C: Setup Automático
-
-```bash
-# Detecta automaticamente UV ou pip
-python scripts/quick_setup.py
-```
-
-<details>
-<summary>📋 <strong>Configuração do arquivo .env</strong></summary>
-
-```bash
-# Copiar template (ou criar manualmente)
-cp .env.example .env  # Linux/Mac
-copy .env.example .env  # Windows
-```
-
-Edite `.env` e adicione sua chave:
-```env
-LLM_PROVIDER=google  # ou openai | anthropic | huggingface
-# Informe apenas a chave correspondente ao provedor escolhido
-GOOGLE_API_KEY=sua_chave_google
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-HUGGINGFACE_API_KEY=
-MODEL_NAME=gemini-2.5-flash
-LOG_LEVEL=INFO
-```
-
-Obtenha sua chave nos provedores suportados:
-- Google Gemini: https://makersuite.google.com/app/apikey
-- OpenAI: https://platform.openai.com/api-keys
-- Anthropic: https://console.anthropic.com/account/keys
-- Hugging Face: https://huggingface.co/settings/tokens
-
-</details>
-
-## 📦 UV vs pip - Qual usar?
-
-| Característica | UV ⚡ | pip 🐍 |
-|----------------|------|--------|
-| **Velocidade** | 10-100x mais rápido | Padrão Python |
-| **Instalação** | `pip install uv` | Já vem com Python |
-| **Compatibilidade** | 100% compatível | Nativo |
-| **Lock file** | ✅ `uv.lock` | ❌ Manual |
-| **Uso** | `.\uv sync` | `pip install -r requirements.txt` |
-| **Recomendado para** | Desenvolvimento ativo | CI/CD tradicional |
-
-**💡 Dica:** Pode usar ambos! UV é retrocompatível com pip.
-
-## ⚙️ Configuração
-
-### 🔧 Comandos por Gerenciador
-
-#### Com UV:
-```bash
-# Sincronizar dependências
-.\uv sync                    # Windows
-uv sync                      # Linux/Mac
-
-# Instalar pacote novo
-.\uv pip install nome-pacote
-
-# Executar script
-.\uv run python seu_script.py
-
-# Ver pacotes instalados
-.\uv pip list
-```
-
-#### Com pip:
-```bash
-# Ativar ambiente virtual primeiro
-.\.venv\Scripts\Activate.ps1  # Windows
-source .venv/bin/activate    # Linux/Mac
-
-# Instalar dependências
-pip install -r requirements.txt
-
-# Instalar pacote novo
-pip install nome-pacote
-
-# Executar script
-python seu_script.py
-
-# Ver pacotes instalados
-pip list
-```
-
-### 🛠️ Configuração Manual do .env
-
-1. **Copie o arquivo de exemplo:**
-```bash
-cp .env.example .env      # Linux/Mac
-copy .env.example .env    # Windows
-```
-
-2. **Edite o arquivo .env:**
-```env
-# Obrigatório
-LLM_PROVIDER=google  # google | openai | anthropic | huggingface
-GOOGLE_API_KEY=sua_chave_google
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-HUGGINGFACE_API_KEY=
-
-# Opcional (com valores padrão)
-MODEL_NAME=gemini-2.5-flash
-AGENT_NAME=MangabaAgent
-LOG_LEVEL=INFO
-```
-
-3. **Obtenha sua chave no provedor escolhido:**
-   - Google Gemini: https://makersuite.google.com/app/apikey
-   - OpenAI: https://platform.openai.com/api-keys
-   - Anthropic: https://console.anthropic.com/account/keys
-   - Hugging Face: https://huggingface.co/settings/tokens
-
-### 🌐 Selecionando o Provedor LLM
-
-No arquivo `.env`, defina qual motor de IA deseja utilizar:
-
-```env
-LLM_PROVIDER=google  # google | openai | anthropic | huggingface
-```
-
-| Provedor      | Variável de API Key            | Modelo padrão (`MODEL_NAME`)          |
-|---------------|--------------------------------|---------------------------------------|
-| `google`      | `GOOGLE_API_KEY`               | `gemini-2.5-flash`                    |
-| `openai`      | `OPENAI_API_KEY`               | `gpt-4o-mini`                         |
-| `anthropic`   | `ANTHROPIC_API_KEY`            | `claude-3-haiku-20240307`             |
-| `huggingface` | `HUGGINGFACE_API_KEY` / `HF_TOKEN` | `mistralai/Mistral-7B-Instruct-v0.2` |
-
-👉 Informe **apenas** a chave do provedor selecionado. Trocar de provider exige apenas atualizar `LLM_PROVIDER` (e opcionalmente `MODEL_NAME`).
-
-### 🔍 Validação do Ambiente
-
-```bash
-# Validação rápida
-python check_setup.py
-
-# Validação completa
-python scripts/validate_env.py
-
-# Com relatório detalhado
-python scripts/validate_env.py --save-report
-```
-
-## 📖 Uso Super Simples
-
-### 🆕 Modo Crew (v2.0) - Multi-Agent
+### Agente simples com ferramenta
 
 ```python
-from mangaba import Agent, Task, Crew, Process
+from mangaba import Agent, Task, Crew, Process, tool
 
-# Criar agentes especializados
+@tool
+def search(query: str) -> str:
+    """Search the web for information."""
+    return f"Results for: {query}"
+
 researcher = Agent(
     role="Research Analyst",
-    goal="Find and analyze information",
-    backstory="Expert researcher with analytical skills",
-    verbose=True
+    goal="Find accurate information",
+    backstory="Expert researcher with 10 years of experience",
+    tools=[search],
+    llm_config={"provider": "google", "api_key": "YOUR_KEY"},
 )
 
-writer = Agent(
-    role="Content Writer", 
-    goal="Create engaging content",
-    backstory="Professional writer with tech expertise"
+task = Task(
+    description="Research the latest AI trends in 2026",
+    expected_output="A list of the top 5 trends with explanations",
+    agent=researcher,
 )
 
-# Definir tarefas
-research_task = Task(
-    description="Research AI trends in {year}",
-    expected_output="List of 10 key trends",
-    agent=researcher
-)
-
-write_task = Task(
-    description="Write a report about the findings",
-    expected_output="Comprehensive report",
-    agent=writer,
-    context=[research_task],
-    output_file="report.md"
-)
-
-# Criar e executar crew
 crew = Crew(
-    agents=[researcher, writer],
-    tasks=[research_task, write_task],
+    agents=[researcher],
+    tasks=[task],
     process=Process.SEQUENTIAL,
-    verbose=True
-)
-
-result = crew.kickoff(inputs={"year": "2025"})
-print(result.final_output)
-```
-
-### 📱 Modo Simples (v1.x - compatível)
-
-```python
-from mangaba_ai import MangabaAgent
-
-# Inicializar com protocolos A2A e MCP habilitados
-agent = MangabaAgent()
-
-# Chat com contexto automático
-resposta = agent.chat("Olá! Como você pode me ajudar?")
-print(resposta)
-```
-
-> 💡 **Novo projeto?** Use a API v2.0 com Agents/Tasks/Crews  
-> 💡 **Migrando?** A API v1.x continua funcionando perfeitamente!
-
-## 🎯 Exemplos Práticos
-
-### 🆕 Crew com Processo Hierárquico
-
-```python
-from mangaba import Agent, Task, Crew, Process
-
-# Manager (primeiro agente)
-manager = Agent(
-    role="Project Manager",
-    goal="Coordinate and ensure quality",
-    backstory="Experienced PM with great leadership",
-    allow_delegation=True
-)
-
-# Workers
-developer = Agent(
-    role="Developer",
-    goal="Write quality code",
-    backstory="Senior Python developer"
-)
-
-# Tasks
-dev_task = Task(
-    description="Develop authentication system",
-    expected_output="Working code with tests",
-    agent=developer
-)
-
-# Hierarchical crew (manager delega e revisa)
-crew = Crew(
-    agents=[manager, developer],
-    tasks=[dev_task],
-    process=Process.HIERARCHICAL,
-    verbose=True
 )
 
 result = crew.kickoff()
+print(result.final_output)
 ```
 
-### Chat Básico com Contexto MCP
+### Pipeline com stages
+
 ```python
-from mangaba_ai import MangabaAgent
+from mangaba import Pipeline, Stage, ParallelStage
 
-agent = MangabaAgent()
+pipeline = Pipeline(stages=[
+    Stage("research", [research_task]),
+    ParallelStage("analysis", [task_a, task_b]),
+    Stage("report", [write_task]),
+])
 
-# O contexto é mantido automaticamente
-print(agent.chat("Meu nome é João"))
-print(agent.chat("Qual é o meu nome?"))  # Lembra do contexto anterior
+result = pipeline.run({"topic": "AI"})
 ```
 
-### Análise de Texto
+### RAG (Retrieval-Augmented Generation)
+
 ```python
-agent = MangabaAgent()
-text = "A inteligência artificial está transformando o mundo."
-analysis = agent.analyze_text(text, "Faça uma análise detalhada")
-print(analysis)
+from mangaba.rag import TextLoader, RecursiveTextSplitter, RAGChain, Retriever
+from mangaba.embeddings import OpenAIEmbedding
+from mangaba.vectorstores import InMemoryVectorStore
+
+# Carregar e dividir documentos
+docs = TextLoader("data.txt").load()
+chunks = RecursiveTextSplitter(chunk_size=500).split_documents(docs)
+
+# Criar retriever
+embedding = OpenAIEmbedding(api_key="YOUR_KEY")
+store = InMemoryVectorStore(embedding)
+store.add(chunks)
+retriever = Retriever(embedding=embedding, vector_store=store)
+
+# RAG chain
+from mangaba.core.llm import create_llm_client
+llm = create_llm_client(provider="google", api_key="YOUR_KEY")
+chain = RAGChain(llm=llm, retriever=retriever)
+answer = chain.query("What are the main topics?")
 ```
 
-### Tradução
+### Memória persistente
+
 ```python
-agent = MangabaAgent()
-translation = agent.translate("Hello, how are you?", "português")
-print(translation)
+from mangaba.memory import ShortTermMemory, LongTermMemory
+
+# Curto prazo (últimas N interações)
+short = ShortTermMemory(max_items=50)
+short.add("User asked about Python")
+
+# Longo prazo (SQLite)
+long_mem = LongTermMemory(storage_path="memory.db")
+long_mem.add("User prefers concise answers")
+results = long_mem.search("preferences")
 ```
 
-### Resumo do Contexto
+### Guardrails e Output Parsers
+
 ```python
-agent = MangabaAgent()
+from mangaba import Agent, Task
+from mangaba.core.guardrails import LengthGuardrail, GuardrailChain
+from mangaba.core.output_parsers import JSONOutputParser
 
-# Após algumas interações...
-summary = agent.get_context_summary()
-print(summary)
-```
-
-## 🔗 Protocolo A2A (Agent-to-Agent)
-
-O protocolo A2A permite comunicação entre múltiplos agentes:
-
-### Comunicação entre Agentes
-```python
-# Criar dois agentes
-agent1 = MangabaAgent()
-agent2 = MangabaAgent()
-
-# Enviar requisição de um agente para outro
-result = agent1.send_agent_request(
-    target_agent_id=agent2.agent_id,
-    action="chat",
-    params={"message": "Olá do Agent 1!"}
+task = Task(
+    description="List the top 3 programming languages",
+    expected_output="JSON with name and reason",
+    agent=agent,
+    guardrails=[LengthGuardrail(max_length=2000)],
+    output_parser=JSONOutputParser(),
 )
 ```
 
-### Broadcast para Múltiplos Agentes
-```python
-agent = MangabaAgent()
-
-# Enviar mensagem para todos os agentes conectados
-result = agent.broadcast_message(
-    message="Olá a todos!",
-    tags=["general", "announcement"]
-)
-```
-
-### Tipos de Mensagens A2A
-- **REQUEST**: Requisições entre agentes
-- **RESPONSE**: Respostas a requisições
-- **BROADCAST**: Mensagens para múltiplos agentes
-- **NOTIFICATION**: Notificações assíncronas
-- **ERROR**: Mensagens de erro
-
-## 🧠 Protocolo MCP (Model Context Protocol)
-
-O protocolo MCP gerencia contexto avançado automaticamente:
-
-### Tipos de Contexto
-- **CONVERSATION**: Conversas e diálogos
-- **TASK**: Tarefas e operações específicas
-- **MEMORY**: Memórias de longo prazo
-- **SYSTEM**: Informações do sistema
-
-### Prioridades de Contexto
-- **HIGH**: Contexto crítico (sempre preservado)
-- **MEDIUM**: Contexto importante
-- **LOW**: Contexto opcional
-
-### Funcionalidades MCP
-```python
-agent = MangabaAgent()
-
-# Chat com contexto automático
-response = agent.chat("Mensagem", use_context=True)
-
-# Chat sem contexto
-response = agent.chat("Mensagem", use_context=False)
-
-# Obter resumo do contexto atual
-summary = agent.get_context_summary()
-```
-
-## 🛠️ Exemplo Avançado
+### Observabilidade com EventBus
 
 ```python
-from mangaba_ai import MangabaAgent
+from mangaba import EventBus
+from mangaba.callbacks import ConsoleCallback, FileCallback
 
-def demo_completa():
-    # Criar agente com protocolos habilitados
-    agent = MangabaAgent()
-    
-    print(f"Agent ID: {agent.agent_id}")
-    print(f"MCP Habilitado: {agent.mcp_enabled}")
-    
-    # Sequência de interações com contexto
-    agent.chat("Olá, meu nome é Maria")
-    agent.chat("Eu trabalho com programação")
-    
-    # Análise com contexto preservado
-    analysis = agent.analyze_text(
-        "Python é uma linguagem versátil",
-        "Analise considerando meu perfil profissional"
-    )
-    
-    # Tradução
-    translation = agent.translate("Good morning", "português")
-    
-    # Resumo do contexto acumulado
-    context = agent.get_context_summary()
-    print("Contexto atual:", context)
-    
-    # Comunicação A2A
-    agent.broadcast_message("Demonstração concluída!")
+# Ativar logging de eventos
+EventBus.register(ConsoleCallback())
+EventBus.register(FileCallback("events.jsonl"))
 
-if __name__ == "__main__":
-    demo_completa()
+# Todos os eventos (agent, task, tool, LLM, crew) são capturados automaticamente
+result = crew.kickoff()
 ```
 
-## 🎮 Exemplo Interativo
+## 🏗️ Arquitetura
 
-Execute o exemplo interativo:
+```
+mangaba/
+├── core/               # Cérebro do framework
+│   ├── agent.py            # Agent com ReAct reasoning
+│   ├── task.py             # Tasks com guardrails e retry
+│   ├── crew.py             # Orquestração (4 processos)
+│   ├── workflow.py         # Pipeline engine
+│   ├── reasoning.py        # ReAct loop (Think→Act→Observe)
+│   ├── guardrails.py       # Validação de outputs
+│   ├── output_parsers.py   # JSON, Pydantic, List, Markdown
+│   ├── planner.py          # Decomposição automática de tarefas
+│   ├── types.py            # Tipos Pydantic v2
+│   ├── exceptions.py       # Hierarquia de exceções
+│   ├── events.py           # EventBus (22+ event types)
+│   └── llm/                # Engine LLM multi-provider
+│       ├── client.py           # 4 providers + function calling + streaming
+│       ├── retry.py            # Retry com backoff exponencial
+│       ├── cache.py            # LRU (memória) + SQLite (disco)
+│       ├── token_counter.py    # Contagem de tokens
+│       └── prompt_templates.py # Templates de prompt
+├── tools/              # Sistema de ferramentas
+│   ├── base.py             # BaseTool + JSON schema automático
+│   ├── decorator.py        # @tool decorator
+│   ├── toolkit.py          # Agrupamento de ferramentas
+│   ├── file_tools.py       # FileReader, FileWriter, DirectoryList
+│   ├── web_search.py       # Serper, DuckDuckGo
+│   ├── math_tools.py       # Calculadora segura (AST)
+│   └── text_tools.py       # TextSplitter, WordCounter
+├── memory/             # Sistema de memória
+│   ├── short_term.py       # Sliding window (deque)
+│   ├── long_term.py        # SQLite + embeddings opcionais
+│   └── entity.py           # Memória de entidades
+├── embeddings/         # Provedores de embedding
+│   ├── openai_embed.py     # text-embedding-3-small
+│   └── google_embed.py     # text-embedding-004
+├── vectorstores/       # Armazenamento vetorial
+│   └── in_memory.py        # Cosine similarity
+├── rag/                # Pipeline RAG
+│   ├── document.py         # Modelo de documento
+│   ├── loaders.py          # Text, CSV, WebPage
+│   ├── splitters.py        # RecursiveTextSplitter
+│   ├── retriever.py        # Embedding + vector store
+│   └── chain.py            # RAGChain com fontes
+└── callbacks/          # Observabilidade
+    ├── console.py          # Print formatado de eventos
+    └── file.py             # Log JSONL
+```
+
+## 🔄 Processos de Crew
+
+| Processo | Descrição | Uso |
+|---|---|---|
+| `SEQUENTIAL` | Tarefas executadas em ordem, uma após a outra | Workflows lineares |
+| `HIERARCHICAL` | Primeiro agente é manager, delega e revisa | Equipes com líder |
+| `PARALLEL` | Tarefas executadas concorrentemente (asyncio) | Tarefas independentes |
+| `CONSENSUAL` | Todos os agentes executam cada tarefa, resultado sintetizado | Decisões críticas |
+
+## 🌐 Provedores LLM
+
+| Provedor | Function Calling | Streaming | Modelo Padrão |
+|---|---|---|---|
+| **Google Gemini** | ✅ Nativo | ✅ | `gemini-2.0-flash` |
+| **OpenAI** | ✅ Nativo | ✅ | `gpt-4o-mini` |
+| **Anthropic** | ✅ Nativo (tool_use) | ✅ | `claude-3-haiku-20240307` |
+| **HuggingFace** | ⚠️ Prompt-based | ❌ | `mistralai/Mistral-7B-Instruct-v0.2` |
+
+Configure via variáveis de ambiente:
+
+```env
+LLM_PROVIDER=google
+GOOGLE_API_KEY=sua_chave
+# ou OPENAI_API_KEY, ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY
+```
+
+## 🧪 Testes
 
 ```bash
-python examples/basic_example.py
+# Testes v3 (32 testes)
+python -m pytest tests/test_v3.py -v
+
+# Todos os testes
+python -m pytest tests/ -v
+
+# Com cobertura
+python -m pytest tests/ --cov=mangaba --cov-report=term-missing
 ```
 
-Comandos disponíveis:
-- `/analyze <texto>` - Analisa texto
-- `/translate <texto>` - Traduz texto
-- `/context` - Mostra contexto atual
-- `/broadcast <mensagem>` - Envia broadcast
-- `/request <agent_id> <action>` - Requisição para outro agente
-- `/help` - Ajuda
+## 📦 Dependências
 
-## 🧪 Demonstração dos Protocolos
+**Core:**
+- `pydantic>=2.0.0` — Validação de tipos
+- `google-generativeai>=0.3.0` — Google Gemini
+- `openai>=1.6.0` — OpenAI GPT
+- `anthropic>=0.20.0` — Anthropic Claude
+- `huggingface-hub>=0.20.0` — HuggingFace
+- `tiktoken>=0.5.0` — Contagem de tokens
+- `requests>=2.25.0` — HTTP client
+- `loguru>=0.6.0` — Logging
 
-Para ver uma demonstração completa dos protocolos A2A e MCP:
-
-```bash
-python examples/basic_example.py --demo
-```
-
-## 📋 Funcionalidades Principais
-
-### MangabaAgent
-- `chat(message, use_context=True)` - Chat com/sem contexto
-- `analyze_text(text, instruction)` - Análise de texto
-- `translate(text, target_language)` - Tradução
-- `get_context_summary()` - Resumo do contexto
-- `send_agent_request(agent_id, action, params)` - Requisição A2A
-- `broadcast_message(message, tags)` - Broadcast A2A
-
-### Protocolos Integrados
-- **A2A Protocol**: Comunicação entre agentes
-- **MCP Protocol**: Gerenciamento de contexto
-- **Handlers Customizados**: Para requisições específicas
-- **Sessões MCP**: Contexto isolado por sessão
-
-## 🔧 Configuração Avançada
-
-### Variáveis de Ambiente
-```bash
-API_KEY=sua_chave_api_aqui          # Obrigatório
-MODEL=modelo_desejado               # Opcional
-LOG_LEVEL=INFO                      # Opcional (DEBUG, INFO, WARNING, ERROR)
-```
-
-### Personalização
-```python
-# Agente com configurações customizadas
-agent = MangabaAgent()
-
-# Acessar protocolos diretamente
-a2a = agent.a2a_protocol
-mcp = agent.mcp
-
-# ID único do agente
-print(f"Agent ID: {agent.agent_id}")
-
-# Sessão MCP atual
-print(f"Session ID: {agent.current_session_id}")
-```
-
-agent = MangabaAgent()
-resposta = agent.chat_with_context(
-    context="Você é um tutor de programação",
-    message="Como criar uma lista em Python?"
-)
-print(resposta)
-```
-
-### Análise de Texto
-```python
-from mangaba_ai import MangabaAgent
-
-agent = MangabaAgent()
-texto = "Este é um texto para analisar..."
-analise = agent.analyze_text(texto, "Resuma os pontos principais")
-print(analise)
-```
-
-## 🔧 Personalização
-
-Para usar um modelo diferente, apenas mude no `.env`:
-```
-MODEL=modelo-avancado     # Modelo mais avançado
-MODEL=modelo-multimodal   # Para diferentes tipos de entrada
-```
-
-## 🚀 Scripts Disponíveis
-
-> 🔧 **Todos os scripts estão organizados na pasta [scripts/](https://github.com/Mangaba-ai/mangaba_ai/tree/master/scripts)**
-
-- [`validate_env.py`](https://github.com/Mangaba-ai/mangaba_ai/blob/master/scripts/validate_env.py) - Valida configuração do ambiente
-- [`quick_setup.py`](https://github.com/Mangaba-ai/mangaba_ai/blob/master/scripts/quick_setup.py) - Configuração rápida automatizada
-- [`example_env_usage.py`](https://github.com/Mangaba-ai/mangaba_ai/blob/master/scripts/example_env_usage.py) - Exemplo de uso das configurações
-- [`exemplo_curso_basico.py`](https://github.com/Mangaba-ai/mangaba_ai/blob/master/scripts/exemplo_curso_basico.py) - Exemplos práticos do curso básico
-- [`setup_env.py`](https://github.com/Mangaba-ai/mangaba_ai/blob/master/scripts/setup_env.py) - Configuração manual detalhada
-
-## 📁 Estrutura do Projeto
-
-```
-mangaba_ai/
-├── 📁 docs/                    # 📚 Documentação
-│   ├── CURSO_BASICO.md         # Curso básico completo
-│   ├── SETUP.md                # Guia de configuração
-│   ├── PROTOCOLS.md            # Documentação dos protocolos
-│   ├── CHANGELOG.md            # Histórico de mudanças
-│   ├── SCRIPTS.md              # Documentação dos scripts
-│   └── README.md               # Índice da documentação
-├── 📁 scripts/                 # 🔧 Scripts de configuração
-│   ├── validate_env.py         # Validação do ambiente
-│   ├── quick_setup.py          # Setup rápido automatizado
-│   ├── example_env_usage.py    # Exemplo de uso
-│   ├── exemplo_curso_basico.py # Exemplos do curso
-│   ├── setup_env.py            # Setup manual detalhado
-│   └── README.md               # Documentação dos scripts
-├── 📁 protocols/               # 🌐 Protocolos de comunicação
-│   ├── mcp.py                  # Model Context Protocol
-│   └── a2a.py                  # Agent-to-Agent Protocol
-├── 📁 examples/                # 📖 Exemplos de uso
-│   └── basic_example.py        # Exemplo básico completo
-├── 📁 utils/                   # 🛠️ Utilitários
-│   ├── __init__.py
-│   └── logger.py               # Sistema de logs
-├── mangaba_agent.py            # 🤖 Agente principal
-├── config.py                   # ⚙️ Configurações do sistema
-├── ESTRUTURA.md                # 📁 Organização do repositório
-├── .env.example                # 🔐 Exemplo de configuração
-├── requirements.txt            # 📦 Dependências Python
-└── README.md                   # 📖 Este arquivo
-```
-
-> 📋 **Para detalhes completos da estrutura, consulte [ESTRUTURA.md](https://github.com/Mangaba-ai/mangaba_ai/blob/master/ESTRUTURA.md)**
-
-## 🧪 Testar Rapidamente
-
-### Com UV:
-```bash
-.\uv run python check_setup.py              # Validação rápida
-.\uv run python examples/basic_example.py   # Exemplo v1.x
-.\uv run python examples/crew_example.py    # 🆕 Exemplo v2.0 Crew
-.\uv run python -m pytest tests/            # Executar testes
-```
-
-### Com pip (após ativar .venv):
-```bash
-python check_setup.py                       # Validação rápida
-python examples/basic_example.py            # Exemplo v1.x
-python examples/crew_example.py             # 🆕 Exemplo v2.0 Crew
-python scripts/quick_setup.py               # Setup automático
-python -m pytest tests/                     # Executar testes
-```
-
-### Scripts Úteis:
-```bash
-python scripts/validate_env.py              # Validação completa
-python scripts/example_env_usage.py         # Exemplo de uso
-python scripts/exemplo_curso_basico.py      # Exemplos do curso
-python test_correcoes.py                    # Testar correções
-```
-
-## 📚 Wiki Avançada e Documentação
-
-### 🌟 **[📖 WIKI COMPLETA](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/WIKI.md) - Portal Principal da Documentação**
-
-A **Wiki Avançada** do Mangaba AI oferece documentação abrangente em português brasileiro para todos os níveis:
-
-#### 🎓 **Para Iniciantes**
-- [🚀 Visão Geral do Projeto](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/WIKI.md#-visão-geral-do-projeto) - O que é e para que serve
-- [🎓 Curso Básico Completo](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/CURSO_BASICO.md) - Tutorial passo-a-passo  
-- [⚙️ Instalação e Configuração](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/SETUP.md) - Guia detalhado de setup
-- [❓ FAQ - Perguntas Frequentes](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/FAQ.md) - Dúvidas comuns e soluções
-
-#### 👨‍💻 **Para Desenvolvedores**
-- [🌐 Protocolos A2A e MCP](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/PROTOCOLS.md) - Documentação técnica completa
-- [⭐ Melhores Práticas](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/MELHORES_PRATICAS.md) - Guia de boas práticas
-- [🤝 Como Contribuir](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/CONTRIBUICAO.md) - Diretrizes de contribuição
-- [📝 Glossário de Termos](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/GLOSSARIO.md) - Definições técnicas
-
-#### 🛠️ **Recursos Técnicos**
-- [🔧 Scripts e Automação](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/SCRIPTS.md) - Documentação dos scripts
-- [📊 Histórico de Mudanças](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/CHANGELOG.md) - Changelog completo
-- [📁 Estrutura do Projeto](https://github.com/Mangaba-ai/mangaba_ai/blob/master/ESTRUTURA.md) - Organização do repositório
-
-> 🎯 **Comece pela [Wiki Principal](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/WIKI.md)** - É seu portal de entrada para toda a documentação!
+**Opcionais:**
+- `numpy>=1.24.0` — RAG e embeddings (`pip install mangaba[rag]`)
+- `duckduckgo-search>=3.9.0` — Busca web (`pip install mangaba[tools]`)
 
 ## 🤝 Contribuição
 
-Agradecemos seu interesse em contribuir! Consulte nosso **[Guia Completo de Contribuição](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/CONTRIBUICAO.md)** para informações detalhadas.
-
-### 🚀 **Primeiros Passos**
-1. 📚 Leia as [Diretrizes de Contribuição](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/CONTRIBUICAO.md)
-2. 🍴 Faça fork do projeto
-3. 🔧 Configure o ambiente de desenvolvimento
-4. ⭐ Siga as [Melhores Práticas](https://github.com/Mangaba-ai/mangaba_ai/blob/master/docs/MELHORES_PRATICAS.md)
-5. 🧪 Execute os testes
-6. 📤 Abra um Pull Request
-
-### 💡 **Formas de Contribuir**
-- 🐛 **Correção de bugs**
-- ✨ **Novas funcionalidades**
-- 📚 **Melhoria da documentação**
-- 🧪 **Adição de testes**
-- 🌐 **Tradução para outros idiomas**
-
-> 📖 **Primeira contribuição?** Procure por issues marcadas com `good first issue`!
+1. Fork o projeto
+2. Crie sua branch (`git checkout -b feature/nova-feature`)
+3. Commit (`git commit -m 'Add nova feature'`)
+4. Push (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
 
 ## 📄 Licença
 
@@ -686,4 +272,4 @@ MIT License
 
 ---
 
-**Mangaba AI** - Agentes de IA simples e eficazes! 🤖✨
+**Mangaba AI v3.0** — Framework profissional de agentes IA 🥭🤖
