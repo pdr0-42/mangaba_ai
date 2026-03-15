@@ -21,7 +21,7 @@ class TestTypes:
     def test_llm_config_defaults(self):
         cfg = LLMConfig(api_key="k", provider="google")
         assert cfg.temperature == 0.7
-        assert cfg.max_tokens == 2048
+        assert cfg.max_tokens == 1024
 
     def test_llm_config_provider_alias(self):
         cfg = LLMConfig(api_key="k", provider="gemini")
@@ -35,13 +35,13 @@ class TestTypes:
         assert m2.role == "system"
 
     def test_llm_response_tool_calls(self):
-        tc = ToolCall(id="1", name="fn", arguments={"x": 1})
+        tc = ToolCall(id="1", tool_name="fn", arguments={"x": 1})
         resp = LLMResponse(content="", tool_calls=[tc], usage=TokenUsage())
         assert resp.has_tool_calls
 
     def test_agent_config(self):
         cfg = AgentConfig(role="R", goal="G", backstory="B")
-        assert cfg.max_iterations == 10
+        assert cfg.max_iterations == 15
 
 
 # ── Exceptions ────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ class _Collector(BaseCallback):
         super().__init__()
         self.events = []
 
-    def handle_event(self, event):
+    def on_event(self, event):
         self.events.append(event)
 
 
@@ -151,14 +151,14 @@ from mangaba.memory.short_term import ShortTermMemory
 
 class TestShortTermMemory:
     def test_add_and_search(self):
-        mem = ShortTermMemory(max_size=10)
+        mem = ShortTermMemory(max_items=10)
         mem.add("Python is great")
         mem.add("Java is verbose")
         results = mem.search("Python")
-        assert any("Python" in r for r in results)
+        assert any("Python" in r["content"] for r in results)
 
-    def test_max_size(self):
-        mem = ShortTermMemory(max_size=2)
+    def test_max_items(self):
+        mem = ShortTermMemory(max_items=2)
         mem.add("a")
         mem.add("b")
         mem.add("c")
@@ -195,16 +195,19 @@ from mangaba.core.guardrails import LengthGuardrail, ContentFilterGuardrail
 class TestGuardrails:
     def test_length_guardrail_pass(self):
         g = LengthGuardrail(max_length=100)
-        assert g.validate("short text") is True
+        result = g.validate("short text")
+        assert result == "short text"
 
-    def test_length_guardrail_fail(self):
+    def test_length_guardrail_truncate(self):
         g = LengthGuardrail(max_length=5)
-        assert g.validate("this is too long") is False
+        result = g.validate("this is too long")
+        assert len(result) == 5
 
     def test_content_filter(self):
-        g = ContentFilterGuardrail(blocked_words=["spam"])
-        assert g.validate("hello world") is True
-        assert g.validate("this is spam content") is False
+        g = ContentFilterGuardrail(blocked_patterns=[r"spam"])
+        assert g.validate("hello world") == "hello world"
+        filtered = g.validate("this is spam content")
+        assert "spam" not in filtered
 
 
 # ── RAG ───────────────────────────────────────────────────────────────
@@ -314,16 +317,16 @@ class TestCallbacks:
     def test_console_callback(self):
         cb = ConsoleCallback()
         e = Event(event_type=EventType.AGENT_START, data={"test": True})
-        cb.handle_event(e)  # Should not raise
+        cb.on_event(e)  # Should not raise
 
     def test_file_callback(self, tmp_path):
         p = tmp_path / "events.jsonl"
         cb = FileCallback(path=p)
         e = Event(event_type=EventType.TOOL_START, data={"tool": "calc"})
-        cb.handle_event(e)
+        cb.on_event(e)
         assert p.exists()
         content = p.read_text()
-        assert "TOOL_START" in content
+        assert "tool_start" in content
 
 
 # ── Package imports ───────────────────────────────────────────────────

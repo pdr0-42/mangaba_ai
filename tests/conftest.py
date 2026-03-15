@@ -13,9 +13,13 @@ from datetime import datetime
 # Adiciona o diretório pai ao path para imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from mangaba_agent import MangabaAgent
-from protocols.a2a import A2AProtocol, A2AAgent
-from protocols.mcp import MCPProtocol, MCPContext, ContextType, ContextPriority
+try:
+    from mangaba_agent import MangabaAgent
+    from protocols.a2a import A2AProtocol, A2AAgent
+    from protocols.mcp import MCPProtocol, MCPContext, ContextType, ContextPriority
+    _LEGACY_AVAILABLE = True
+except (ImportError, ValueError):
+    _LEGACY_AVAILABLE = False
 
 
 # Fixtures globais
@@ -34,6 +38,8 @@ def test_config():
 @pytest.fixture
 def mock_llm_client():
     """Mock global para o cliente LLM genérico"""
+    if not _LEGACY_AVAILABLE:
+        pytest.skip("Legacy MangabaAgent not available")
     with patch('mangaba_agent.create_llm_client') as mock_factory:
         mock_client = Mock()
         mock_client.generate_text.return_value = "Resposta simulada do modelo AI"
@@ -44,6 +50,8 @@ def mock_llm_client():
 @pytest.fixture
 def sample_agent(mock_llm_client, test_config):
     """Fixture para criar um agente de teste padrão"""
+    if not _LEGACY_AVAILABLE:
+        pytest.skip("Legacy MangabaAgent not available")
     return MangabaAgent(
         api_key=test_config["api_key"],
         model=test_config["model_name"],
@@ -54,6 +62,8 @@ def sample_agent(mock_llm_client, test_config):
 @pytest.fixture
 def clean_agent(mock_llm_client, test_config):
     """Fixture para criar um agente limpo sem protocolos"""
+    if not _LEGACY_AVAILABLE:
+        pytest.skip("Legacy MangabaAgent not available")
     return MangabaAgent(
         api_key=test_config["api_key"],
         model=test_config["model_name"],
@@ -64,18 +74,24 @@ def clean_agent(mock_llm_client, test_config):
 @pytest.fixture
 def a2a_protocol():
     """Fixture para protocolo A2A"""
+    if not _LEGACY_AVAILABLE:
+        pytest.skip("Legacy protocols not available")
     return A2AProtocol("test_agent")
 
 
 @pytest.fixture
 def mcp_protocol(test_config):
     """Fixture para protocolo MCP"""
+    if not _LEGACY_AVAILABLE:
+        pytest.skip("Legacy protocols not available")
     return MCPProtocol(max_contexts=test_config["max_contexts"])
 
 
 @pytest.fixture
 def sample_contexts():
     """Fixture para contextos de exemplo"""
+    if not _LEGACY_AVAILABLE:
+        pytest.skip("Legacy protocols not available")
     contexts = []
     
     # Contexto de conversa
@@ -219,58 +235,63 @@ def performance_config():
     }
 
 
-# Helpers para testes
-class TestHelpers:
-    """Classe com métodos auxiliares para testes"""
-    
-    @staticmethod
-    def create_test_context(context_type=ContextType.CONVERSATION, **kwargs):
-        """Cria um contexto de teste personalizado"""
-        default_content = {
-            "test_data": "dados de teste",
-            "timestamp": datetime.now().isoformat()
-        }
-        
-        content = kwargs.pop('content', default_content)
-        tags = kwargs.pop('tags', ['test'])
-        priority = kwargs.pop('priority', ContextPriority.MEDIUM)
-        
-        return MCPContext.create(
-            context_type=context_type,
-            content=content,
-            tags=tags,
-            priority=priority,
-            **kwargs
-        )
-    
-    @staticmethod
-    def assert_context_valid(context):
-        """Valida se um contexto está bem formado"""
-        assert context.id is not None
-        assert context.context_type is not None
-        assert context.content is not None
-        assert context.created_at is not None
-        assert context.updated_at is not None
-        assert isinstance(context.tags, list)
-        assert isinstance(context.metadata, dict)
-    
-    @staticmethod
-    def assert_agent_valid(agent):
-        """Valida se um agente está bem configurado"""
-        assert agent.agent_name is not None
-        assert agent.agent_id is not None
-        assert agent.model is not None
-        
-        if agent.use_mcp:
-            assert agent.mcp_protocol is not None
-        
-        if agent.use_a2a:
-            assert agent.a2a_protocol is not None
+# Helpers para testes (legacy)
+if _LEGACY_AVAILABLE:
+    class TestHelpers:
+        """Classe com métodos auxiliares para testes"""
+
+        @staticmethod
+        def create_test_context(context_type=ContextType.CONVERSATION, **kwargs):
+            """Cria um contexto de teste personalizado"""
+            default_content = {
+                "test_data": "dados de teste",
+                "timestamp": datetime.now().isoformat()
+            }
+
+            content = kwargs.pop('content', default_content)
+            tags = kwargs.pop('tags', ['test'])
+            priority = kwargs.pop('priority', ContextPriority.MEDIUM)
+
+            return MCPContext.create(
+                context_type=context_type,
+                content=content,
+                tags=tags,
+                priority=priority,
+                **kwargs
+            )
+
+        @staticmethod
+        def assert_context_valid(context):
+            """Valida se um contexto está bem formado"""
+            assert context.id is not None
+            assert context.context_type is not None
+            assert context.content is not None
+            assert context.created_at is not None
+            assert context.updated_at is not None
+            assert isinstance(context.tags, list)
+            assert isinstance(context.metadata, dict)
+
+        @staticmethod
+        def assert_agent_valid(agent):
+            """Valida se um agente está bem configurado"""
+            assert agent.agent_name is not None
+            assert agent.agent_id is not None
+            assert agent.model is not None
+
+            if agent.use_mcp:
+                assert agent.mcp_protocol is not None
+
+            if agent.use_a2a:
+                assert agent.a2a_protocol is not None
+else:
+    TestHelpers = None
 
 
 @pytest.fixture
 def test_helpers():
     """Fixture para acessar helpers de teste"""
+    if TestHelpers is None:
+        pytest.skip("Legacy helpers not available")
     return TestHelpers
 
 

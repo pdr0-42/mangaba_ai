@@ -18,12 +18,12 @@ class FileCallback(BaseCallback):
         super().__init__()
         self.path = Path(path)
 
-    def handle_event(self, event: Event) -> None:
+    def on_event(self, event: Event) -> None:
         record = {
             "event_type": event.event_type.value,
             "source_id": event.source_id,
             "source_type": event.source_type,
-            "timestamp": event.timestamp.isoformat() if event.timestamp else None,
+            "timestamp": event.timestamp,
             "data": event.data,
         }
         try:

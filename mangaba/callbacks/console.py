@@ -33,7 +33,7 @@ class ConsoleCallback(BaseCallback):
         super().__init__()
         self.level = level
 
-    def handle_event(self, event: Event) -> None:
+    def on_event(self, event: Event) -> None:
         icon = _ICONS.get(event.event_type, "•")
         msg = f"{icon} [{event.event_type.value}]"
         if event.source_id:
