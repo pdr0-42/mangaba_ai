@@ -576,20 +576,33 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         """Return curated open models available via HuggingFace Inference API."""
         return list_huggingface_models(category=category)
 
+    def _chat_messages(self, prompt: str) -> List[Dict[str, str]]:
+        msgs: List[Dict[str, str]] = []
+        if self._system_prompt:
+            msgs.append({"role": "system", "content": self._system_prompt})
+        msgs.append({"role": "user", "content": prompt})
+        return msgs
+
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
         try:
-            response = self._client.text_generation(
-                prompt,
+            response = self._client.chat_completion(
+                messages=self._chat_messages(prompt),
                 model=self.model,
-                max_new_tokens=kwargs.get("max_output_tokens", self._max_tokens),
+                max_tokens=kwargs.get("max_output_tokens", self._max_tokens),
                 temperature=kwargs.get("temperature", self._temperature),
-                return_full_text=False,
             )
         except Exception as exc:
             raise LLMError(f"HuggingFace error: {exc}", cause=exc) from exc
 
-        text = response if isinstance(response, str) else (response.get("generated_text") or "")
-        return LLMResponse(content=text, model=self.model, raw=response)
+        choice = response.choices[0]
+        text = choice.message.content or ""
+        usage = getattr(response, "usage", None)
+        token_usage = TokenUsage(
+            prompt_tokens=getattr(usage, "prompt_tokens", 0),
+            completion_tokens=getattr(usage, "completion_tokens", 0),
+            total_tokens=getattr(usage, "total_tokens", 0),
+        ) if usage else TokenUsage()
+        return LLMResponse(content=text, model=self.model, usage=token_usage, raw=response)
 
     def generate_with_tools(
         self,
@@ -597,43 +610,50 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        # Build prompt with tool descriptions injected
+        # Inject tool descriptions into system message (prompt-based, no native tool_use)
         tool_section = _tools_to_hf_prompt_section(tools or [])
-        parts = []
+        enriched: List[Dict[str, Any]] = []
+        injected = False
         for m in messages:
-            role = m.get("role", "user")
-            content = m.get("content", "")
-            if role == "system":
-                parts.append(f"{content}\n\n{tool_section}")
+            if m.get("role") == "system" and tool_section:
+                enriched.append({"role": "system", "content": f"{m['content']}\n\n{tool_section}"})
+                injected = True
             else:
-                parts.append(f"{role}: {content}")
-        if not any(m.get("role") == "system" for m in messages) and tool_section:
-            parts.insert(0, tool_section)
+                enriched.append(m)
+        if not injected and tool_section:
+            enriched.insert(0, {"role": "system", "content": tool_section})
 
-        prompt = "\n\n".join(parts)
-        resp = self.generate(prompt, **kwargs)
+        try:
+            response = self._client.chat_completion(
+                messages=enriched,
+                model=self.model,
+                max_tokens=kwargs.get("max_output_tokens", self._max_tokens),
+                temperature=kwargs.get("temperature", self._temperature),
+            )
+        except Exception as exc:
+            raise LLMError(f"HuggingFace error: {exc}", cause=exc) from exc
 
-        # Try to parse tool calls from output
-        tool_calls = self._try_parse_tool_calls(resp.text)
+        text = response.choices[0].message.content or ""
+        tool_calls = self._try_parse_tool_calls(text)
         if tool_calls:
             return LLMResponse(
-                content=resp.text, tool_calls=tool_calls,
-                model=self.model, finish_reason=FinishReason.TOOL_CALLS, raw=resp.raw,
+                content=text, tool_calls=tool_calls,
+                model=self.model, finish_reason=FinishReason.TOOL_CALLS, raw=response,
             )
-        return resp
+        return LLMResponse(content=text, model=self.model, raw=response)
 
     def stream(self, prompt: str, **kwargs: Any) -> Iterator[str]:
         try:
-            stream = self._client.text_generation(
-                prompt, model=self.model,
-                max_new_tokens=kwargs.get("max_output_tokens", self._max_tokens),
+            for chunk in self._client.chat_completion(
+                messages=self._chat_messages(prompt),
+                model=self.model,
+                max_tokens=kwargs.get("max_output_tokens", self._max_tokens),
                 temperature=kwargs.get("temperature", self._temperature),
-                return_full_text=False, stream=True,
-            )
-            for token in stream:
-                txt = token if isinstance(token, str) else getattr(token, "token", {}).get("text", "")
-                if txt:
-                    yield txt
+                stream=True,
+            ):
+                delta = chunk.choices[0].delta.content if chunk.choices else None
+                if delta:
+                    yield delta
         except Exception as exc:
             raise LLMError(f"HuggingFace streaming error: {exc}", cause=exc) from exc
 

@@ -22,6 +22,13 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Alterado
 - `mangaba/core/llm/__init__.py` — exporta `list_huggingface_models` e `HF_OPEN_MODELS`
 - `mangaba/__init__.py` — exporta `list_huggingface_models` e `HF_OPEN_MODELS` no topo do pacote
+- **`HuggingFaceLLMProvider`** migrado de `text_generation` (API legada) para `chat_completion` (OpenAI-compatible):
+  - `generate()` — usa `chat_completion` com suporte a `system_prompt` e `TokenUsage`
+  - `stream()` — streaming real token a token via `chat_completion(stream=True)`
+  - `generate_with_tools()` — injeção de tools via system message no formato chat
+
+### Corrigido
+- Streaming HuggingFace não funcionava com modelos de instrução modernos (Llama 3, Mistral v0.3, Qwen 2.5) porque usava `text_generation` em vez de `chat_completion`
 
 ## [2.0.4] - 2026-02-13
 
