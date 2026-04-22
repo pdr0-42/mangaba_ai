@@ -238,7 +238,7 @@ mangaba/
 | **Google Gemini** | ✅ Nativo | ✅ | `gemini-2.5-flash` |
 | **OpenAI** | ✅ Nativo | ✅ | `gpt-4o-mini` |
 | **Anthropic** | ✅ Nativo (tool_use) | ✅ | `claude-3-haiku-20240307` |
-| **HuggingFace** | ⚠️ Prompt-based | ✅ via `chat_completion` | `mistralai/Mistral-7B-Instruct-v0.3` |
+| **HuggingFace** | ✅ Nativo (11 modelos) / ⚠️ Prompt (14 modelos) | ✅ via `chat_completion` | `mistralai/Mistral-7B-Instruct-v0.3` |
 
 Configure via variáveis de ambiente:
 
@@ -250,7 +250,7 @@ GOOGLE_API_KEY=sua_chave
 
 ### 🤗 Modelos Open-Source HuggingFace
 
-> O provider HuggingFace usa a API `chat_completion` (OpenAI-compatible), que suporta streaming real token a token e system prompts em todos os modelos de instrução modernos.
+> O provider HuggingFace usa `chat_completion` (OpenAI-compatible) com **detecção automática de tool calling**: modelos que suportam function calling nativo recebem `tools=[...]` direto na API; os demais usam prompt injection como fallback. Use `hf_model_supports_tools(model_id)` para verificar.
 
 
 
@@ -280,6 +280,13 @@ HuggingFaceLLMProvider.list_models(category="general")
 | **embedding** (3) | BGE-M3, all-MiniLM-L6-v2, Multilingual E5 Large |
 
 Cada modelo expõe: `id`, `name`, `category`, `context` (tokens), `tool_calling`, `streaming`, `notes`.
+
+```python
+from mangaba import hf_model_supports_tools
+
+hf_model_supports_tools("mistralai/Mistral-7B-Instruct-v0.3")  # True  — nativo
+hf_model_supports_tools("google/gemma-2-9b-it")                # False — prompt injection
+```
 
 ## 🧪 Testes
 

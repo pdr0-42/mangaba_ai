@@ -496,26 +496,26 @@ class AnthropicLLMProvider(BaseLLMProvider):
 # Fields: id, name, category, context_window, tool_calling, streaming, notes
 HF_OPEN_MODELS: List[Dict[str, Any]] = [
     # ── Instruction-tuned general ──────────────────────────────────────────
-    {"id": "mistralai/Mistral-7B-Instruct-v0.3",       "name": "Mistral 7B Instruct v0.3",       "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "default; fast, strong 7B"},
-    {"id": "mistralai/Mixtral-8x7B-Instruct-v0.1",     "name": "Mixtral 8x7B Instruct",          "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "MoE, quality close to GPT-3.5"},
-    {"id": "mistralai/Mixtral-8x22B-Instruct-v0.1",    "name": "Mixtral 8x22B Instruct",         "category": "general",    "context": 65536,  "tool_calling": False, "streaming": True,  "notes": "MoE, near GPT-4 quality"},
-    {"id": "mistralai/Mistral-Nemo-Instruct-2407",      "name": "Mistral Nemo 12B Instruct",      "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "128k context, multilingual"},
+    {"id": "mistralai/Mistral-7B-Instruct-v0.3",       "name": "Mistral 7B Instruct v0.3",       "category": "general",    "context": 32768,  "tool_calling": True,  "streaming": True,  "notes": "default; native function calling"},
+    {"id": "mistralai/Mixtral-8x7B-Instruct-v0.1",     "name": "Mixtral 8x7B Instruct",          "category": "general",    "context": 32768,  "tool_calling": True,  "streaming": True,  "notes": "MoE; native function calling"},
+    {"id": "mistralai/Mixtral-8x22B-Instruct-v0.1",    "name": "Mixtral 8x22B Instruct",         "category": "general",    "context": 65536,  "tool_calling": True,  "streaming": True,  "notes": "MoE; near GPT-4 quality; native function calling"},
+    {"id": "mistralai/Mistral-Nemo-Instruct-2407",      "name": "Mistral Nemo 12B Instruct",      "category": "general",    "context": 128000, "tool_calling": True,  "streaming": True,  "notes": "128k context; native function calling"},
     # ── Meta Llama 3 ──────────────────────────────────────────────────────
-    {"id": "meta-llama/Meta-Llama-3-8B-Instruct",      "name": "Llama 3 8B Instruct",            "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "fast, lightweight"},
-    {"id": "meta-llama/Meta-Llama-3-70B-Instruct",     "name": "Llama 3 70B Instruct",           "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "high quality"},
-    {"id": "meta-llama/Meta-Llama-3.1-8B-Instruct",    "name": "Llama 3.1 8B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "128k context"},
-    {"id": "meta-llama/Meta-Llama-3.1-70B-Instruct",   "name": "Llama 3.1 70B Instruct",         "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "128k context, top open model"},
-    {"id": "meta-llama/Meta-Llama-3.1-405B-Instruct",  "name": "Llama 3.1 405B Instruct",        "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "largest open model; PRO required"},
-    {"id": "meta-llama/Llama-3.2-1B-Instruct",         "name": "Llama 3.2 1B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "ultra-light edge model"},
-    {"id": "meta-llama/Llama-3.2-3B-Instruct",         "name": "Llama 3.2 3B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "edge-friendly"},
+    {"id": "meta-llama/Meta-Llama-3-8B-Instruct",      "name": "Llama 3 8B Instruct",            "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "fast, lightweight; prompt-based tools"},
+    {"id": "meta-llama/Meta-Llama-3-70B-Instruct",     "name": "Llama 3 70B Instruct",           "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "high quality; prompt-based tools"},
+    {"id": "meta-llama/Meta-Llama-3.1-8B-Instruct",    "name": "Llama 3.1 8B Instruct",          "category": "general",    "context": 128000, "tool_calling": True,  "streaming": True,  "notes": "128k context; native function calling"},
+    {"id": "meta-llama/Meta-Llama-3.1-70B-Instruct",   "name": "Llama 3.1 70B Instruct",         "category": "general",    "context": 128000, "tool_calling": True,  "streaming": True,  "notes": "128k context; native function calling"},
+    {"id": "meta-llama/Meta-Llama-3.1-405B-Instruct",  "name": "Llama 3.1 405B Instruct",        "category": "general",    "context": 128000, "tool_calling": True,  "streaming": True,  "notes": "largest open model; PRO required; native function calling"},
+    {"id": "meta-llama/Llama-3.2-1B-Instruct",         "name": "Llama 3.2 1B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "ultra-light edge model; prompt-based tools"},
+    {"id": "meta-llama/Llama-3.2-3B-Instruct",         "name": "Llama 3.2 3B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "edge-friendly; prompt-based tools"},
     # ── Code ──────────────────────────────────────────────────────────────
-    {"id": "bigcode/starcoder2-15b-instruct-v0.1",     "name": "StarCoder2 15B Instruct",        "category": "code",       "context": 16384,  "tool_calling": False, "streaming": True,  "notes": "code generation & completion"},
-    {"id": "Qwen/Qwen2.5-Coder-7B-Instruct",           "name": "Qwen 2.5 Coder 7B Instruct",     "category": "code",       "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "strong coding, multilingual"},
-    {"id": "Qwen/Qwen2.5-Coder-32B-Instruct",          "name": "Qwen 2.5 Coder 32B Instruct",    "category": "code",       "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "top open code model"},
-    {"id": "deepseek-ai/deepseek-coder-33b-instruct",  "name": "DeepSeek Coder 33B Instruct",    "category": "code",       "context": 16384,  "tool_calling": False, "streaming": True,  "notes": "competitive code assistant"},
+    {"id": "bigcode/starcoder2-15b-instruct-v0.1",     "name": "StarCoder2 15B Instruct",        "category": "code",       "context": 16384,  "tool_calling": False, "streaming": True,  "notes": "code generation & completion; prompt-based tools"},
+    {"id": "Qwen/Qwen2.5-Coder-7B-Instruct",           "name": "Qwen 2.5 Coder 7B Instruct",     "category": "code",       "context": 32768,  "tool_calling": True,  "streaming": True,  "notes": "strong coding; native function calling"},
+    {"id": "Qwen/Qwen2.5-Coder-32B-Instruct",          "name": "Qwen 2.5 Coder 32B Instruct",    "category": "code",       "context": 32768,  "tool_calling": True,  "streaming": True,  "notes": "top open code model; native function calling"},
+    {"id": "deepseek-ai/deepseek-coder-33b-instruct",  "name": "DeepSeek Coder 33B Instruct",    "category": "code",       "context": 16384,  "tool_calling": False, "streaming": True,  "notes": "competitive code assistant; prompt-based tools"},
     # ── Qwen general ──────────────────────────────────────────────────────
-    {"id": "Qwen/Qwen2.5-7B-Instruct",                 "name": "Qwen 2.5 7B Instruct",           "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "multilingual, strong benchmarks"},
-    {"id": "Qwen/Qwen2.5-72B-Instruct",                "name": "Qwen 2.5 72B Instruct",          "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "near GPT-4 quality open model"},
+    {"id": "Qwen/Qwen2.5-7B-Instruct",                 "name": "Qwen 2.5 7B Instruct",           "category": "general",    "context": 32768,  "tool_calling": True,  "streaming": True,  "notes": "multilingual; native function calling"},
+    {"id": "Qwen/Qwen2.5-72B-Instruct",                "name": "Qwen 2.5 72B Instruct",          "category": "general",    "context": 32768,  "tool_calling": True,  "streaming": True,  "notes": "near GPT-4 quality; native function calling"},
     # ── Phi (Microsoft) ───────────────────────────────────────────────────
     {"id": "microsoft/Phi-3-mini-4k-instruct",         "name": "Phi-3 Mini 4K Instruct",         "category": "general",    "context": 4096,   "tool_calling": False, "streaming": True,  "notes": "3.8B, efficient small model"},
     {"id": "microsoft/Phi-3-medium-128k-instruct",     "name": "Phi-3 Medium 128K Instruct",     "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "14B, 128k context"},
@@ -538,6 +538,11 @@ _HF_MODELS_BY_CATEGORY: Dict[str, List[Dict[str, Any]]] = {}
 for _m in HF_OPEN_MODELS:
     _HF_MODELS_BY_CATEGORY.setdefault(_m["category"], []).append(_m)
 
+# Set of model IDs with native function calling support
+_HF_NATIVE_TOOL_MODELS: set = {
+    m["id"] for m in HF_OPEN_MODELS if m["tool_calling"]
+}
+
 
 def list_huggingface_models(category: Optional[str] = None) -> List[Dict[str, Any]]:
     """Return curated HuggingFace open models, optionally filtered by category.
@@ -547,6 +552,11 @@ def list_huggingface_models(category: Optional[str] = None) -> List[Dict[str, An
     if category:
         return [m for m in HF_OPEN_MODELS if m["category"] == category]
     return list(HF_OPEN_MODELS)
+
+
+def hf_model_supports_tools(model_id: str) -> bool:
+    """Return True if the model supports native function calling via chat_completion."""
+    return model_id in _HF_NATIVE_TOOL_MODELS
 
 
 # ---------------------------------------------------------------------------
@@ -604,14 +614,63 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         ) if usage else TokenUsage()
         return LLMResponse(content=text, model=self.model, usage=token_usage, raw=response)
 
+    def _supports_native_tools(self) -> bool:
+        return hf_model_supports_tools(self.model)
+
+    def _openai_tool_schema(self, tool: Any) -> Dict[str, Any]:
+        schema = tool.get_function_schema()
+        return {
+            "type": "function",
+            "function": {
+                "name": schema["name"],
+                "description": schema["description"],
+                "parameters": schema.get("parameters", {"type": "object", "properties": {}}),
+            },
+        }
+
     def generate_with_tools(
         self,
         messages: List[Dict[str, Any]],
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        # Inject tool descriptions into system message (prompt-based, no native tool_use)
-        tool_section = _tools_to_hf_prompt_section(tools or [])
+        tool_list = tools or []
+
+        if self._supports_native_tools() and tool_list:
+            # Native function calling via chat_completion tools parameter
+            hf_tools = [self._openai_tool_schema(t) for t in tool_list]
+            try:
+                response = self._client.chat_completion(
+                    messages=messages,
+                    model=self.model,
+                    tools=hf_tools,
+                    max_tokens=kwargs.get("max_output_tokens", self._max_tokens),
+                    temperature=kwargs.get("temperature", self._temperature),
+                )
+            except Exception as exc:
+                raise LLMError(f"HuggingFace error: {exc}", cause=exc) from exc
+
+            choice = response.choices[0]
+            native_calls = getattr(choice.message, "tool_calls", None) or []
+            if native_calls:
+                tool_calls = [
+                    ToolCall(
+                        tool_name=c.function.name,
+                        arguments=json.loads(c.function.arguments) if isinstance(c.function.arguments, str) else c.function.arguments,
+                    )
+                    for c in native_calls
+                ]
+                return LLMResponse(
+                    content=choice.message.content or "",
+                    tool_calls=tool_calls,
+                    model=self.model,
+                    finish_reason=FinishReason.TOOL_CALLS,
+                    raw=response,
+                )
+            return LLMResponse(content=choice.message.content or "", model=self.model, raw=response)
+
+        # Fallback: inject tool descriptions into system message (prompt-based)
+        tool_section = _tools_to_hf_prompt_section(tool_list)
         enriched: List[Dict[str, Any]] = []
         injected = False
         for m in messages:

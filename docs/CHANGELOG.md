@@ -30,6 +30,20 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Corrigido
 - Streaming HuggingFace não funcionava com modelos de instrução modernos (Llama 3, Mistral v0.3, Qwen 2.5) porque usava `text_generation` em vez de `chat_completion`
 
+## [3.1.1] - 2026-04-22
+
+### Adicionado
+- **Tool calling nativo para 11 modelos HuggingFace** — detecção automática: usa `chat_completion(tools=[...])` para modelos que suportam; cai em prompt injection como fallback para os demais
+  - Nativo: Mistral 7B/Mixtral 8x7B/8x22B/Nemo, Llama 3.1 8B/70B/405B, Qwen 2.5 7B/72B, Qwen 2.5 Coder 7B/32B
+  - Prompt-based: Llama 3.0, Llama 3.2, Gemma 2, Phi-3, StarCoder2, DeepSeek Coder, DeepSeek R1
+- **`hf_model_supports_tools(model_id)`** — função pública para verificar suporte nativo por model ID
+- **`_HF_NATIVE_TOOL_MODELS`** — índice interno de modelos com function calling nativo
+- Campo `tool_calling` corrigido no catálogo `HF_OPEN_MODELS` (era `False` para todos; agora reflete suporte real)
+
+### Alterado
+- `HuggingFaceLLMProvider.generate_with_tools()` — lógica de despacho: nativo quando possível, prompt injection como fallback
+- `mangaba/core/llm/__init__.py` e `mangaba/__init__.py` — exportam `hf_model_supports_tools`
+
 ## [2.0.4] - 2026-02-13
 
 ### Corrigido

@@ -9,7 +9,7 @@ from mangaba.core.exceptions import MangabaError
 from mangaba.core.reasoning import ReActEngine
 from mangaba.core.guardrails import GuardrailChain
 from mangaba.core.output_parsers import JSONOutputParser, PydanticOutputParser
-from mangaba.core.llm import LLMClient, create_llm_client, list_huggingface_models, HF_OPEN_MODELS
+from mangaba.core.llm import LLMClient, create_llm_client, list_huggingface_models, hf_model_supports_tools, HF_OPEN_MODELS
 from mangaba.tools.base import BaseTool
 from mangaba.tools.decorator import tool
 
@@ -29,6 +29,7 @@ __all__ = [
     "LLMClient",
     "create_llm_client",
     "list_huggingface_models",
+    "hf_model_supports_tools",
     "HF_OPEN_MODELS",
     # Events
     "EventBus",

@@ -6,6 +6,7 @@ from .client import (
     create_llm_client,
     get_supported_providers,
     list_huggingface_models,
+    hf_model_supports_tools,
     HF_OPEN_MODELS,
 )
 from .retry import with_retry
@@ -19,6 +20,7 @@ __all__ = [
     "create_llm_client",
     "get_supported_providers",
     "list_huggingface_models",
+    "hf_model_supports_tools",
     "HF_OPEN_MODELS",
     "with_retry",
     "LLMCache",
