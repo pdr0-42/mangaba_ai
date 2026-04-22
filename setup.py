@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="mangaba",
-    version="3.0.0",
+    version="3.1.1",
     author="Mangaba AI Team",
     author_email="contato@mangaba.ai",
     description="Professional multi-agent AI framework with ReAct reasoning, RAG, memory, and function calling",

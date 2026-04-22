@@ -13,7 +13,7 @@ from mangaba.core.llm import LLMClient, create_llm_client, list_huggingface_mode
 from mangaba.tools.base import BaseTool
 from mangaba.tools.decorator import tool
 
-__version__ = "3.0.0"
+__version__ = "3.1.1"
 __all__ = [
     # Core
     "Agent",
