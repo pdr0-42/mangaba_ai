@@ -489,7 +489,68 @@ class AnthropicLLMProvider(BaseLLMProvider):
 
 
 # ---------------------------------------------------------------------------
-# Hugging Face
+# Hugging Face – open-model catalogue
+# ---------------------------------------------------------------------------
+
+# Curated list of models available via HuggingFace Inference API.
+# Fields: id, name, category, context_window, tool_calling, streaming, notes
+HF_OPEN_MODELS: List[Dict[str, Any]] = [
+    # ── Instruction-tuned general ──────────────────────────────────────────
+    {"id": "mistralai/Mistral-7B-Instruct-v0.3",       "name": "Mistral 7B Instruct v0.3",       "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "default; fast, strong 7B"},
+    {"id": "mistralai/Mixtral-8x7B-Instruct-v0.1",     "name": "Mixtral 8x7B Instruct",          "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "MoE, quality close to GPT-3.5"},
+    {"id": "mistralai/Mixtral-8x22B-Instruct-v0.1",    "name": "Mixtral 8x22B Instruct",         "category": "general",    "context": 65536,  "tool_calling": False, "streaming": True,  "notes": "MoE, near GPT-4 quality"},
+    {"id": "mistralai/Mistral-Nemo-Instruct-2407",      "name": "Mistral Nemo 12B Instruct",      "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "128k context, multilingual"},
+    # ── Meta Llama 3 ──────────────────────────────────────────────────────
+    {"id": "meta-llama/Meta-Llama-3-8B-Instruct",      "name": "Llama 3 8B Instruct",            "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "fast, lightweight"},
+    {"id": "meta-llama/Meta-Llama-3-70B-Instruct",     "name": "Llama 3 70B Instruct",           "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "high quality"},
+    {"id": "meta-llama/Meta-Llama-3.1-8B-Instruct",    "name": "Llama 3.1 8B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "128k context"},
+    {"id": "meta-llama/Meta-Llama-3.1-70B-Instruct",   "name": "Llama 3.1 70B Instruct",         "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "128k context, top open model"},
+    {"id": "meta-llama/Meta-Llama-3.1-405B-Instruct",  "name": "Llama 3.1 405B Instruct",        "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "largest open model; PRO required"},
+    {"id": "meta-llama/Llama-3.2-1B-Instruct",         "name": "Llama 3.2 1B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "ultra-light edge model"},
+    {"id": "meta-llama/Llama-3.2-3B-Instruct",         "name": "Llama 3.2 3B Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "edge-friendly"},
+    # ── Code ──────────────────────────────────────────────────────────────
+    {"id": "bigcode/starcoder2-15b-instruct-v0.1",     "name": "StarCoder2 15B Instruct",        "category": "code",       "context": 16384,  "tool_calling": False, "streaming": True,  "notes": "code generation & completion"},
+    {"id": "Qwen/Qwen2.5-Coder-7B-Instruct",           "name": "Qwen 2.5 Coder 7B Instruct",     "category": "code",       "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "strong coding, multilingual"},
+    {"id": "Qwen/Qwen2.5-Coder-32B-Instruct",          "name": "Qwen 2.5 Coder 32B Instruct",    "category": "code",       "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "top open code model"},
+    {"id": "deepseek-ai/deepseek-coder-33b-instruct",  "name": "DeepSeek Coder 33B Instruct",    "category": "code",       "context": 16384,  "tool_calling": False, "streaming": True,  "notes": "competitive code assistant"},
+    # ── Qwen general ──────────────────────────────────────────────────────
+    {"id": "Qwen/Qwen2.5-7B-Instruct",                 "name": "Qwen 2.5 7B Instruct",           "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "multilingual, strong benchmarks"},
+    {"id": "Qwen/Qwen2.5-72B-Instruct",                "name": "Qwen 2.5 72B Instruct",          "category": "general",    "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "near GPT-4 quality open model"},
+    # ── Phi (Microsoft) ───────────────────────────────────────────────────
+    {"id": "microsoft/Phi-3-mini-4k-instruct",         "name": "Phi-3 Mini 4K Instruct",         "category": "general",    "context": 4096,   "tool_calling": False, "streaming": True,  "notes": "3.8B, efficient small model"},
+    {"id": "microsoft/Phi-3-medium-128k-instruct",     "name": "Phi-3 Medium 128K Instruct",     "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "14B, 128k context"},
+    {"id": "microsoft/Phi-3.5-mini-instruct",          "name": "Phi-3.5 Mini Instruct",          "category": "general",    "context": 128000, "tool_calling": False, "streaming": True,  "notes": "3.8B, multilingual"},
+    # ── Gemma (Google) ────────────────────────────────────────────────────
+    {"id": "google/gemma-2-2b-it",                     "name": "Gemma 2 2B Instruct",            "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "tiny but capable"},
+    {"id": "google/gemma-2-9b-it",                     "name": "Gemma 2 9B Instruct",            "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "strong 9B model"},
+    {"id": "google/gemma-2-27b-it",                    "name": "Gemma 2 27B Instruct",           "category": "general",    "context": 8192,   "tool_calling": False, "streaming": True,  "notes": "top Gemma, near 70B quality"},
+    # ── Math / Reasoning ──────────────────────────────────────────────────
+    {"id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",  "name": "DeepSeek R1 Distill Qwen 7B",   "category": "reasoning",  "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "chain-of-thought reasoning"},
+    {"id": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B","name": "DeepSeek R1 Distill Llama 70B", "category": "reasoning",  "context": 32768,  "tool_calling": False, "streaming": True,  "notes": "top open reasoning model"},
+    # ── Embeddings ────────────────────────────────────────────────────────
+    {"id": "BAAI/bge-m3",                              "name": "BGE-M3",                         "category": "embedding",  "context": 8192,   "tool_calling": False, "streaming": False, "notes": "multilingual, multi-granularity"},
+    {"id": "sentence-transformers/all-MiniLM-L6-v2",   "name": "all-MiniLM-L6-v2",              "category": "embedding",  "context": 512,    "tool_calling": False, "streaming": False, "notes": "fast, lightweight embeddings"},
+    {"id": "intfloat/multilingual-e5-large-instruct",  "name": "Multilingual E5 Large Instruct", "category": "embedding",  "context": 512,    "tool_calling": False, "streaming": False, "notes": "100+ languages"},
+]
+
+# Index by category for quick lookup
+_HF_MODELS_BY_CATEGORY: Dict[str, List[Dict[str, Any]]] = {}
+for _m in HF_OPEN_MODELS:
+    _HF_MODELS_BY_CATEGORY.setdefault(_m["category"], []).append(_m)
+
+
+def list_huggingface_models(category: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Return curated HuggingFace open models, optionally filtered by category.
+
+    Categories: general, code, reasoning, embedding.
+    """
+    if category:
+        return [m for m in HF_OPEN_MODELS if m["category"] == category]
+    return list(HF_OPEN_MODELS)
+
+
+# ---------------------------------------------------------------------------
+# Hugging Face – provider
 # ---------------------------------------------------------------------------
 
 class HuggingFaceLLMProvider(BaseLLMProvider):
@@ -498,6 +559,10 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
     name = "huggingface"
     aliases = ("hf", "hugging-face")
 
+    SUPPORTED_MODELS: Tuple[str, ...] = tuple(
+        m["id"] for m in HF_OPEN_MODELS if m["category"] != "embedding"
+    )
+
     def __init__(self, api_key: str, model: str, **options: Any) -> None:
         super().__init__(api_key, model, **options)
         try:
@@ -505,6 +570,11 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         except ImportError as exc:  # pragma: no cover
             raise ImportError("Package 'huggingface-hub' not found. Install with: pip install huggingface-hub") from exc
         self._client = InferenceClient(token=api_key)
+
+    @classmethod
+    def list_models(cls, category: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Return curated open models available via HuggingFace Inference API."""
+        return list_huggingface_models(category=category)
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
         try:

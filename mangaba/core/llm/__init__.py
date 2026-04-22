@@ -5,6 +5,8 @@ from .client import (
     LLMClient,
     create_llm_client,
     get_supported_providers,
+    list_huggingface_models,
+    HF_OPEN_MODELS,
 )
 from .retry import with_retry
 from .cache import LLMCache, InMemoryCache, DiskCache
@@ -16,6 +18,8 @@ __all__ = [
     "LLMClient",
     "create_llm_client",
     "get_supported_providers",
+    "list_huggingface_models",
+    "HF_OPEN_MODELS",
     "with_retry",
     "LLMCache",
     "InMemoryCache",

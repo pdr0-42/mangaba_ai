@@ -153,6 +153,25 @@ EventBus.register(FileCallback("events.jsonl"))
 result = crew.kickoff()
 ```
 
+## 🏛️ Padrões de Projeto
+
+O Mangaba aplica padrões GoF de forma consistente em toda a base de código:
+
+| Padrão | Onde é usado |
+|---|---|
+| **Factory** | `create_llm_client()` — instancia o provider correto por nome |
+| **Abstract Factory** | `BaseLLMProvider` — interface comum; cada provider é uma família concreta |
+| **Facade** | `LLMClient` — esconde a complexidade dos 4 providers atrás de uma API uniforme |
+| **Decorator** | `@tool` — converte funções Python em `BaseTool` com schema automático |
+| **Composite** | `Crew` — agrega múltiplos `Agent` + `Task` e os executa como unidade |
+| **Strategy** | `Process` (sequential/hierarchical/parallel/consensual); providers como strategies |
+| **Observer** | `EventBus` + callbacks (`ConsoleCallback`, `FileCallback`) |
+| **Template Method** | `BaseLLMProvider.generate/stream/generate_with_tools` — subclasses implementam os passos |
+| **Chain of Responsibility** | `GuardrailChain` — passa o output por validadores em sequência |
+| **Command** | `Task` — encapsula instrução, agente e ferramentas |
+| **Iterator** | `stream()` — retorna `Iterator[str]` token a token |
+| **Pipes & Filters** | `Pipeline → Stage[] → ParallelStage / ConditionalStage` |
+
 ## 🏗️ Arquitetura
 
 ```
@@ -216,10 +235,10 @@ mangaba/
 
 | Provedor | Function Calling | Streaming | Modelo Padrão |
 |---|---|---|---|
-| **Google Gemini** | ✅ Nativo | ✅ | `gemini-2.0-flash` |
+| **Google Gemini** | ✅ Nativo | ✅ | `gemini-2.5-flash` |
 | **OpenAI** | ✅ Nativo | ✅ | `gpt-4o-mini` |
 | **Anthropic** | ✅ Nativo (tool_use) | ✅ | `claude-3-haiku-20240307` |
-| **HuggingFace** | ⚠️ Prompt-based | ❌ | `mistralai/Mistral-7B-Instruct-v0.2` |
+| **HuggingFace** | ⚠️ Prompt-based | ✅ | `mistralai/Mistral-7B-Instruct-v0.3` |
 
 Configure via variáveis de ambiente:
 
@@ -228,6 +247,35 @@ LLM_PROVIDER=google
 GOOGLE_API_KEY=sua_chave
 # ou OPENAI_API_KEY, ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY
 ```
+
+### 🤗 Modelos Open-Source HuggingFace
+
+O Mangaba inclui um catálogo de **28 modelos open-source** disponíveis via HuggingFace Inference API, organizados por categoria:
+
+```python
+from mangaba import list_huggingface_models, HF_OPEN_MODELS
+
+# Listar todos os modelos
+todos = list_huggingface_models()
+
+# Filtrar por categoria: general, code, reasoning, embedding
+modelos_codigo  = list_huggingface_models(category="code")
+modelos_reason  = list_huggingface_models(category="reasoning")
+modelos_embed   = list_huggingface_models(category="embedding")
+
+# Via classe do provider
+from mangaba.core.llm.client import HuggingFaceLLMProvider
+HuggingFaceLLMProvider.list_models(category="general")
+```
+
+| Categoria | Modelos incluídos |
+|---|---|
+| **general** (19) | Mistral 7B/Mixtral 8x7B/8x22B, Llama 3/3.1/3.2, Qwen 2.5, Phi-3/3.5, Gemma 2 |
+| **code** (4) | StarCoder2 15B, Qwen 2.5 Coder 7B/32B, DeepSeek Coder 33B |
+| **reasoning** (2) | DeepSeek R1 Distill Qwen 7B, DeepSeek R1 Distill Llama 70B |
+| **embedding** (3) | BGE-M3, all-MiniLM-L6-v2, Multilingual E5 Large |
+
+Cada modelo expõe: `id`, `name`, `category`, `context` (tokens), `tool_calling`, `streaming`, `notes`.
 
 ## 🧪 Testes
 
