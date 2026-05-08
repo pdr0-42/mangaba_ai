@@ -1,11 +1,22 @@
-import chromadb
 from typing import List, Dict, Any, Optional
 import uuid
+
 from mangaba.vectorstores import BaseVectorStore
+
+try:
+    import chromadb
+    CHROMA_AVAILABLE = True
+except ImportError:
+    chromadb = None
+    CHROMA_AVAILABLE = False
 
 
 class ChromaVectorStore(BaseVectorStore):
     def __init__(self, path: str = "./chroma_db", collection_name: str = "mangaba_collection"):
+        if not CHROMA_AVAILABLE:
+            raise ImportError(
+                "chromadb package is required. Install with: pip install mangaba[chroma]"
+            )
         self.client = chromadb.PersistentClient(path=path)
         self.collection = self.client.get_or_create_collection(name=collection_name)
 

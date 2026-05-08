@@ -23,7 +23,7 @@ def create_vectorstore(store_type: str, **kwargs: Any) -> BaseVectorStore:
     """Create a vector store by type name.
 
     Args:
-        store_type: Type of store ("inmemory", "redis", "postgres")
+        store_type: Type of store ("inmemory", "redis", "postgres", "chroma", "sqlite")
         **kwargs: Additional arguments passed to the store constructor
 
     Returns:
@@ -37,6 +37,8 @@ def create_vectorstore(store_type: str, **kwargs: Any) -> BaseVectorStore:
         store = create_vectorstore("redis", url="redis://localhost:6379", vector_dimensions=1536)
         store = create_vectorstore("postgres", url="postgresql://user:pass@localhost/db")
         store = create_vectorstore("inmemory")
+        store = create_vectorstore("chroma", path="./chroma_db", collection_name="my_collection")
+        store = create_vectorstore("sqlite", db_path="mangaba_memory.db")
     """
     store_type = store_type.lower()
 
@@ -67,3 +69,5 @@ def _try_register(name: str, module_path: str, class_name: str) -> None:
 # Lazy register external stores
 _try_register("redis", "mangaba.vectorstores.redis", "RedisVectorStore")
 _try_register("postgres", "mangaba.vectorstores.postgres", "PostgresVectorStore")
+_try_register("chroma", "mangaba.vectorstores.chroma_db", "ChromaVectorStore")
+_try_register("sqlite", "mangaba.vectorstores.sqlite", "SQLiteVectorStore")

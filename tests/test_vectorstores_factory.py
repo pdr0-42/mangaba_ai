@@ -116,3 +116,56 @@ class TestVectorStoreFactory:
             assert isinstance(store, PostgresVectorStore)
             assert store._table_name == "factory_table"
             assert store._vector_dimensions == 512
+
+    def test_chroma_registered_when_available(self):
+        from mangaba.vectorstores.factory import get_supported_stores
+        from mangaba.vectorstores.chroma_db import CHROMA_AVAILABLE
+
+        if CHROMA_AVAILABLE:
+            stores = get_supported_stores()
+            assert "chroma" in stores
+
+    def test_sqlite_registered(self):
+        from mangaba.vectorstores.factory import get_supported_stores
+
+        stores = get_supported_stores()
+        assert "sqlite" in stores
+
+    def test_create_chroma_with_kwargs(self, tmp_path):
+        from mangaba.vectorstores.factory import create_vectorstore, STORE_REGISTRY
+        from mangaba.vectorstores.chroma_db import ChromaVectorStore
+
+        mock_client = MagicMock()
+        mock_collection = MagicMock()
+        mock_client.get_or_create_collection.return_value = mock_collection
+        mock_collection.name = "test_collection"
+
+        with patch("mangaba.vectorstores.chroma_db.chromadb") as mock_chroma_module, \
+             patch("mangaba.vectorstores.chroma_db.CHROMA_AVAILABLE", True):
+            mock_chroma_module.PersistentClient.return_value = mock_client
+
+            STORE_REGISTRY["chroma"] = ChromaVectorStore
+
+            chroma_path = tmp_path / "chroma_test"
+            store = create_vectorstore(
+                "chroma",
+                path=str(chroma_path),
+                collection_name="test_collection",
+            )
+
+            assert isinstance(store, ChromaVectorStore)
+            assert store.collection.name == "test_collection"
+
+    def test_create_sqlite_with_kwargs(self, tmp_path):
+        from mangaba.vectorstores.factory import create_vectorstore, STORE_REGISTRY
+        from mangaba.vectorstores.sqlite import SQLiteVectorStore
+
+        db_path = tmp_path / "test.db"
+        STORE_REGISTRY["sqlite"] = SQLiteVectorStore
+
+        store = create_vectorstore(
+            "sqlite",
+            db_path=str(db_path),
+        )
+
+        assert isinstance(store, SQLiteVectorStore)

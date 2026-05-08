@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mangaba"
-version = "3.2.0"
+version = "3.3.0"
 description = "Professional multi-agent AI framework with ReAct reasoning, RAG, memory, and function calling"
 readme = "README.md"
 license = {text = "MIT"}
@@ -71,12 +71,17 @@ postgres = [
     "psycopg[binary]>=3.1.0",
 ]
 
+chroma = [
+    "chromadb>=0.4.0",
+]
+
 all = [
     "duckduckgo-search>=3.9.0",
     "numpy>=1.24.0",
     "sentence-transformers>=2.2.0",
     "redis>=5.0.0",
     "psycopg[binary]>=3.1.0",
+    "chromadb>=0.4.0",
 ]
 
 dev = [

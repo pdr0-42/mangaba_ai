@@ -3,13 +3,26 @@
 [![PyPI version](https://img.shields.io/pypi/v/mangaba.svg)](https://pypi.org/project/mangaba/)
 [![Python](https://img.shields.io/pypi/pyversions/mangaba.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/usuario/mangaba-ai/actions)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Mangaba-ai/mangaba_ai/actions)
 
-**Framework profissional de orquestração multi-agente** com ReAct reasoning, function calling nativo, RAG, memória persistente e suporte resiliente a múltiplos provedores LLM.
+**Framework profissional de orquestração multi-agente** com ReAct reasoning, function calling nativo, RAG, memória persistente, protocolos A2A/MCP, vector stores avançadas e suporte resiliente a múltiplos provedores LLM.
 
-> Alternativa leve e completa a CrewAI + LangChain em um único pacote, agora com interoperabilidade real entre provedores e arquitetura resiliente.
+> Alternativa leve e completa a CrewAI + LangChain em um único pacote, com interoperabilidade real entre provedores, arquitetura resiliente e comunicação entre agentes via protocolos padrão.
 
-## ✨ Destaques v3.2.0
+## ✨ Destaques v3.3.0
+
+- 🤝 **Protocolos A2A & MCP** — Agent-to-Agent messaging com request/response/broadcast + Multi-Context Protocol para contextos hierárquicos entre agentes
+- 🗄️ **Vector Stores Avançadas** — ChromaDB, PostgreSQL+pgvector, Redis+RediSearch, SQLite + factory `create_vectorstore()` para troca transparente
+- 🧩 **Prompt Templates** — `PromptTemplate`, `ChatPromptTemplate`, `SystemPromptBuilder` para engenharia de prompt reutilizável
+- 📋 **Task Planner** — Decomposição automática de tarefas complexas em planos de execução com dependências
+- 🧰 **Toolkits** — Agrupamento lógico de ferramentas com `BaseToolkit`, `FileToolkit`, `WebToolkit`
+- 🤗 **HuggingFace Embeddings** — Sentence-transformers como terceiro provedor de embedding
+- 👤 **Entity Memory** — Rastreamento de entidades e relacionamentos entre interações
+- 📊 **UsageTracker** — Controle acumulativo de tokens por provedor em toda a execução
+- ⚙️ **Config System** — Configuração unificada via `Config` class com suporte a `.env` e JSON
+- 🔄 **CallbackManager** — Gerencie callbacks customizados com filtro por tipo de evento
+
+### Features consolidadas (desde v3.0)
 
 - 🚀 **OpenRouter Native Support** — Roteamento dinâmico com fallback automático entre modelos
 - 🔄 **Multi-Provider Interoperability** — Misture agentes de diferentes provedores (ex: Gemini + Llama) na mesma Crew
@@ -23,7 +36,6 @@
 - 📊 **Observabilidade** — EventBus com 22+ tipos de evento, callbacks console/arquivo
 - 🔄 **Workflow Engine** — Pipelines com stages sequenciais, paralelos e condicionais
 - ⚡ **Cache & Retry** — Cache LRU + disco (SQLite), retry com backoff exponencial + fallback automático
-
 
 ## 🚀 Instalação
 
@@ -55,7 +67,7 @@ researcher = Agent(
     goal="Find accurate information",
     backstory="Expert researcher with 10 years of experience",
     tools=[search],
-    llm_config= LLMConfig(provider = "google", model = "gemini-2.5-flash", api_key="sua-chave"),
+    llm_config=LLMConfig(provider="google", model="gemini-2.5-flash", api_key="sua-chave"),
 )
 
 task = Task(
@@ -74,7 +86,7 @@ result = crew.kickoff()
 print(result.final_output)
 ```
 
-### Multi-Provider Crew com fallback (NOVO v3.2.0)
+### Multi-Provider Crew com fallback
 
 ```python
 from mangaba.core import Agent, Task, Crew
@@ -147,17 +159,14 @@ from mangaba.rag import TextLoader, RecursiveTextSplitter, RAGChain, Retriever
 from mangaba.embeddings import OpenAIEmbedding
 from mangaba.vectorstores import InMemoryVectorStore
 
-# Carregar e dividir documentos
 docs = TextLoader("data.txt").load()
 chunks = RecursiveTextSplitter(chunk_size=500).split_documents(docs)
 
-# Criar retriever
 embedding = OpenAIEmbedding(api_key="YOUR_KEY")
 store = InMemoryVectorStore(embedding)
 store.add(chunks)
 retriever = Retriever(embedding=embedding, vector_store=store)
 
-# RAG chain
 from mangaba.core.llm import create_llm_client
 llm = create_llm_client(provider="google", api_key="YOUR_KEY")
 chain = RAGChain(llm=llm, retriever=retriever)
@@ -169,11 +178,9 @@ answer = chain.query("What are the main topics?")
 ```python
 from mangaba.memory import ShortTermMemory, LongTermMemory
 
-# Curto prazo (últimas N interações)
 short = ShortTermMemory(max_items=50)
 short.add("User asked about Python")
 
-# Longo prazo (SQLite)
 long_mem = LongTermMemory(storage_path="memory.db")
 long_mem.add("User prefers concise answers")
 results = long_mem.search("preferences")
@@ -195,18 +202,105 @@ task = Task(
 )
 ```
 
-### Observabilidade com EventBus
+### Comunicação entre agentes (A2A Protocol — NOVO v3.3.0)
 
 ```python
-from mangaba import EventBus
-from mangaba.callbacks import ConsoleCallback, FileCallback
+from protocols.a2a import A2AProtocol, A2AMessage
 
-# Ativar logging de eventos
-EventBus.register(ConsoleCallback())
-EventBus.register(FileCallback("events.jsonl"))
+protocolo = A2AProtocol()
 
-# Todos os eventos (agent, task, tool, LLM, crew) são capturados automaticamente
-result = crew.kickoff()
+# Enviar mensagem de um agente para outro
+msg = A2AMessage(
+    sender="pesquisador",
+    recipient="revisor",
+    content="Análise de vulnerabilidade concluída",
+    msg_type="request"
+)
+protocolo.send(msg)
+
+# Broadcast para todos os agentes
+protocolo.broadcast(A2AMessage(
+    sender="manager",
+    recipient="*",
+    content="Iniciando nova tarefa",
+    msg_type="broadcast"
+))
+```
+
+### Vector store com ChromaDB (NOVO v3.3.0)
+
+```python
+from mangaba.vectorstores import ChromaVectorStore, create_vectorstore
+from mangaba.embeddings import OpenAIEmbedding
+
+embedding = OpenAIEmbedding(api_key="KEY")
+
+# Via factory
+store = create_vectorstore("chroma", embedding=embedding, persist_directory="./chroma_db")
+
+# Adicionar e buscar
+store.add(chunks)
+results = store.similarity_search("machine learning", k=5)
+```
+
+## 🗄️ Vector Stores
+
+| Store | Persistência | Ideal para |
+|---|---|---|
+| **InMemoryVectorStore** | Volátil (RAM) | Testes e protótipos |
+| **ChromaVectorStore** | Disco (ChromaDB) | Aplicações standalone |
+| **PostgresVectorStore** | PostgreSQL + pgvector | Produção, dados relacionais |
+| **RedisVectorStore** | Redis + RediSearch | Alta performance, caching |
+| **SQLiteVectorStore** | SQLite local | Embeddings simples, sem infra |
+
+Todas implementam `BaseVectorStore` e são intercambiáveis via `create_vectorstore()`.
+
+## 🤝 Protocolos de Comunicação
+
+### A2A (Agent-to-Agent)
+Mensageria direta entre agentes com suporte a request/response e broadcast:
+
+```python
+from protocols.a2a import A2AProtocol, A2AMessage
+
+protocol = A2AProtocol()
+protocol.send(A2AMessage(sender="agent_a", recipient="agent_b", content="..."))
+```
+
+### MCP (Multi-Context Protocol)
+Compartilhamento de contexto hierárquico entre agentes com prioridade, tags e busca por relevância:
+
+```python
+from protocols.mcp import MCPProtocol, MCPContext
+
+mcp = MCPProtocol()
+ctx = MCPContext(content="Dados da análise", priority=8, tags=["analise", "vulnerabilidade"])
+mcp.share_context("sessao_1", ctx)
+resultados = mcp.query_context("sessao_1", "vulnerabilidade")
+```
+
+## 🧩 Prompt Templates
+
+```python
+from mangaba.core.llm.prompt_templates import PromptTemplate, ChatPromptTemplate, SystemPromptBuilder
+
+# Template simples
+template = PromptTemplate("Responda em {idioma}: {pergunta}")
+result = template.format(idioma="português", pergunta="o que é IA?")
+
+# Template de chat
+chat = ChatPromptTemplate([
+    ("system", "Você é um especialista em {topico}"),
+    ("user", "{pergunta}"),
+])
+messages = chat.format_messages(topico="segurança", pergunta="O que é XSS?")
+
+# Builder pattern
+builder = SystemPromptBuilder()
+builder.add_role("Analista de Segurança")
+builder.add_context("Você trabalha com pentest há 10 anos")
+builder.add_instruction("Responda em markdown")
+prompt = builder.build()
 ```
 
 ## 🏛️ Padrões de Projeto
@@ -215,11 +309,11 @@ O Mangaba aplica padrões GoF de forma consistente em toda a base de código:
 
 | Padrão | Onde é usado |
 |---|---|
-| **Factory** | `create_llm_client()` — instancia o provider correto por nome |
-| **Abstract Factory** | `BaseLLMProvider` — interface comum; cada provider é uma família concreta |
-| **Facade** | `LLMClient` — esconde a complexidade dos 4 providers atrás de uma API uniforme |
+| **Factory** | `create_llm_client()` / `create_vectorstore()` — instancia provedores por nome |
+| **Abstract Factory** | `BaseLLMProvider` / `BaseVectorStore` — interface comum; cada provider é uma família concreta |
+| **Facade** | `LLMClient` — esconde a complexidade dos provedores atrás de uma API uniforme |
 | **Decorator** | `@tool` — converte funções Python em `BaseTool` com schema automático |
-| **Composite** | `Crew` — agrega múltiplos `Agent` + `Task` e os executa como unidade |
+| **Composite** | `Crew` / `Toolkit` — agrega múltiplos agentes/tarefas/ferramentas como unidade |
 | **Strategy** | `Process` (sequential/hierarchical/parallel/consensual); providers como strategies |
 | **Observer** | `EventBus` + callbacks (`ConsoleCallback`, `FileCallback`) |
 | **Template Method** | `BaseLLMProvider.generate/stream/generate_with_tools` — subclasses implementam os passos |
@@ -227,55 +321,107 @@ O Mangaba aplica padrões GoF de forma consistente em toda a base de código:
 | **Command** | `Task` — encapsula instrução, agente e ferramentas |
 | **Iterator** | `stream()` — retorna `Iterator[str]` token a token |
 | **Pipes & Filters** | `Pipeline → Stage[] → ParallelStage / ConditionalStage` |
+| **Builder** | `SystemPromptBuilder` — constrói system prompts passo a passo |
+| **Singleton** | `EventBus` — instância única de barramento de eventos |
 
 ## 🏗️ Arquitetura
 
 ```
 mangaba/
-├── core/               # Cérebro do framework
-│   ├── agent.py            # Agent com ReAct reasoning
-│   ├── task.py             # Tasks com guardrails e retry
-│   ├── crew.py             # Orquestração (4 processos)
-│   ├── workflow.py         # Pipeline engine
-│   ├── reasoning.py        # ReAct loop (Think→Act→Observe)
-│   ├── guardrails.py       # Validação de outputs
-│   ├── output_parsers.py   # JSON, Pydantic, List, Markdown
-│   ├── planner.py          # Decomposição automática de tarefas
-│   ├── types.py            # Tipos Pydantic v2
-│   ├── exceptions.py       # Hierarquia de exceções
-│   ├── events.py           # EventBus (22+ event types)
-│   └── llm/                # Engine LLM multi-provider
-│       ├── client.py           # 5 providers + OpenRouter + fallback + function calling + streaming
-│       ├── retry.py            # Retry com backoff exponencial
-│       ├── cache.py            # LRU (memória) + SQLite (disco)
-│       ├── token_counter.py    # Contagem de tokens
-│       └── prompt_templates.py # Templates de prompt
-├── tools/              # Sistema de ferramentas
-│   ├── base.py             # BaseTool + JSON schema automático
-│   ├── decorator.py        # @tool decorator
-│   ├── toolkit.py          # Agrupamento de ferramentas
-│   ├── file_tools.py       # FileReader, FileWriter, DirectoryList
-│   ├── web_search.py       # Serper, DuckDuckGo
-│   ├── math_tools.py       # Calculadora segura (AST)
-│   └── text_tools.py       # TextSplitter, WordCounter
-├── memory/             # Sistema de memória
-│   ├── short_term.py       # Sliding window (deque)
-│   ├── long_term.py        # SQLite + embeddings opcionais
-│   └── entity.py           # Memória de entidades
-├── embeddings/         # Provedores de embedding
-│   ├── openai_embed.py     # text-embedding-3-small
-│   └── google_embed.py     # text-embedding-004
-├── vectorstores/       # Armazenamento vetorial
-│   └── in_memory.py        # Cosine similarity
-├── rag/                # Pipeline RAG
-│   ├── document.py         # Modelo de documento
-│   ├── loaders.py          # Text, CSV, WebPage
-│   ├── splitters.py        # RecursiveTextSplitter
-│   ├── retriever.py        # Embedding + vector store
-│   └── chain.py            # RAGChain com fontes
-└── callbacks/          # Observabilidade
-    ├── console.py          # Print formatado de eventos
-    └── file.py             # Log JSONL
+├── core/                   # Cérebro do framework
+│   ├── agent.py                # Agent com ReAct reasoning
+│   ├── task.py                 # Tasks com guardrails e retry
+│   ├── crew.py                 # Orquestração (4 processos)
+│   ├── workflow.py             # Pipeline engine
+│   ├── reasoning.py            # ReAct loop (Think→Act→Observe)
+│   ├── planner.py              # Decomposição automática de tarefas
+│   ├── guardrails.py           # LengthGuardrail, ContentFilter, Schema
+│   ├── output_parsers.py       # JSON, Pydantic, List, Markdown
+│   ├── types.py                # Tipos Pydantic v2 (LLMConfig, AgentState...)
+│   ├── exceptions.py           # Hierarquia de 19+ exceções
+│   ├── events.py               # EventBus (22+ event types)
+│   └── llm/                    # Engine LLM multi-provider
+│       ├── client.py               # 5 providers + OpenRouter + fallback
+│       ├── retry.py                # Retry com backoff exponencial
+│       ├── cache.py                # LRU (memória) + SQLite (disco)
+│       ├── token_counter.py        # TokenCounter + UsageTracker
+│       └── prompt_templates.py     # PromptTemplate, ChatPromptTemplate, SystemPromptBuilder
+├── tools/                  # Sistema de ferramentas
+│   ├── base.py                 # BaseTool + JSON schema automático
+│   ├── decorator.py            # @tool decorator
+│   ├── toolkit.py              # BaseToolkit, FileToolkit, WebToolkit
+│   ├── file_tools.py           # FileReader, FileWriter, DirectoryList
+│   ├── web_search.py           # Serper, DuckDuckGo
+│   ├── math_tools.py           # Calculadora segura (AST)
+│   └── text_tools.py           # TextSplitter, WordCounter
+├── memory/                 # Sistema de memória
+│   ├── base.py                 # BaseMemory ABC
+│   ├── short_term.py           # Sliding window (deque)
+│   ├── long_term.py            # SQLite + embeddings opcionais
+│   └── entity.py               # Memória de entidades
+├── embeddings/             # Provedores de embedding
+│   ├── base.py                 # BaseEmbedding ABC
+│   ├── openai_embed.py         # text-embedding-3-small
+│   ├── google_embed.py         # text-embedding-004
+│   └── huggingface_embed.py    # Sentence-transformers
+├── vectorstores/           # Armazenamento vetorial
+│   ├── base.py                 # BaseVectorStore ABC
+│   ├── factory.py              # create_vectorstore() + register_store()
+│   ├── in_memory.py            # Cosine similarity (numpy)
+│   ├── chroma_db.py            # ChromaDB
+│   ├── postgres.py             # PostgreSQL + pgvector
+│   ├── redis.py                # Redis + RediSearch
+│   └── sqlite.py               # SQLite vector store
+├── rag/                    # Pipeline RAG
+│   ├── document.py             # Modelo de documento
+│   ├── loaders.py              # Text, CSV
+│   ├── splitters.py            # RecursiveTextSplitter
+│   ├── retriever.py            # Embedding + vector store
+│   └── chain.py                # RAGChain com fontes
+├── callbacks/              # Observabilidade
+│   ├── console.py              # Print formatado de eventos
+│   └── file.py                 # Log JSONL
+├── __init__.py              # API pública do pacote
+├── config.py                # Config system (leituta .env)
+└── exceptions.py            # (legado)
+
+protocols/                 # Protocolos de comunicação entre agentes
+├── a2a.py                     # Agent-to-Agent protocol
+└── mcp.py                     # Multi-Context Protocol
+
+utils/                     # Utilitários
+└── logger.py                  # Logger colorido (Loguru)
+
+docs/                       # Documentação completa
+├── API-Reference.md
+├── CHANGELOG.md
+├── Core-Components.md
+├── Events.md
+├── Guardrails.md
+├── LLM-Providers.md
+├── Memory.md
+├── RAG.md
+├── Tools.md
+├── Vector-Stores.md
+├── Workflows.md
+├── Getting-Started.md
+├── CURSO_BASICO.md
+├── Examples.md
+├── FAQ.md
+└── ...
+
+examples/                  # Exemplos práticos
+├── basic_example.py
+├── crew_example.py
+├── finance_example.py
+├── legal_example.py
+├── medical_example.py
+├── marketing_example.py
+├── text_analysis_example.py
+├── translation_example.py
+├── document_analysis_example.py
+├── vectorstores_example.py
+└── ...
 ```
 
 ## 🔄 Processos de Crew
@@ -307,9 +453,7 @@ GOOGLE_API_KEY=sua_chave
 
 ### 🤗 Modelos Open-Source HuggingFace
 
-> O provider HuggingFace usa `chat_completion` (OpenAI-compatible) com **detecção automática de tool calling**: modelos que suportam function calling nativo recebem `tools=[...]` direto na API; os demais usam prompt injection como fallback. Use `hf_model_supports_tools(model_id)` para verificar.
-
-
+O provider HuggingFace usa `chat_completion` (OpenAI-compatible) com **detecção automática de tool calling**: modelos que suportam function calling nativo recebem `tools=[...]` direto na API; os demais usam prompt injection como fallback. Use `hf_model_supports_tools(model_id)` para verificar.
 
 O Mangaba inclui um catálogo de **28 modelos open-source** disponíveis via HuggingFace Inference API, organizados por categoria:
 
@@ -336,26 +480,11 @@ HuggingFaceLLMProvider.list_models(category="general")
 | **reasoning** (2) | DeepSeek R1 Distill Qwen 7B, DeepSeek R1 Distill Llama 70B |
 | **embedding** (3) | BGE-M3, all-MiniLM-L6-v2, Multilingual E5 Large |
 
-Cada modelo expõe: `id`, `name`, `category`, `context` (tokens), `tool_calling`, `streaming`, `notes`.
-
 ```python
 from mangaba import hf_model_supports_tools
 
 hf_model_supports_tools("mistralai/Mistral-7B-Instruct-v0.3")  # True  — nativo
 hf_model_supports_tools("google/gemma-2-9b-it")                # False — prompt injection
-```
-
-## 🧪 Testes
-
-```bash
-# Testes v3 (32 testes)
-python -m pytest tests/test_v3.py -v
-
-# Todos os testes
-python -m pytest tests/ -v
-
-# Com cobertura
-python -m pytest tests/ --cov=mangaba --cov-report=term-missing
 ```
 
 ## 📦 Dependências
@@ -372,7 +501,25 @@ python -m pytest tests/ --cov=mangaba --cov-report=term-missing
 
 **Opcionais:**
 - `numpy>=1.24.0` — RAG e embeddings (`pip install mangaba[rag]`)
+- `sentence-transformers>=2.2.0` — Embeddings HF (`pip install mangaba[embeddings]`)
 - `duckduckgo-search>=3.9.0` — Busca web (`pip install mangaba[tools]`)
+- `redis>=5.0.0` — Redis vector store (`pip install mangaba[redis]`)
+- `psycopg[binary]>=3.1.0` — Postgres vector store (`pip install mangaba[postgres]`)
+- `chromadb>=0.4.0` — ChromaDB vector store (`pip install mangaba[chroma]`)
+- **Tudo:** `pip install mangaba[all]`
+
+## 🧪 Testes
+
+```bash
+# Testes v3
+python -m pytest tests/test_v3.py -v
+
+# Todos os testes (14 suites)
+python -m pytest tests/ -v
+
+# Com cobertura (mínimo 80%)
+python -m pytest tests/ --cov=mangaba --cov-report=term-missing
+```
 
 ## 🤝 Contribuição
 
@@ -387,4 +534,3 @@ python -m pytest tests/ --cov=mangaba --cov-report=term-missing
 MIT License
 
 ---
-
