@@ -3,5 +3,6 @@
 from mangaba.embeddings.base import BaseEmbedding
 from mangaba.embeddings.openai_embed import OpenAIEmbedding
 from mangaba.embeddings.google_embed import GoogleEmbedding
+from mangaba.embeddings.huggingface_embed import HuggingFaceEmbedding
 
-__all__ = ["BaseEmbedding", "OpenAIEmbedding", "GoogleEmbedding"]
+__all__ = ["BaseEmbedding", "OpenAIEmbedding", "GoogleEmbedding", "HuggingFaceEmbedding"]

@@ -970,6 +970,30 @@ class LLMClient:
 # ---------------------------------------------------------------------------
 
 def create_llm_client(provider: str, api_key: str, model: str, **options: Any) -> LLMClient:
+    """
+    Create a unified LLM client for the specified provider.
+    
+    Supported providers:
+    - "google" / "gemini": Google Gemini models
+    - "openai": OpenAI GPT models
+    - "anthropic": Anthropic Claude models
+    - "huggingface" / "hf": HuggingFace Inference API models
+    - "openrouter" / "or" / "open-router": OpenRouter models (uses OpenAI-compatible API)
+    
+    Args:
+        provider: Provider name (see supported providers above)
+        api_key: API key for the provider
+        model: Model name/ID (e.g., "gpt-4o", "anthropic/claude-3-haiku")
+        **options: Provider-specific options (e.g., base_url, temperature, max_tokens)
+    
+    For OpenRouter:
+        - Use model format like "openai/gpt-4o" or "anthropic/claude-3-haiku"
+        - Optional: base_url (default: https://openrouter.ai/api/v1)
+        - Optional: site_url, site_name for OpenRouter headers
+    
+    Returns:
+        LLMClient instance with generate/generate_with_tools methods
+    """
     if not provider:
         raise ValueError("LLM provider name is required")
     if not api_key:

@@ -1,297 +1,192 @@
-# 📡 Documentação Técnica dos Protocolos
+# 🔗 Protocols (A2A & MCP)
 
-## Visão Geral
+Protocolos de comunicação entre agents e integração com sistemas externos.
 
-O Mangaba AI implementa dois protocolos fundamentais para comunicação e gerenciamento de contexto:
+---
 
-- **A2A (Agent-to-Agent)**: Protocolo de comunicação entre agentes
-- **MCP (Model Context Protocol)**: Protocolo de gerenciamento de contexto
+## A2A Protocol (Agent-to-Agent)
 
-## 🔗 Protocolo A2A (Agent-to-Agent)
+Protocolo para comunicação entre agents independentes.
 
-### Arquitetura
+### Modelos
 
-O protocolo A2A permite que múltiplos agentes se comuniquem de forma estruturada e eficiente.
+| Modelo | Descrição |
+|---|---|
+| `Task` | Unidade de trabalho com ID, status, inputs/outputs |
+| `Message` | Mensagem entre agents com conteúdo e metadata |
+| `Artifact` | Resultado produzido por uma task |
+| `TaskStatus` | Estado atual da task (pending, working, completed, failed) |
 
-#### Tipos de Mensagem
-
-```python
-class MessageType(Enum):
-    REQUEST = "request"        # Requisições entre agentes
-    RESPONSE = "response"      # Respostas a requisições
-    BROADCAST = "broadcast"    # Mensagens para múltiplos agentes
-    NOTIFICATION = "notification"  # Notificações assíncronas
-    ERROR = "error"           # Mensagens de erro
-```
-
-#### Estrutura de Mensagem
+### Server
 
 ```python
-class A2AMessage:
-    message_id: str          # ID único da mensagem
-    message_type: MessageType # Tipo da mensagem
-    sender_id: str           # ID do agente remetente
-    target_id: str           # ID do agente destinatário (opcional para broadcast)
-    content: dict            # Conteúdo da mensagem
-    timestamp: datetime      # Timestamp da criação
-    correlation_id: str      # ID para correlacionar request/response
-```
+from protocols.a2a import A2AServer
 
-#### Funcionalidades Principais
-
-1. **Registro de Handlers**
-   ```python
-   protocol.register_handler(MessageType.REQUEST, handler_function)
-   ```
-
-2. **Envio de Mensagens**
-   ```python
-   protocol.send_message(message)
-   ```
-
-3. **Criação de Requisições**
-   ```python
-   request = protocol.create_request(target_id, content)
-   ```
-
-4. **Criação de Broadcasts**
-   ```python
-   broadcast = protocol.create_broadcast(content)
-   ```
-
-### Implementação no Mangaba
-
-O `MangabaAgent` implementa handlers específicos:
-
-- `handle_mangaba_request`: Processa requisições recebidas
-- `handle_mangaba_response`: Processa respostas recebidas
-
-#### Ações Suportadas
-
-- `chat`: Executa chat com mensagem
-- `analyze`: Executa análise de texto
-- `translate`: Executa tradução
-- `get_context`: Retorna resumo do contexto
-
-## 🧠 Protocolo MCP (Model Context Protocol)
-
-### Arquitetura
-
-O protocolo MCP gerencia contexto de forma inteligente e estruturada.
-
-#### Tipos de Contexto
-
-```python
-class ContextType(Enum):
-    CONVERSATION = "conversation"  # Conversas e diálogos
-    TASK = "task"                 # Tarefas específicas
-    MEMORY = "memory"             # Memórias de longo prazo
-    SYSTEM = "system"             # Informações do sistema
-```
-
-#### Prioridades de Contexto
-
-```python
-class ContextPriority(Enum):
-    HIGH = "high"      # Contexto crítico (sempre preservado)
-    MEDIUM = "medium"  # Contexto importante
-    LOW = "low"        # Contexto opcional
-```
-
-#### Estrutura de Contexto
-
-```python
-class MCPContext:
-    context_id: str          # ID único do contexto
-    context_type: ContextType # Tipo do contexto
-    content: dict            # Conteúdo do contexto
-    priority: ContextPriority # Prioridade do contexto
-    tags: List[str]          # Tags para categorização
-    timestamp: datetime      # Timestamp da criação
-    expires_at: datetime     # Data de expiração (opcional)
-    metadata: dict           # Metadados adicionais
-```
-
-#### Sessões MCP
-
-```python
-class MCPSession:
-    session_id: str          # ID único da sessão
-    created_at: datetime     # Data de criação
-    last_accessed: datetime  # Último acesso
-    metadata: dict           # Metadados da sessão
-```
-
-### Funcionalidades Principais
-
-1. **Gerenciamento de Contexto**
-   ```python
-   mcp.add_context(context, session_id)
-   mcp.get_context(context_id)
-   mcp.update_context(context_id, new_content)
-   mcp.remove_context(context_id)
-   ```
-
-2. **Busca de Contexto**
-   ```python
-   contexts = mcp.find_contexts_by_tag("conversation")
-   contexts = mcp.find_contexts_by_type(ContextType.TASK)
-   contexts = mcp.get_relevant_contexts(query, max_results=5)
-   ```
-
-3. **Gerenciamento de Sessões**
-   ```python
-   session = mcp.create_session()
-   contexts = mcp.get_session_contexts(session_id)
-   ```
-
-### Implementação no Mangaba
-
-O `MangabaAgent` integra MCP automaticamente:
-
-1. **Chat com Contexto**
-   - Adiciona mensagens do usuário ao contexto
-   - Busca contexto relevante para enriquecer prompts
-   - Armazena respostas da IA no contexto
-
-2. **Análise e Tradução**
-   - Armazena resultados como contexto de tarefa
-   - Permite referência futura aos resultados
-
-3. **Resumo de Contexto**
-   - Agrupa contextos por tipo
-   - Fornece visão geral da sessão atual
-
-## 🔄 Integração dos Protocolos
-
-### Fluxo de Comunicação
-
-1. **Agente A** envia requisição via A2A para **Agente B**
-2. **Agente B** processa requisição usando contexto MCP
-3. **Agente B** envia resposta via A2A para **Agente A**
-4. **Agente A** armazena resposta no contexto MCP
-
-### Benefícios da Integração
-
-- **Contexto Compartilhado**: Agentes podem compartilhar contexto
-- **Comunicação Inteligente**: Respostas baseadas em histórico
-- **Escalabilidade**: Suporte a múltiplos agentes
-- **Persistência**: Contexto mantido entre sessões
-
-## 🛠️ Exemplos de Uso
-
-### Comunicação Básica A2A
-
-```python
-# Agente 1 envia requisição
-request = agent1.send_agent_request(
-    target_agent_id=agent2.agent_id,
-    action="analyze",
-    params={
-        "text": "Texto para análise",
-        "instruction": "Analise o sentimento"
-    }
+server = A2AServer(
+    agent_name="ResearchAgent",
+    host="localhost",
+    port=8080,
 )
-```
-
-### Contexto Avançado MCP
-
-```python
-# Chat com contexto automático
-agent.chat("Meu nome é João")  # Armazenado no contexto
-agent.chat("Qual minha profissão?")  # Usa contexto anterior
-
-# Busca contexto específico
-contexts = agent.mcp.find_contexts_by_tag("user_info")
-```
-
-### Broadcast com Contexto
-
-```python
-# Broadcast que será armazenado no contexto de todos os agentes
-result = agent.broadcast_message(
-    message="Reunião às 15h",
-    tags=["meeting", "schedule"]
-)
-```
-
-## 🔧 Configuração e Personalização
-
-### Handlers Customizados
-
-```python
-def custom_handler(message: A2AMessage):
-    # Lógica personalizada
-    response = process_custom_action(message.content)
-    return agent.a2a_protocol.create_response(message, response, True)
 
 # Registrar handler
-agent.a2a_protocol.register_handler(MessageType.REQUEST, custom_handler)
+@server.on_task
+def handle_task(task):
+    # Processar task
+    return {
+        "status": "completed",
+        "result": "Research findings...",
+    }
+
+server.start()
 ```
 
-### Contexto Personalizado
+### Client
 
 ```python
-# Criar contexto customizado
-custom_context = MCPContext.create(
-    context_type=ContextType.MEMORY,
-    content={"key": "value"},
-    priority=ContextPriority.HIGH,
-    tags=["custom", "important"]
+from protocols.a2a import A2AClient
+
+client = A2AClient(server_url="http://localhost:8080")
+
+# Enviar task
+response = client.send_task(
+    task_id="task_001",
+    description="Research AI trends",
 )
 
-agent.mcp.add_context(custom_context, agent.current_session_id)
+# Ver status
+status = client.get_task_status("task_001")
+
+# Streaming
+for chunk in client.stream_task("task_001"):
+    print(chunk)
 ```
 
-## 📊 Monitoramento e Debug
+---
 
-### Logs A2A
+## MCP Protocol (Model Context Protocol)
+
+Protocolo para integração de tools e resources com LLMs.
+
+### Server
 
 ```python
-# Logs automáticos para todas as operações A2A
-# 📤 Requisição enviada para agent_123: chat
-# 📨 Resposta de agent_456: resultado...
-# 📢 Broadcast enviado: mensagem...
+from protocols.mcp import MCPServer
+
+server = MCPServer(name="MyTools")
+
+# Registrar tool
+@server.tool(name="calculator", description="Evaluate math expressions")
+def calculator(expression: str) -> str:
+    return str(eval(expression))
+
+# Registrar resource
+@server.resource(uri="file://docs/readme.md")
+def readme() -> str:
+    return open("README.md").read()
+
+server.run(transport="stdio")
 ```
 
-### Logs MCP
+### Client
 
 ```python
-# Logs automáticos para operações MCP
-# 💬 Chat: mensagem... → resposta...
-# 🔍 Análise: texto... → resultado...
-# 🌐 Tradução: texto... → idioma
+from protocols.mcp import MCPClient
+
+client = MCPClient()
+
+# Conectar
+client.connect("stdio")
+
+# Listar tools
+tools = client.list_tools()
+
+# Executar tool
+result = client.call_tool("calculator", {"expression": "2 + 2"})
+
+# Ler resource
+content = client.read_resource("file://docs/readme.md")
+
+client.disconnect()
 ```
 
-### Debugging
+---
+
+## Integração com Mangaba
+
+### Agent via A2A
 
 ```python
-# Verificar estado dos protocolos
-print(f"Agent ID: {agent.agent_id}")
-print(f"MCP Enabled: {agent.mcp_enabled}")
-print(f"Session ID: {agent.current_session_id}")
+from mangaba import Agent
+from mangaba.core.types import LLMConfig
+from mangaba.core.llm import create_llm_client
+from protocols.a2a import A2AClient
 
-# Verificar contextos
-contexts = agent.mcp.get_session_contexts(agent.current_session_id)
-print(f"Contextos ativos: {len(contexts)}")
+llm_config = LLMConfig(provider="google", api_key="KEY", model="gemini-2.5-flash")
+llm = create_llm_client(
+    provider=llm_config.provider,
+    api_key=llm_config.api_key,
+    model=llm_config.model,
+    temperature=llm_config.temperature,
+    max_output_tokens=llm_config.max_tokens,
+)
+
+# Agent que pode delegar via A2A
+research_agent = Agent(
+    role="Researcher",
+    goal="Research topics via A2A protocol",
+    backstory="Connected researcher",
+    llm=llm,
+)
+
+# Client para outro agent
+a2a_client = A2AClient(server_url="http://research-server:8080")
+response = a2a_client.send_task(
+    task_id="research_001",
+    description="Research quantum computing advances",
+)
 ```
 
-## 🚀 Próximos Passos
+### Tools via MCP
 
-### Funcionalidades Planejadas
+```python
+from mangaba import Agent, BaseTool
+from mangaba.core.types import LLMConfig
+from mangaba.core.llm import create_llm_client
+from protocols.mcp import MCPClient
 
-1. **Persistência**: Salvar contexto em banco de dados
-2. **Rede de Agentes**: Descoberta automática de agentes
-3. **Balanceamento**: Distribuição de carga entre agentes
-4. **Segurança**: Autenticação e autorização
-5. **Métricas**: Monitoramento de performance
+llm_config = LLMConfig(provider="google", api_key="KEY", model="gemini-2.5-flash")
+llm = create_llm_client(
+    provider=llm_config.provider,
+    api_key=llm_config.api_key,
+    model=llm_config.model,
+    temperature=llm_config.temperature,
+    max_output_tokens=llm_config.max_tokens,
+)
 
-### Extensibilidade
+class MCPTool(BaseTool):
+    """Tool que executa via MCP."""
 
-Os protocolos foram projetados para serem extensíveis:
+    def __init__(self, mcp_client, tool_name):
+        self.mcp_client = mcp_client
+        self.tool_name = tool_name
+        self.name = tool_name
+        self.description = f"MCP tool: {tool_name}"
 
-- Novos tipos de mensagem A2A
-- Novos tipos de contexto MCP
-- Handlers personalizados
-- Estratégias de busca customizadas
-- Políticas de expiração flexíveis
+    def _run(self, **kwargs):
+        return self.mcp_client.call_tool(self.tool_name, kwargs)
+
+# Conectar ao MCP server
+mcp = MCPClient()
+mcp.connect("stdio")
+
+# Criar tools do MCP
+tools = [MCPTool(mcp, t.name) for t in mcp.list_tools()]
+
+agent = Agent(
+    role="MCP Agent",
+    goal="Use MCP tools",
+    backstory="Connected agent",
+    tools=tools,
+    llm=llm,
+)
+```
