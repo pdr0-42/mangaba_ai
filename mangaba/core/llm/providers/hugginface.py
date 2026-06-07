@@ -19,7 +19,7 @@ def list_huggingface_models(category: Optional[str] = None) -> List[Dict[str, An
         List of model dictionaries with metadata (id, name, category, context, etc.).
     """
     from .constants import HF_OPEN_MODELS
-    
+
     if category:
         return [m for m in HF_OPEN_MODELS if m["category"] == category]
     return list(HF_OPEN_MODELS)
@@ -35,7 +35,7 @@ def hf_model_supports_tools(model_id: str) -> bool:
         True if the model supports native function calling, False otherwise.
     """
     from .constants import _HF_NATIVE_TOOL_MODELS
-    
+
     return model_id in _HF_NATIVE_TOOL_MODELS
 
 
@@ -49,9 +49,8 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
     def SUPPORTED_MODELS(self) -> Tuple[str, ...]:
         """Supported models excluding embeddings."""
         from .constants import HF_OPEN_MODELS
-        return tuple(
-            m["id"] for m in HF_OPEN_MODELS if m["category"] != "embedding"
-        )
+
+        return tuple(m["id"] for m in HF_OPEN_MODELS if m["category"] != "embedding")
 
     def __init__(self, api_key: str, model: str, **options: Any) -> None:
         """Initialize the HuggingFace Inference API provider.
@@ -145,8 +144,6 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         Returns:
             True if the model supports native function calling, False otherwise.
         """
-        from .constants import _HF_NATIVE_TOOL_MODELS
-        
         return hf_model_supports_tools(self.model)
 
     def _openai_tool_schema(self, tool: Any) -> Dict[str, Any]:
