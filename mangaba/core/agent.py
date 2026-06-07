@@ -8,7 +8,7 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 
-from mangaba.core.types import AgentState, AgentStatus, LLMConfig, MemoryConfig, OpenRouterConfig
+from mangaba.core.types import AgentState, LLMConfig, MemoryConfig, OpenRouterConfig
 from mangaba.core.exceptions import AgentError
 from mangaba.core.events import EventBus, Event, EventType
 from mangaba.core.reasoning import ReActEngine
