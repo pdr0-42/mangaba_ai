@@ -28,13 +28,30 @@ CREATE TABLE IF NOT EXISTS memories (
 
 
 class LongTermMemory(BaseMemory):
-    """SQLite-backed persistent memory with optional embedding search."""
+    """SQLite-backed persistent memory with optional embedding search.
+
+    This memory implementation persists memories to disk and supports
+    optional vector-similarity search when an embedding provider is
+    available (falls back to keyword search).
+
+    Attributes:
+        db_path: The path to the SQLite database file.
+        embedding_fn: Optional callable that takes text and returns a vector.
+        _conn: The SQLite database connection.
+    """
 
     def __init__(
         self,
         db_path: str = "mangaba_memory.db",
         embedding_fn: Optional[Any] = None,
     ) -> None:
+        """Initialize the LongTermMemory.
+
+        Args:
+            db_path: The path to the SQLite database file (default: "mangaba_memory.db").
+            embedding_fn: Optional callable that takes text and returns a vector
+                for similarity search.
+        """
         self.db_path = db_path
         self.embedding_fn = embedding_fn  # callable(text) -> List[float]
         self._conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -44,6 +61,15 @@ class LongTermMemory(BaseMemory):
     # ── public API ─────────────────────────────────────────────────────
 
     def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+        """Add a memory entry to the database.
+
+        Args:
+            content: The content to store.
+            metadata: Optional metadata associated with the content.
+
+        Returns:
+            The unique ID of the stored memory entry.
+        """
         entry_id = uuid.uuid4().hex[:12]
         embedding_json: Optional[str] = None
         if self.embedding_fn:
@@ -52,31 +78,66 @@ class LongTermMemory(BaseMemory):
 
         self._conn.execute(
             "INSERT INTO memories (id, content, metadata, embedding, created_at) VALUES (?, ?, ?, ?, ?)",
-            (entry_id, content, json.dumps(metadata or {}), embedding_json, datetime.now().isoformat()),
+            (
+                entry_id,
+                content,
+                json.dumps(metadata or {}),
+                embedding_json,
+                datetime.now().isoformat(),
+            ),
         )
         self._conn.commit()
         return entry_id
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """Search for memories relevant to the query.
+
+        Args:
+            query: The search query.
+            top_k: The maximum number of results to return (default: 5).
+
+        Returns:
+            A list of memory entries sorted by relevance.
+        """
         if self.embedding_fn:
             return self._vector_search(query, top_k)
         return self._keyword_search(query, top_k)
 
     def get_all(self) -> List[Dict[str, Any]]:
-        rows = self._conn.execute("SELECT id, content, metadata, created_at FROM memories ORDER BY created_at DESC").fetchall()
+        """Return all stored memories.
+
+        Returns:
+            A list of all memory entries in the database, ordered by creation time.
+        """
+        rows = self._conn.execute(
+            "SELECT id, content, metadata, created_at FROM memories ORDER BY created_at DESC"
+        ).fetchall()
         return [self._row_to_dict(r) for r in rows]
 
     def clear(self) -> None:
+        """Clear all stored memories from the database."""
         self._conn.execute("DELETE FROM memories")
         self._conn.commit()
 
     def close(self) -> None:
+        """Close the database connection."""
         self._conn.close()
 
     # ── internals ──────────────────────────────────────────────────────
 
     def _keyword_search(self, query: str, top_k: int) -> List[Dict[str, Any]]:
-        rows = self._conn.execute("SELECT id, content, metadata, created_at FROM memories").fetchall()
+        """Perform keyword-based search.
+
+        Args:
+            query: The search query.
+            top_k: The maximum number of results to return.
+
+        Returns:
+            A list of memory entries sorted by keyword match score.
+        """
+        rows = self._conn.execute(
+            "SELECT id, content, metadata, created_at FROM memories"
+        ).fetchall()
         q_lower = query.lower()
         scored = []
         for r in rows:
@@ -88,8 +149,19 @@ class LongTermMemory(BaseMemory):
         return [self._row_to_dict(r) for _, r in scored[:top_k]]
 
     def _vector_search(self, query: str, top_k: int) -> List[Dict[str, Any]]:
+        """Perform vector similarity search.
+
+        Args:
+            query: The search query.
+            top_k: The maximum number of results to return.
+
+        Returns:
+            A list of memory entries sorted by cosine similarity.
+        """
         query_vec = self.embedding_fn(query)
-        rows = self._conn.execute("SELECT id, content, metadata, created_at, embedding FROM memories WHERE embedding IS NOT NULL").fetchall()
+        rows = self._conn.execute(
+            "SELECT id, content, metadata, created_at, embedding FROM memories WHERE embedding IS NOT NULL"
+        ).fetchall()
         scored = []
         for r in rows:
             vec = json.loads(r[4])
@@ -100,6 +172,15 @@ class LongTermMemory(BaseMemory):
 
     @staticmethod
     def _cosine_similarity(a: List[float], b: List[float]) -> float:
+        """Calculate cosine similarity between two vectors.
+
+        Args:
+            a: First vector.
+            b: Second vector.
+
+        Returns:
+            The cosine similarity score between 0 and 1.
+        """
         if len(a) != len(b):
             return 0.0
         dot = sum(x * y for x, y in zip(a, b))
@@ -111,6 +192,14 @@ class LongTermMemory(BaseMemory):
 
     @staticmethod
     def _row_to_dict(row: tuple) -> Dict[str, Any]:
+        """Convert a database row to a dictionary.
+
+        Args:
+            row: A tuple representing a database row.
+
+        Returns:
+            A dictionary with keys: id, content, metadata, created_at.
+        """
         return {
             "id": row[0],
             "content": row[1],

@@ -12,8 +12,14 @@ from mangaba.rag.document import Document
 class RecursiveTextSplitter:
     """Split text recursively using a hierarchy of separators.
 
-    Tries the first separator; if any chunk is still too large, falls
-    back to subsequent separators.
+    This splitter tries the first separator; if any chunk is still too large,
+    it falls back to subsequent separators in the hierarchy. This approach
+    helps maintain semantic coherence in the resulting chunks.
+
+    Attributes:
+        chunk_size: The maximum size of each chunk.
+        chunk_overlap: The number of characters to overlap between chunks.
+        separators: A list of separators to try in order, from coarse to fine.
     """
 
     def __init__(
@@ -22,11 +28,29 @@ class RecursiveTextSplitter:
         chunk_overlap: int = 200,
         separators: List[str] | None = None,
     ) -> None:
+        """Initialize the RecursiveTextSplitter.
+
+        Args:
+            chunk_size: The maximum size of each chunk in characters (default: 1000).
+            chunk_overlap: The number of characters to overlap between chunks
+                (default: 200).
+            separators: A list of separators to try in order. If not provided,
+                uses ["\n\n", "\n", ". ", " ", ""].
+        """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.separators = separators or ["\n\n", "\n", ". ", " ", ""]
 
     def split_documents(self, documents: List[Document]) -> List[Document]:
+        """Split a list of documents into smaller chunks.
+
+        Args:
+            documents: A list of Document objects to split.
+
+        Returns:
+            A list of Document chunks with updated metadata including chunk_index
+            and total_chunks.
+        """
         result: List[Document] = []
         for doc in documents:
             chunks = self._split(doc.content, self.separators)
@@ -36,9 +60,26 @@ class RecursiveTextSplitter:
         return result
 
     def split_text(self, text: str) -> List[str]:
+        """Split text into smaller chunks.
+
+        Args:
+            text: The text to split.
+
+        Returns:
+            A list of text chunks.
+        """
         return self._split(text, self.separators)
 
     def _split(self, text: str, separators: List[str]) -> List[str]:
+        """Recursively split text using the given separators.
+
+        Args:
+            text: The text to split.
+            separators: A list of separators to try in order.
+
+        Returns:
+            A list of text chunks.
+        """
         if len(text) <= self.chunk_size:
             return [text.strip()] if text.strip() else []
 
@@ -73,7 +114,11 @@ class RecursiveTextSplitter:
             overlapped: List[str] = [chunks[0]]
             for i in range(1, len(chunks)):
                 prev = chunks[i - 1]
-                overlap_text = prev[-self.chunk_overlap:] if len(prev) > self.chunk_overlap else prev
+                overlap_text = (
+                    prev[-self.chunk_overlap :]
+                    if len(prev) > self.chunk_overlap
+                    else prev
+                )
                 combined = overlap_text + chunks[i]
                 overlapped.append(combined)
             return overlapped

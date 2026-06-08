@@ -15,7 +15,12 @@ STORE_REGISTRY: Dict[str, Type[BaseVectorStore]] = {
 
 
 def register_store(name: str, cls: Type[BaseVectorStore]) -> None:
-    """Register a vector store class under a given name."""
+    """Register a vector store class under a given name.
+
+    Args:
+        name: The name to register the store under.
+        cls: The vector store class to register.
+    """
     STORE_REGISTRY[name.lower()] = cls
 
 
@@ -23,15 +28,15 @@ def create_vectorstore(store_type: str, **kwargs: Any) -> BaseVectorStore:
     """Create a vector store by type name.
 
     Args:
-        store_type: Type of store ("inmemory", "redis", "postgres", "chroma", "sqlite")
-        **kwargs: Additional arguments passed to the store constructor
+        store_type: Type of store ("inmemory", "redis", "postgres", "chroma", "sqlite").
+        **kwargs: Additional arguments passed to the store constructor.
 
     Returns:
-        An instance of the requested vector store
+        An instance of the requested vector store.
 
     Raises:
-        ValueError: If the store type is not supported
-        ImportError: If required dependencies are missing
+        ValueError: If the store type is not supported.
+        ImportError: If required dependencies are missing.
 
     Example:
         store = create_vectorstore("redis", url="redis://localhost:6379", vector_dimensions=1536)
@@ -52,12 +57,22 @@ def create_vectorstore(store_type: str, **kwargs: Any) -> BaseVectorStore:
 
 
 def get_supported_stores() -> tuple[str, ...]:
-    """Return tuple of supported vector store type names."""
+    """Return tuple of supported vector store type names.
+
+    Returns:
+        A tuple of supported store type names.
+    """
     return tuple(sorted(STORE_REGISTRY.keys()))
 
 
 def _try_register(name: str, module_path: str, class_name: str) -> None:
-    """Lazily register a vector store if its dependencies are available."""
+    """Lazily register a vector store if its dependencies are available.
+
+    Args:
+        name: The name to register the store under.
+        module_path: The module path to import.
+        class_name: The class name to register.
+    """
     try:
         module = __import__(module_path, fromlist=[class_name])
         cls = getattr(module, class_name)

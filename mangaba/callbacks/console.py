@@ -27,13 +27,30 @@ _ICONS = {
 
 
 class ConsoleCallback(BaseCallback):
-    """Pretty-print events to the console."""
+    """Callback handler that prints agent/task/tool events to the console.
+
+    This callback provides real-time visibility into the execution flow by
+    logging events with appropriate icons and formatting.
+
+    Attributes:
+        level: The logging level to use for output (default: INFO).
+    """
 
     def __init__(self, level: int = logging.INFO) -> None:
+        """Initialize the ConsoleCallback.
+
+        Args:
+            level: The logging level to use for output (default: INFO).
+        """
         super().__init__()
         self.level = level
 
     def on_event(self, event: Event) -> None:
+        """Handle an event by logging it to the console.
+
+        Args:
+            event: The event to log.
+        """
         icon = _ICONS.get(event.event_type, "•")
         msg = f"{icon} [{event.event_type.value}]"
         if event.source_id:

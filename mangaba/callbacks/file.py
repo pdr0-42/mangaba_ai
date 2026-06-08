@@ -12,13 +12,31 @@ log = logging.getLogger(__name__)
 
 
 class FileCallback(BaseCallback):
-    """Append events to a JSONL log file."""
+    """Callback handler that persists events to a JSONL log file.
+
+    This callback writes each event as a JSON line to a log file for
+    persistent storage and later analysis.
+
+    Attributes:
+        path: The file path where events will be written.
+    """
 
     def __init__(self, path: str | Path = "mangaba_events.jsonl") -> None:
+        """Initialize the FileCallback.
+
+        Args:
+            path: The file path where events will be written
+                (default: "mangaba_events.jsonl").
+        """
         super().__init__()
         self.path = Path(path)
 
     def on_event(self, event: Event) -> None:
+        """Handle an event by appending it to the log file.
+
+        Args:
+            event: The event to log.
+        """
         record = {
             "event_type": event.event_type.value,
             "source_id": event.source_id,
