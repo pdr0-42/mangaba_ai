@@ -33,16 +33,29 @@ def tool(
     description: Optional[str] = None,
     return_direct: bool = False,
 ) -> Any:
-    """Decorator that converts a function into a :class:`BaseTool`.
+    """Decorator that converts a function into a BaseTool.
+
+    Automatically infers the tool name, description (from docstring),
+    and arguments schema (from type hints and defaults).
 
     Can be used with or without arguments::
 
         @tool
         def my_tool(x: int) -> str: ...
 
-        @tool(name="custom_name")
+        @tool(name="custom_name", description="Custom description")
         def my_tool(x: int) -> str: ...
+
+    Args:
+        fn: The function to convert. If None, returns a decorator.
+        name: Optional custom name for the tool. Defaults to function name.
+        description: Optional custom description. Defaults to function docstring.
+        return_direct: Whether to return the tool output directly to the user.
+
+    Returns:
+        Either a decorator function or a BaseTool instance.
     """
+
     def _wrap(func: Callable[..., Any]) -> BaseTool:
         tool_name = name or func.__name__
         tool_desc = description or (inspect.getdoc(func) or func.__name__)
@@ -77,19 +90,22 @@ def tool(
 
 
 def _build_pydantic_model(func: Callable[..., Any], tool_name: str) -> Type[BaseModel]:
-    """Create a Pydantic model from the function signature."""
+    """Create a Pydantic model from the function signature.
+
+    Analyzes the function's signature and type hints to build a Pydantic
+    BaseModel that represents the tool's input schema.
+
+    Args:
+        func: The function to analyze.
+        tool_name: Name of the tool (used for model naming).
+
+    Returns:
+        A Pydantic BaseModel class representing the function's input schema.
+    """
     sig = inspect.signature(func)
     hints = get_type_hints(func)
 
     fields: Dict[str, Any] = {}
-    type_map = {
-        str: (str, ...),
-        int: (int, ...),
-        float: (float, ...),
-        bool: (bool, ...),
-        list: (list, ...),
-        dict: (dict, ...),
-    }
 
     for param_name, param in sig.parameters.items():
         if param_name in ("self", "cls"):

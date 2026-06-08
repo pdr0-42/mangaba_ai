@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +17,18 @@ log = logging.getLogger(__name__)
 
 
 class PlanStep(BaseModel):
-    """A single step in an execution plan."""
+    """A single step in an execution plan.
+
+    Represents one actionable step in a decomposed task plan,
+    including which tool to use (if any) and expected results.
+
+    Attributes:
+        step_number: The sequential order of this step in the plan.
+        description: What this step should accomplish.
+        tool: Optional tool name to use for this step.
+        expected_result: What the output of this step should look like.
+        dependencies: List of step numbers this step depends on.
+    """
 
     step_number: int
     description: str
@@ -27,18 +38,33 @@ class PlanStep(BaseModel):
 
 
 class ExecutionPlan(BaseModel):
-    """An ordered plan produced by the TaskPlanner."""
+    """An ordered plan produced by the TaskPlanner.
+
+    Contains the overall goal and a sequence of PlanSteps to achieve it.
+
+    Attributes:
+        goal: The overall task or objective to accomplish.
+        steps: Ordered list of steps to execute.
+    """
 
     goal: str
     steps: List[PlanStep] = Field(default_factory=list)
 
     @property
     def total_steps(self) -> int:
+        """Get the total number of steps in the plan.
+
+        Returns:
+            The number of steps in the plan.
+        """
         return len(self.steps)
 
 
 class TaskPlanner:
     """Decomposes a complex task into a sequence of PlanSteps using an LLM.
+
+    Uses the LLM to analyze a task and break it down into concrete,
+    sequential steps that can be executed by agents or tools.
 
     Example::
 
@@ -58,10 +84,27 @@ class TaskPlanner:
     )
 
     def __init__(self, llm: Any, tools: Optional[List[Any]] = None) -> None:
+        """Initialize the task planner.
+
+        Args:
+            llm: LLM client instance for generating plans.
+            tools: Optional list of available tools for the plan.
+        """
         self.llm = llm
         self.tools = tools or []
 
     def plan(self, task: str) -> ExecutionPlan:
+        """Generate an execution plan for the given task.
+
+        Args:
+            task: The task description to decompose.
+
+        Returns:
+            An ExecutionPlan containing the goal and ordered steps.
+
+        Raises:
+            ValueError: If the plan cannot be generated or parsed.
+        """
         tools_str = ", ".join(t.name for t in self.tools) if self.tools else "none"
         prompt = self.PLAN_PROMPT.format(tools=tools_str, task=task)
         raw = self.llm.generate_text(prompt)
@@ -71,6 +114,17 @@ class TaskPlanner:
 
     @staticmethod
     def _parse_steps(raw: str) -> List[PlanStep]:
+        """Parse the LLM response into PlanStep objects.
+
+        Args:
+            raw: The raw text response from the LLM.
+
+        Returns:
+            List of PlanStep objects parsed from the response.
+
+        Raises:
+            ValueError: If the JSON cannot be parsed.
+        """
         # Try to find a JSON array in the response
         try:
             start = raw.index("[")
@@ -78,16 +132,20 @@ class TaskPlanner:
             data = json.loads(raw[start:end])
         except (ValueError, json.JSONDecodeError):
             # Fallback: single step
-            return [PlanStep(step_number=1, description=raw.strip(), expected_result="")]
+            return [
+                PlanStep(step_number=1, description=raw.strip(), expected_result="")
+            ]
 
         steps = []
         for item in data:
             if isinstance(item, dict):
-                steps.append(PlanStep(
-                    step_number=item.get("step_number", len(steps) + 1),
-                    description=item.get("description", ""),
-                    tool=item.get("tool"),
-                    expected_result=item.get("expected_result", ""),
-                    dependencies=item.get("dependencies", []),
-                ))
+                steps.append(
+                    PlanStep(
+                        step_number=item.get("step_number", len(steps) + 1),
+                        description=item.get("description", ""),
+                        tool=item.get("tool"),
+                        expected_result=item.get("expected_result", ""),
+                        dependencies=item.get("dependencies", []),
+                    )
+                )
         return steps
