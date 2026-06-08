@@ -166,7 +166,6 @@ omit = [
     "*/venv/*",
     "*/env/*",
     "*/.venv/*",
-    "setup.py",
     "conftest.py",
     "*/site-packages/*",
 ]
