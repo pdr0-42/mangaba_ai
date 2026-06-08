@@ -1,5 +1,5 @@
 """
-RAGChain: end-to-end retrieval-augmented generation.
+RAGChain: geração aumentada por recuperação de ponta a ponta.
 """
 
 from __future__ import annotations
@@ -11,11 +11,11 @@ from mangaba.rag.retriever import Retriever
 
 
 class RAGChain:
-    """Combines a Retriever with an LLM to answer questions using retrieved context.
+    """Combina um Retriever com um LLM para responder perguntas usando contexto recuperado.
 
-    This class implements retrieval-augmented generation (RAG), which retrieves
-    relevant documents from a knowledge base and uses them as context for an LLM
-    to generate answers to questions.
+    Esta classe implementa geração aumentada por recuperação (RAG), que recupera
+    documentos relevantes de uma base de conhecimento e os usa como contexto para um LLM
+    gerar respostas para perguntas.
 
     Example::
 
@@ -23,10 +23,10 @@ class RAGChain:
         answer = chain.query("What is the capital of France?")
 
     Attributes:
-        retriever: The retriever to use for document search.
-        llm: The LLM client to use for answer generation.
-        template: The prompt template to use for answer generation.
-        top_k: The number of documents to retrieve for each query.
+        retriever: O recuperador para usar na busca de documentos.
+        llm: O cliente LLM para usar na geração de respostas.
+        template: O modelo de prompt para usar na geração de respostas.
+        top_k: O número de documentos para recuperar para cada consulta.
     """
 
     DEFAULT_TEMPLATE = (
@@ -43,14 +43,14 @@ class RAGChain:
         prompt_template: Optional[str] = None,
         top_k: int = 5,
     ) -> None:
-        """Initialize the RAGChain.
+        """Inicializa a RAGChain.
 
         Args:
-            retriever: The retriever to use for document search.
-            llm: The LLM client to use for answer generation.
-            prompt_template: Optional custom prompt template. If not provided,
-                uses the default template.
-            top_k: The number of documents to retrieve for each query (default: 5).
+            retriever: O recuperador para usar na busca de documentos.
+            llm: O cliente LLM para usar na geração de respostas.
+            prompt_template: Modelo de prompt personalizado opcional. Se não fornecido,
+                usa o modelo padrão.
+            top_k: O número de documentos para recuperar para cada consulta (padrão: 5).
         """
         self.retriever = retriever
         self.llm = llm
@@ -58,13 +58,13 @@ class RAGChain:
         self.top_k = top_k
 
     def query(self, question: str) -> str:
-        """Retrieve relevant documents and generate an answer.
+        """Recupera documentos relevantes e gera uma resposta.
 
         Args:
-            question: The question to answer.
+            question: A pergunta para responder.
 
         Returns:
-            The generated answer as a string.
+            A resposta gerada como uma string.
         """
         docs = self.retriever.search(question, top_k=self.top_k)
         context = self._format_context(docs)
@@ -72,14 +72,14 @@ class RAGChain:
         return self.llm.generate_text(prompt)
 
     def query_with_sources(self, question: str) -> dict:
-        """Return answer plus the source documents.
+        """Retorna a resposta mais os documentos de origem.
 
         Args:
-            question: The question to answer.
+            question: A pergunta para responder.
 
         Returns:
-            A dictionary with keys "answer" (the generated answer) and "sources"
-            (the list of retrieved documents).
+            Um dicionário com chaves "answer" (a resposta gerada) e "sources"
+            (a lista de documentos recuperados).
         """
         docs = self.retriever.search(question, top_k=self.top_k)
         context = self._format_context(docs)
@@ -89,12 +89,12 @@ class RAGChain:
 
     @staticmethod
     def _format_context(docs: List[Document]) -> str:
-        """Format a list of documents into a context string.
+        """Formata uma lista de documentos em uma string de contexto.
 
         Args:
-            docs: The documents to format.
+            docs: Os documentos para formatar.
 
         Returns:
-            A string with document contents separated by "---".
+            Uma string com conteúdos de documentos separados por "---".
         """
         return "\n---\n".join(d.content for d in docs)

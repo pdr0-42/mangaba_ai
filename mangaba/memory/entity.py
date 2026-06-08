@@ -1,8 +1,8 @@
 """
-Entity memory for Mangaba AI v3.0
+Memória de entidades para Mangaba AI v3.0
 
-Extracts and tracks entities (people, places, concepts) mentioned
-during conversations, keeping a running summary for each entity.
+Extrai e rastreia entidades (pessoas, lugares, conceitos) mencionadas
+durante conversas, mantendo um resumo em execução para cada entidade.
 """
 
 from __future__ import annotations
@@ -16,34 +16,34 @@ from mangaba.memory.base import BaseMemory
 
 
 class EntityMemory(BaseMemory):
-    """In-memory entity store that maintains per-entity summaries.
+    """Armazenamento de entidades em memória que mantém resumos por entidade.
 
-    This memory implementation extracts and tracks entities (people, places,
-    concepts) mentioned during conversations, keeping a running summary of
-    facts for each entity.
+    Esta implementação de memória extrai e rastreia entidades (pessoas, lugares,
+    conceitos) mencionadas durante conversas, mantendo um resumo em execução de
+    fatos para cada entidade.
 
     Attributes:
-        _entities: A dictionary mapping entity names (lowercase) to their
-            associated data including id, name, facts, and last_updated timestamp.
+        _entities: Um dicionário mapeando nomes de entidades (minúsculas) para seus
+            dados associados incluindo id, nome, fatos e timestamp last_updated.
     """
 
     def __init__(self) -> None:
-        """Initialize the EntityMemory."""
+        """Inicializa a EntityMemory."""
         # entity_name (lower) -> {id, name, facts: [str], last_updated}
         self._entities: Dict[str, Dict[str, Any]] = {}
 
     def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
-        """Extract entities from content and store facts about them.
+        """Extrai entidades do conteúdo e armazena fatos sobre elas.
 
         Args:
-            content: The content to analyze and store.
-            metadata: Optional metadata. May contain {"entities": ["Alice", "Berlin"]}
-                to explicitly list entities. If absent, a simple heuristic
-                (capitalized words) is used.
+            content: O conteúdo para analisar e armazenar.
+            metadata: Metadados opcionais. Pode conter {"entities": ["Alice", "Berlin"]}
+                para listar entidades explicitamente. Se ausente, uma heurística simples
+                (palavras capitalizadas) é usada.
 
         Returns:
-            A comma-separated string of entity IDs, or an empty string if
-            no entities were found.
+            Uma string separada por vírgulas de IDs de entidades, ou uma string vazia se
+            nenhuma entidade foi encontrada.
         """
         meta = metadata or {}
         entities = meta.get("entities") or self._extract_entities(content)
@@ -69,14 +69,14 @@ class EntityMemory(BaseMemory):
         return ",".join(ids) if ids else ""
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Search for entities relevant to the query.
+        """Busca por entidades relevantes para a consulta.
 
         Args:
-            query: The search query.
-            top_k: The maximum number of results to return (default: 5).
+            query: A consulta de busca.
+            top_k: O número máximo de resultados a retornar (padrão: 5).
 
         Returns:
-            A list of entity entries sorted by relevance score.
+            Uma lista de entradas de entidades ordenadas por pontuação de relevância.
         """
         q_lower = query.lower()
         scored = []
@@ -96,40 +96,40 @@ class EntityMemory(BaseMemory):
         return [e for _, e in scored[:top_k]]
 
     def get_entity(self, name: str) -> Optional[Dict[str, Any]]:
-        """Retrieve an entity by name.
+        """Recupera uma entidade por nome.
 
         Args:
-            name: The entity name to retrieve.
+            name: O nome da entidade para recuperar.
 
         Returns:
-            The entity dictionary if found, None otherwise.
+            O dicionário da entidade se encontrado, None caso contrário.
         """
         return self._entities.get(name.lower())
 
     def get_all(self) -> List[Dict[str, Any]]:
-        """Return all stored entities.
+        """Retorna todas as entidades armazenadas.
 
         Returns:
-            A list of all entity entries in the memory store.
+            Uma lista de todas as entradas de entidades no armazenamento de memória.
         """
         return list(self._entities.values())
 
     def clear(self) -> None:
-        """Clear all stored entities."""
+        """Limpa todas as entidades armazenadas."""
         self._entities.clear()
 
     @staticmethod
     def _extract_entities(text: str) -> List[str]:
-        """Extract entities from text using a simple heuristic.
+        """Extrai entidades do texto usando uma heurística simples.
 
-        This method matches sequences of capitalized words (2+ chars) not at
-        sentence start to identify potential entities.
+        Este método corresponde a sequências de palavras capitalizadas (2+ caracteres) não no
+        início da frase para identificar entidades potenciais.
 
         Args:
-            text: The text to extract entities from.
+            text: O texto para extrair entidades.
 
         Returns:
-            A list of extracted entity names.
+            Uma lista de nomes de entidades extraídas.
         """
         # Matches sequences of capitalised words (2+ chars) not at sentence start
         pattern = r"(?<!\.\s)(?<!\n)\b([A-Z][a-z]{1,}\b(?:\s+[A-Z][a-z]{1,}\b)*)"

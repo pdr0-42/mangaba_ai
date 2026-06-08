@@ -1,4 +1,4 @@
-"""LLM engine for Mangaba AI v3.0 — function calling, streaming, caching."""
+"""Motor LLM para Mangaba AI v3.0 — chamada de função, streaming, cache."""
 
 from .client import LLMClient
 from .llm_factory import create_llm_client, get_supported_providers

@@ -1,8 +1,8 @@
 """
-Redis vector store using RediSearch with HNSW index for vector similarity search.
+Armazenamento de vetores Redis usando RediSearch com índice HNSW para busca de similaridade de vetores.
 
-Requires Redis Stack server with RediSearch and RedisJSON modules enabled.
-Install with: pip install mangaba[redis]
+Requer servidor Redis Stack com módulos RediSearch e RedisJSON habilitados.
+Instale com: pip install mangaba[redis]
 """
 
 from __future__ import annotations
@@ -26,10 +26,10 @@ except ImportError:
 
 
 def _get_search_classes():
-    """Lazy import RediSearch classes to support mocking in tests.
+    """Importação preguiçosa de classes RediSearch para suportar mock em testes.
 
     Returns:
-        A tuple of RediSearch classes.
+        Uma tupla de classes RediSearch.
     """
     from redis.commands.search.field import TextField, VectorField, TagField
     from redis.commands.search.index_definition import IndexDefinition, IndexType
@@ -40,17 +40,17 @@ def _get_search_classes():
 
 
 class RedisVectorStore(BaseVectorStore):
-    """Vector store backed by Redis Stack with RediSearch HNSW index.
+    """Armazenamento de vetores apoiado por Redis Stack com índice RediSearch HNSW.
 
-    This implementation uses Redis Stack's RediSearch module with HNSW indexes
-    for efficient vector similarity search.
+    Esta implementação usa o módulo RediSearch do Redis Stack com índices HNSW
+    para busca eficiente de similaridade de vetores.
 
     Attributes:
-        _index_name: The name of the RediSearch index.
-        _vector_dimensions: The dimensionality of the vectors.
-        _distance_metric: The distance metric to use (COSINE, L2, or IP).
-        _key_prefix: The prefix for Redis keys.
-        _client: The Redis client connection.
+        _index_name: O nome do índice RediSearch.
+        _vector_dimensions: A dimensionalidade dos vetores.
+        _distance_metric: A métrica de distância para usar (COSINE, L2 ou IP).
+        _key_prefix: O prefixo para chaves Redis.
+        _client: A conexão do cliente Redis.
     """
 
     def __init__(
@@ -67,26 +67,26 @@ class RedisVectorStore(BaseVectorStore):
         db: int | None = None,
         **kwargs: Any,
     ) -> None:
-        """Initialize the RedisVectorStore.
+        """Inicializa o RedisVectorStore.
 
         Args:
-            url: Redis connection URL. If not provided, will try to build from
-                host/port/db or read from MANGABA_REDIS_URL/REDIS_URL env vars.
-            index_name: The name of the RediSearch index (default: "mangaba_vectors").
-            vector_dimensions: The dimensionality of the vectors (deprecated, use
-                embedding_dimensions). Default: 1536.
-            embedding_dimensions: The dimensionality of the vectors. Default: 1536.
-            distance_metric: The distance metric to use (default: "COSINE").
-            hnsw_m: The HNSW M parameter (default: 16).
-            hnsw_ef_construction: The HNSW EF_CONSTRUCTION parameter (default: 200).
-            host: Redis host (if url not provided). Default: localhost.
-            port: Redis port (if url not provided). Default: 6379.
-            db: Redis database number (if url not provided). Default: 0.
-            **kwargs: Additional arguments passed to redis.Redis.from_url.
+            url: URL de conexão Redis. Se não fornecido, tentará construir a partir de
+                host/port/db ou ler das variáveis de ambiente MANGABA_REDIS_URL/REDIS_URL.
+            index_name: O nome do índice RediSearch (padrão: "mangaba_vectors").
+            vector_dimensions: A dimensionalidade dos vetores (obsoleto, use
+                embedding_dimensions). Padrão: 1536.
+            embedding_dimensions: A dimensionalidade dos vetores. Padrão: 1536.
+            distance_metric: A métrica de distância para usar (padrão: "COSINE").
+            hnsw_m: O parâmetro HNSW M (padrão: 16).
+            hnsw_ef_construction: O parâmetro HNSW EF_CONSTRUCTION (padrão: 200).
+            host: Host Redis (se url não fornecido). Padrão: localhost.
+            port: Porta Redis (se url não fornecido). Padrão: 6379.
+            db: Número do banco de dados Redis (se url não fornecido). Padrão: 0.
+            **kwargs: Argumentos adicionais passados para redis.Redis.from_url.
 
         Raises:
-            ImportError: If redis package is not installed.
-            redis.ConnectionError: If connection to Redis fails.
+            ImportError: Se o pacote redis não estiver instalado.
+            redis.ConnectionError: Se a conexão com Redis falhar.
         """
         if not REDIS_AVAILABLE:
             raise ImportError(
@@ -135,19 +135,19 @@ class RedisVectorStore(BaseVectorStore):
         retry_delay: float = 2.0,
         **kwargs: Any,
     ) -> redis.Redis:
-        """Connect to Redis with automatic retry on connection failures.
+        """Conecta ao Redis com repetição automática em falhas de conexão.
 
         Args:
-            url: The Redis connection URL.
-            max_retries: Maximum number of connection attempts (default: 15).
-            retry_delay: Delay between retries in seconds (default: 2.0).
-            **kwargs: Additional arguments passed to redis.Redis.from_url.
+            url: A URL de conexão Redis.
+            max_retries: Número máximo de tentativas de conexão (padrão: 15).
+            retry_delay: Atraso entre repetições em segundos (padrão: 2.0).
+            **kwargs: Argumentos adicionais passados para redis.Redis.from_url.
 
         Returns:
-            A connected Redis client.
+            Um cliente Redis conectado.
 
         Raises:
-            redis.ConnectionError: If connection fails after all retries.
+            redis.ConnectionError: Se a conexão falhar após todas as repetições.
         """
         import sys
 
@@ -189,14 +189,14 @@ class RedisVectorStore(BaseVectorStore):
         hnsw_m: int,
         hnsw_ef_construction: int,
     ) -> None:
-        """Create the RediSearch index if it doesn't exist.
+        """Cria o índice RediSearch se ele não existir.
 
         Args:
-            index_name: The name of the index.
-            vector_dimensions: The dimensionality of the vectors.
-            distance_metric: The distance metric to use.
-            hnsw_m: The HNSW M parameter.
-            hnsw_ef_construction: The HNSW EF_CONSTRUCTION parameter.
+            index_name: O nome do índice.
+            vector_dimensions: A dimensionalidade dos vetores.
+            distance_metric: A métrica de distância para usar.
+            hnsw_m: O parâmetro HNSW M.
+            hnsw_ef_construction: O parâmetro HNSW EF_CONSTRUCTION.
         """
         TextField, VectorField, TagField, IndexDefinition, IndexType, Query, Path = (
             _get_search_classes()
@@ -231,13 +231,13 @@ class RedisVectorStore(BaseVectorStore):
         self._client.ft(index_name).create_index(fields=schema, definition=definition)
 
     def _pack_vector(self, embedding: List[float]) -> bytes:
-        """Pack a list of floats into bytes for Redis.
+        """Empacota uma lista de floats em bytes para Redis.
 
         Args:
-            embedding: The embedding vector to pack.
+            embedding: O vetor de embedding para empacotar.
 
         Returns:
-            The packed bytes representation of the vector.
+            A representação em bytes empacotada do vetor.
         """
         return struct.pack(f"{len(embedding)}f", *embedding)
 
@@ -247,15 +247,15 @@ class RedisVectorStore(BaseVectorStore):
         embeddings: List[List[float]],
         metadatas: Optional[List[Dict[str, Any]]] = None,
     ) -> List[str]:
-        """Store texts with their embeddings in Redis.
+        """Armazena textos com seus embeddings no Redis.
 
         Args:
-            texts: A list of text strings to store.
-            embeddings: A list of embedding vectors corresponding to the texts.
-            metadatas: Optional list of metadata dictionaries for each text.
+            texts: Uma lista de strings de texto para armazenar.
+            embeddings: Uma lista de vetores de embedding correspondentes aos textos.
+            metadatas: Lista opcional de dicionários de metadados para cada texto.
 
         Returns:
-            A list of IDs for the stored entries.
+            Uma lista de IDs para as entradas armazenadas.
         """
         ids: List[str] = []
         pipe = self._client.pipeline(transaction=False)
@@ -280,15 +280,15 @@ class RedisVectorStore(BaseVectorStore):
     def search(
         self, query_embedding: List[float], top_k: int = 5
     ) -> List[Dict[str, Any]]:
-        """Search for similar entries using vector similarity.
+        """Busca entradas similares usando similaridade de vetores.
 
         Args:
-            query_embedding: The query embedding vector.
-            top_k: The maximum number of results to return (default: 5).
+            query_embedding: O vetor de embedding de consulta.
+            top_k: O número máximo de resultados para retornar (padrão: 5).
 
         Returns:
-            A list of dictionaries containing id, content, score, and metadata
-            for each result, sorted by similarity score.
+            Uma lista de dicionários contendo id, content, score e metadata
+            para cada resultado, ordenados por pontuação de similaridade.
         """
         _, _, _, _, _, Query, _ = _get_search_classes()
 
@@ -340,10 +340,10 @@ class RedisVectorStore(BaseVectorStore):
         return output
 
     def delete(self, ids: List[str]) -> None:
-        """Delete entries by ID.
+        """Exclui entradas por ID.
 
         Args:
-            ids: A list of IDs to delete.
+            ids: Uma lista de IDs para excluir.
         """
         pipe = self._client.pipeline(transaction=False)
         for eid in ids:
@@ -352,7 +352,7 @@ class RedisVectorStore(BaseVectorStore):
         pipe.execute()
 
     def clear(self) -> None:
-        """Remove all entries from the store."""
+        """Remove todas as entradas do armazenamento."""
         cursor = 0
         while True:
             cursor, keys = self._client.scan(
@@ -365,10 +365,10 @@ class RedisVectorStore(BaseVectorStore):
 
     @property
     def count(self) -> int:
-        """Return the number of stored entries.
+        """Retorna o número de entradas armazenadas.
 
         Returns:
-            The number of entries in the store.
+            O número de entradas no armazenamento.
         """
         cursor = 0
         total = 0
@@ -382,11 +382,11 @@ class RedisVectorStore(BaseVectorStore):
         return total
 
     def close(self) -> None:
-        """Close the Redis connection."""
+        """Fecha a conexão Redis."""
         self._client.close()
 
     def __del__(self) -> None:
-        """Cleanup when the object is deleted."""
+        """Limpeza quando o objeto é excluído."""
         try:
             self.close()
         except Exception:

@@ -1,4 +1,4 @@
-"""ChromaDB vector store implementation for Mangaba AI."""
+"""Implementação de armazenamento de vetores ChromaDB para Mangaba AI."""
 
 from typing import List, Dict, Any, Optional
 import uuid
@@ -15,27 +15,27 @@ except ImportError:
 
 
 class ChromaVectorStore(BaseVectorStore):
-    """Vector store implementation using ChromaDB.
+    """Implementação de armazenamento de vetores usando ChromaDB.
 
-    This implementation uses ChromaDB's persistent client for storing and
-    searching vector embeddings.
+    Esta implementação usa o cliente persistente do ChromaDB para armazenar e
+    buscar embeddings de vetores.
 
     Attributes:
-        client: The ChromaDB persistent client.
-        collection: The ChromaDB collection for storing embeddings.
+        client: O cliente persistente do ChromaDB.
+        collection: A coleção do ChromaDB para armazenar embeddings.
     """
 
     def __init__(
         self, path: str = "./chroma_db", collection_name: str = "mangaba_collection"
     ):
-        """Initialize the ChromaVectorStore.
+        """Inicializa o ChromaVectorStore.
 
         Args:
-            path: The path to the ChromaDB database (default: "./chroma_db").
-            collection_name: The name of the collection (default: "mangaba_collection").
+            path: O caminho para o banco de dados ChromaDB (padrão: "./chroma_db").
+            collection_name: O nome da coleção (padrão: "mangaba_collection").
 
         Raises:
-            ImportError: If chromadb package is not installed.
+            ImportError: Se o pacote chromadb não estiver instalado.
         """
         if not CHROMA_AVAILABLE:
             raise ImportError(
@@ -50,15 +50,15 @@ class ChromaVectorStore(BaseVectorStore):
         embeddings: List[List[float]],
         metadatas: Optional[List[Dict[str, Any]]] = None,
     ) -> List[str]:
-        """Store texts with their embeddings in ChromaDB.
+        """Armazena textos com seus embeddings no ChromaDB.
 
         Args:
-            texts: A list of text strings to store.
-            embeddings: A list of embedding vectors corresponding to the texts.
-            metadatas: Optional list of metadata dictionaries for each text.
+            texts: Uma lista de strings de texto para armazenar.
+            embeddings: Uma lista de vetores de embedding correspondentes aos textos.
+            metadatas: Lista opcional de dicionários de metadados para cada texto.
 
         Returns:
-            A list of IDs for the stored entries.
+            Uma lista de IDs para as entradas armazenadas.
         """
         ids = [uuid.uuid4().hex for _ in texts]
         self.collection.add(
@@ -69,15 +69,15 @@ class ChromaVectorStore(BaseVectorStore):
     def search(
         self, query_embedding: List[float], top_k: int = 5
     ) -> List[Dict[str, Any]]:
-        """Search for similar entries in ChromaDB.
+        """Busca entradas similares no ChromaDB.
 
         Args:
-            query_embedding: The query embedding vector.
-            top_k: The maximum number of results to return (default: 5).
+            query_embedding: O vetor de embedding de consulta.
+            top_k: O número máximo de resultados para retornar (padrão: 5).
 
         Returns:
-            A list of dictionaries containing id, content, score, and metadata
-            for each result.
+            Uma lista de dicionários contendo id, content, score e metadata
+            para cada resultado.
         """
         results = self.collection.query(
             query_embeddings=[query_embedding], n_results=top_k
@@ -99,24 +99,24 @@ class ChromaVectorStore(BaseVectorStore):
         return final
 
     def delete(self, ids: List[str]) -> None:
-        """Delete entries by ID.
+        """Exclui entradas por ID.
 
         Args:
-            ids: A list of IDs to delete.
+            ids: Uma lista de IDs para excluir.
         """
         self.collection.delete(ids=ids)
 
     def clear(self) -> None:
-        """Remove all entries from the collection."""
+        """Remove todas as entradas da coleção."""
         all_ids = self.collection.get()["ids"]
         if all_ids:
             self.collection.delete(ids=all_ids)
 
     @property
     def count(self) -> int:
-        """Return the number of stored entries.
+        """Retorna o número de entradas armazenadas.
 
         Returns:
-            The number of entries in the collection.
+            O número de entradas na coleção.
         """
         return self.collection.count()

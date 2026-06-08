@@ -1,7 +1,7 @@
 """
-LLM Factory Module
+Módulo de Fábrica LLM
 
-This module provides a factory function to create LLM clients for different providers.
+Este módulo fornece uma função de fábrica para criar clientes LLM para diferentes provedores.
 """
 
 from __future__ import annotations
@@ -15,31 +15,31 @@ from .client import LLMClient
 def create_llm_client(
     provider: str, api_key: str, model: str, **options: Any
 ) -> "LLMClient":
-    """Create a unified LLM client for the specified provider.
+    """Cria um cliente LLM unificado para o provedor especificado.
 
-    Supported providers:
-        - "google" / "gemini": Google Gemini models
-        - "openai": OpenAI GPT models
-        - "anthropic": Anthropic Claude models
-        - "huggingface" / "hf": HuggingFace Inference API models
-        - "openrouter" / "or" / "open-router": OpenRouter models
+    Provedores suportados:
+        - "google" / "gemini": Modelos Google Gemini
+        - "openai": Modelos OpenAI GPT
+        - "anthropic": Modelos Anthropic Claude
+        - "huggingface" / "hf": Modelos HuggingFace Inference API
+        - "openrouter" / "or" / "open-router": Modelos OpenRouter
 
     Args:
-        provider: Provider name (see supported providers above).
-        api_key: API key for the provider.
-        model: Model name/ID (e.g., "gpt-4o", "anthropic/claude-3-haiku").
-        **options: Provider-specific options (e.g., base_url, temperature, max_tokens).
+        provider: Nome do provedor (ver provedores suportados acima).
+        api_key: Chave de API para o provedor.
+        model: Nome/ID do modelo (ex: "gpt-4o", "anthropic/claude-3-haiku").
+        **options: Opções específicas do provedor (ex: base_url, temperature, max_tokens).
 
-    For OpenRouter:
-        - Use model format like "openai/gpt-4o" or "anthropic/claude-3-haiku"
-        - Optional: base_url (default: https://openrouter.ai/api/v1)
-        - Optional: site_url, site_name for OpenRouter headers
+    Para OpenRouter:
+        - Use formato de modelo como "openai/gpt-4o" ou "anthropic/claude-3-haiku"
+        - Opcional: base_url (padrão: https://openrouter.ai/api/v1)
+        - Opcional: site_url, site_name para cabeçalhos OpenRouter
 
     Returns:
-        LLMClient instance with generate/generate_with_tools methods.
+        Instância LLMClient com métodos generate/generate_with_tools.
 
     Raises:
-        ValueError: If provider, api_key, or model is not provided.
+        ValueError: Se provider, api_key ou model não forem fornecidos.
     """
     from .client import LLMClient
 
@@ -54,10 +54,10 @@ def create_llm_client(
 
 
 def get_supported_providers() -> Tuple[str, ...]:
-    """Get all supported provider names and aliases.
+    """Obtém todos os nomes de provedores suportados e aliases.
 
     Returns:
-        Tuple of all supported provider names and their aliases, sorted alphabetically.
+        Tupla de todos os nomes de provedores suportados e seus aliases, ordenados alfabeticamente.
     """
     aliases: set[str] = set()
     PROVIDERS = get_providers_dict()

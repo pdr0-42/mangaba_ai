@@ -1,8 +1,8 @@
 """
-Short-term (sliding window) memory for Mangaba AI v3.0
+Memória de curto prazo (janela deslizante) para Mangaba AI v3.0
 
-Keeps the last *N* interactions in a list. No persistence — when the
-process ends the memories are gone.
+Mantém as últimas *N* interações em uma lista. Sem persistência — quando o
+processo termina as memórias desaparecem.
 """
 
 from __future__ import annotations
@@ -16,34 +16,34 @@ from mangaba.memory.base import BaseMemory
 
 
 class ShortTermMemory(BaseMemory):
-    """In-process sliding-window memory.
+    """Memória de janela deslizante em processo.
 
-    This memory implementation keeps the last N interactions in a deque.
-    No persistence — when the process ends the memories are gone.
+    Esta implementação de memória mantém as últimas N interações em um deque.
+    Sem persistência — quando o processo termina as memórias desaparecem.
 
     Attributes:
-        max_items: The maximum number of items to store in memory.
-        _store: A deque storing memory entries with automatic size limiting.
+        max_items: O número máximo de itens para armazenar na memória.
+        _store: Um deque armazenando entradas de memória com limitação automática de tamanho.
     """
 
     def __init__(self, max_items: int = 50) -> None:
-        """Initialize the ShortTermMemory.
+        """Inicializa a ShortTermMemory.
 
         Args:
-            max_items: The maximum number of items to store (default: 50).
+            max_items: O número máximo de itens para armazenar (padrão: 50).
         """
         self.max_items = max_items
         self._store: Deque[Dict[str, Any]] = deque(maxlen=max_items)
 
     def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
-        """Add a memory entry to the sliding window.
+        """Adiciona uma entrada de memória à janela deslizante.
 
         Args:
-            content: The content to store.
-            metadata: Optional metadata associated with the content.
+            content: O conteúdo para armazenar.
+            metadata: Metadados opcionais associados ao conteúdo.
 
         Returns:
-            The unique ID of the stored memory entry.
+            O ID único da entrada de memória armazenada.
         """
         entry_id = uuid.uuid4().hex[:12]
         entry: Dict[str, Any] = {
@@ -56,14 +56,14 @@ class ShortTermMemory(BaseMemory):
         return entry_id
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Perform simple keyword search across stored memories.
+        """Realiza busca simples por palavras-chave nas memórias armazenadas.
 
         Args:
-            query: The search query.
-            top_k: The maximum number of results to return (default: 5).
+            query: A consulta de busca.
+            top_k: O número máximo de resultados a retornar (padrão: 5).
 
         Returns:
-            A list of memory entries sorted by keyword match score.
+            Uma lista de entradas de memória ordenadas por pontuação de correspondência de palavras-chave.
         """
         q_lower = query.lower()
         scored = []
@@ -77,22 +77,22 @@ class ShortTermMemory(BaseMemory):
         return [e for _, e in scored[:top_k]]
 
     def get_all(self) -> List[Dict[str, Any]]:
-        """Return all stored memories.
+        """Retorna todas as memórias armazenadas.
 
         Returns:
-            A list of all memory entries in the store.
+            Uma lista de todas as entradas de memória no armazenamento.
         """
         return list(self._store)
 
     def clear(self) -> None:
-        """Clear all stored memories."""
+        """Limpa todas as memórias armazenadas."""
         self._store.clear()
 
     @property
     def size(self) -> int:
-        """Return the current number of stored memories.
+        """Retorna o número atual de memórias armazenadas.
 
         Returns:
-            The number of items currently in the memory store.
+            O número de itens atualmente no armazenamento de memória.
         """
         return len(self._store)

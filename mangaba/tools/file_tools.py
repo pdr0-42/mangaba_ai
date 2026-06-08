@@ -1,5 +1,5 @@
 """
-File manipulation tools
+Ferramentas de manipulação de arquivos
 """
 
 import os
@@ -8,25 +8,25 @@ from mangaba.tools.base import BaseTool
 
 
 class FileReaderTool(BaseTool):
-    """Tool for reading text files.
+    """Ferramenta para ler arquivos de texto.
 
-    Example:
+    Exemplo:
         tool = FileReaderTool()
         content = tool.run("document.txt")
     """
 
     name = "file_reader"
-    description = "Read text files and return their contents"
+    description = "Lê arquivos de texto e retorna seu conteúdo"
 
     def _run(self, file_path: str, encoding: str = "utf-8") -> str:
-        """Read the content of a file.
+        """Lê o conteúdo de um arquivo.
 
         Args:
-            file_path: Path to the file.
-            encoding: File encoding (default: utf-8).
+            file_path: Caminho para o arquivo.
+            encoding: Codificação do arquivo (padrão: utf-8).
 
         Returns:
-            The content of the file.
+            O conteúdo do arquivo.
         """
         try:
             if not os.path.exists(file_path):
@@ -42,32 +42,32 @@ class FileReaderTool(BaseTool):
 
 
 class FileWriterTool(BaseTool):
-    """Tool for writing to files.
+    """Ferramenta para escrever em arquivos.
 
-    Example:
+    Exemplo:
         tool = FileWriterTool()
-        tool.run("output.txt", "Content to write")
+        tool.run("output.txt", "Conteúdo para escrever")
     """
 
     name = "file_writer"
-    description = "Write content to text files"
+    description = "Escreve conteúdo em arquivos de texto"
 
     def _run(
         self, file_path: str, content: str, mode: str = "w", encoding: str = "utf-8"
     ) -> str:
-        """Write content to a file.
+        """Escreve conteúdo em um arquivo.
 
         Args:
-            file_path: Path to the file.
-            content: Content to write.
-            mode: Write mode ('w' for write or 'a' for append).
-            encoding: File encoding (default: utf-8).
+            file_path: Caminho para o arquivo.
+            content: Conteúdo para escrever.
+            mode: Modo de escrita ('w' para escrever ou 'a' para anexar).
+            encoding: Codificação do arquivo (padrão: utf-8).
 
         Returns:
-            Success message or error message.
+            Mensagem de sucesso ou mensagem de erro.
         """
         try:
-            # Create directory if it doesn't exist
+            # Criar diretório se não existir
             directory = os.path.dirname(file_path)
             if directory and not os.path.exists(directory):
                 os.makedirs(directory)
@@ -82,25 +82,25 @@ class FileWriterTool(BaseTool):
 
 
 class DirectoryListTool(BaseTool):
-    """Tool for listing directory contents.
+    """Ferramenta para listar o conteúdo de diretórios.
 
-    Example:
+    Exemplo:
         tool = DirectoryListTool()
         files = tool.run("./documents")
     """
 
     name = "directory_list"
-    description = "List files and directories in a given path"
+    description = "Lista arquivos e diretórios em um caminho fornecido"
 
     def _run(self, directory_path: str, pattern: Optional[str] = None) -> str:
-        """List the contents of a directory.
+        """Lista o conteúdo de um diretório.
 
         Args:
-            directory_path: Path to the directory.
-            pattern: Filter pattern (e.g., "*.txt").
+            directory_path: Caminho para o diretório.
+            pattern: Padrão de filtro (por exemplo, "*.txt").
 
         Returns:
-            Formatted list of files and folders.
+            Lista formatada de arquivos e pastas.
         """
         try:
             if not os.path.exists(directory_path):
@@ -111,7 +111,7 @@ class DirectoryListTool(BaseTool):
 
             items = os.listdir(directory_path)
 
-            # Apply filter if specified
+            # Aplicar filtro se especificado
             if pattern:
                 import fnmatch
 
@@ -120,7 +120,7 @@ class DirectoryListTool(BaseTool):
             if not items:
                 return "Directory is empty or no files match the pattern"
 
-            # Separate files and directories
+            # Separar arquivos e diretórios
             files = []
             directories = []
 

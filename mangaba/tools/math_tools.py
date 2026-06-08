@@ -1,5 +1,5 @@
 """
-Math tools for Mangaba AI v3.0
+Ferramentas matemáticas para Mangaba AI v3.0
 """
 
 from __future__ import annotations
@@ -14,23 +14,23 @@ from mangaba.tools.base import BaseTool
 
 
 class CalculatorInput(BaseModel):
-    """Input schema for the calculator tool."""
+    """Esquema de entrada para a ferramenta de calculadora."""
 
     expression: str = Field(
-        ..., description="Mathematical expression to evaluate, e.g. '2 + 3 * 4'"
+        ..., description="Expressão matemática para avaliar, por exemplo, '2 + 3 * 4'"
     )
 
 
 class CalculatorTool(BaseTool):
-    """Safely evaluate mathematical expressions.
+    """Avalia expressões matemáticas com segurança.
 
-    Supports basic arithmetic operations: addition, subtraction, multiplication,
-    division, floor division, modulo, and exponentiation. Uses AST parsing to
-    ensure safe evaluation without executing arbitrary code.
+    Suporta operações aritméticas básicas: adição, subtração, multiplicação,
+    divisão, divisão inteira, módulo e exponenciação. Usa análise AST para
+    garantir avaliação segura sem executar código arbitrário.
     """
 
     name = "calculator"
-    description = "Evaluate a mathematical expression and return the numeric result"
+    description = "Avalia uma expressão matemática e retorna o resultado numérico"
     args_schema = CalculatorInput
 
     _SAFE_OPS = {
@@ -46,13 +46,13 @@ class CalculatorTool(BaseTool):
     }
 
     def _run(self, expression: str) -> str:
-        """Evaluate a mathematical expression.
+        """Avalia uma expressão matemática.
 
         Args:
-            expression: The mathematical expression to evaluate.
+            expression: A expressão matemática para avaliar.
 
         Returns:
-            The numeric result as a string, or an error message if evaluation fails.
+            O resultado numérico como string ou uma mensagem de erro se a avaliação falhar.
         """
         try:
             tree = ast.parse(expression, mode="eval")
@@ -62,16 +62,16 @@ class CalculatorTool(BaseTool):
             return f"Error: {exc}"
 
     def _eval_node(self, node: ast.AST) -> Any:
-        """Recursively evaluate an AST node.
+        """Avalia recursivamente um nó AST.
 
         Args:
-            node: The AST node to evaluate.
+            node: O nó AST para avaliar.
 
         Returns:
-            The evaluated value of the node.
+            O valor avaliado do nó.
 
         Raises:
-            ValueError: If the node type or value is not supported.
+            ValueError: Se o tipo ou valor do nó não for suportado.
         """
         if isinstance(node, ast.Constant):
             if isinstance(node.value, (int, float, complex)):

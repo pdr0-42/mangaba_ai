@@ -1,4 +1,4 @@
-"""SQLite vector store implementation for Mangaba AI."""
+"""Implementação de armazenamento de vetores SQLite para Mangaba AI."""
 
 import sqlite3
 import json
@@ -9,26 +9,26 @@ from mangaba.vectorstores import BaseVectorStore
 
 
 class SQLiteVectorStore(BaseVectorStore):
-    """Vector store backed by SQLite with cosine similarity search.
+    """Armazenamento de vetores apoiado por SQLite com busca de similaridade de cosseno.
 
-    This implementation stores embeddings as JSON in SQLite and performs
-    cosine similarity search in Python.
+    Esta implementação armazena embeddings como JSON no SQLite e realiza
+    busca de similaridade de cosseno em Python.
 
     Attributes:
-        conn: The SQLite database connection.
+        conn: A conexão com o banco de dados SQLite.
     """
 
     def __init__(self, db_path: str = "mangaba_memory.db"):
-        """Initialize the SQLiteVectorStore.
+        """Inicializa o SQLiteVectorStore.
 
         Args:
-            db_path: The path to the SQLite database file (default: "mangaba_memory.db").
+            db_path: O caminho para o arquivo de banco de dados SQLite (padrão: "mangaba_memory.db").
         """
         self.conn = sqlite3.connect(db_path)
         self._create_table()
 
     def _create_table(self) -> None:
-        """Create the vector store table if it doesn't exist."""
+        """Cria a tabela de armazenamento de vetores se ela não existir."""
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS vector_store (
                 id TEXT PRIMARY KEY, content TEXT, embedding TEXT, metadata TEXT
@@ -42,15 +42,15 @@ class SQLiteVectorStore(BaseVectorStore):
         embeddings: List[List[float]],
         metadatas: Optional[List[Dict[str, Any]]] = None,
     ) -> List[str]:
-        """Store texts with their embeddings in SQLite.
+        """Armazena textos com seus embeddings no SQLite.
 
         Args:
-            texts: A list of text strings to store.
-            embeddings: A list of embedding vectors corresponding to the texts.
-            metadatas: Optional list of metadata dictionaries for each text.
+            texts: Uma lista de strings de texto para armazenar.
+            embeddings: Uma lista de vetores de embedding correspondentes aos textos.
+            metadatas: Lista opcional de dicionários de metadados para cada texto.
 
         Returns:
-            A list of IDs for the stored entries.
+            Uma lista de IDs para as entradas armazenadas.
         """
         ids = []
         for i, (text, emb) in enumerate(zip(texts, embeddings)):
@@ -67,15 +67,15 @@ class SQLiteVectorStore(BaseVectorStore):
     def search(
         self, query_embedding: List[float], top_k: int = 5
     ) -> List[Dict[str, Any]]:
-        """Search for similar entries using cosine similarity.
+        """Busca entradas similares usando similaridade de cosseno.
 
         Args:
-            query_embedding: The query embedding vector.
-            top_k: The maximum number of results to return (default: 5).
+            query_embedding: O vetor de embedding de consulta.
+            top_k: O número máximo de resultados para retornar (padrão: 5).
 
         Returns:
-            A list of dictionaries containing id, content, score, and metadata
-            for each result, sorted by similarity score.
+            Uma lista de dicionários contendo id, content, score e metadata
+            para cada resultado, ordenados por pontuação de similaridade.
         """
         cursor = self.conn.execute(
             "SELECT id, content, embedding, metadata FROM vector_store"
@@ -96,14 +96,14 @@ class SQLiteVectorStore(BaseVectorStore):
         return results[:top_k]
 
     def _cosine_similarity(self, v1: List[float], v2: List[float]) -> float:
-        """Calculate cosine similarity between two vectors.
+        """Calcula a similaridade de cosseno entre dois vetores.
 
         Args:
-            v1: First vector.
-            v2: Second vector.
+            v1: Primeiro vetor.
+            v2: Segundo vetor.
 
         Returns:
-            The cosine similarity score between 0 and 1.
+            A pontuação de similaridade de cosseno entre 0 e 1.
         """
         dot = sum(x * y for x, y in zip(v1, v2))
         mag1 = math.sqrt(sum(x**2 for x in v1))
@@ -111,10 +111,10 @@ class SQLiteVectorStore(BaseVectorStore):
         return dot / (mag1 * mag2) if mag1 * mag2 != 0 else 0.0
 
     def delete(self, ids: List[str]) -> None:
-        """Delete entries by ID.
+        """Exclui entradas por ID.
 
         Args:
-            ids: A list of IDs to delete.
+            ids: Uma lista de IDs para excluir.
         """
         self.conn.executemany(
             "DELETE FROM vector_store WHERE id = ?", [(i,) for i in ids]
@@ -122,15 +122,15 @@ class SQLiteVectorStore(BaseVectorStore):
         self.conn.commit()
 
     def clear(self) -> None:
-        """Remove all entries from the table."""
+        """Remove todas as entradas da tabela."""
         self.conn.execute("DELETE FROM vector_store")
         self.conn.commit()
 
     @property
     def count(self) -> int:
-        """Return the number of stored entries.
+        """Retorna o número de entradas armazenadas.
 
         Returns:
-            The number of entries in the table.
+            O número de entradas na tabela.
         """
         return self.conn.execute("SELECT COUNT(*) FROM vector_store").fetchone()[0]

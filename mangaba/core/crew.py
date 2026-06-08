@@ -1,5 +1,5 @@
 """
-Crew v3.0 — multi-agent orchestration with all process types.
+Crew v3.0 — orquestração multi-agente com todos os tipos de processo.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ class Process(Enum):
 
 
 class CrewOutput:
-    """Result of a crew execution, including metrics."""
+    """Resultado de uma execução de crew, incluindo métricas."""
 
     def __init__(
         self,
@@ -55,7 +55,7 @@ class CrewOutput:
 
 
 class Crew:
-    """Orchestrate multiple agents working on multiple tasks.
+    """Orquestra múltiplos agentes trabalhando em múltiplas tarefas.
 
     Example::
 
@@ -106,7 +106,7 @@ class Crew:
     # ── public API ─────────────────────────────────────────────────────
 
     def kickoff(self, inputs: Optional[Dict[str, Any]] = None) -> CrewOutput:
-        """Start the crew execution."""
+        """Inicia a execução da crew."""
         start = time.monotonic()
 
         EventBus.emit(
@@ -196,7 +196,7 @@ class Crew:
                     task.agent.role,
                 )
 
-            # Manager refines instructions
+            # Gerente refina instruções
             delegation_prompt = (
                 f"You are the manager. Refine these instructions for your worker.\n"
                 f"Worker role: {task.agent.role}\n"
@@ -205,7 +205,7 @@ class Crew:
             )
             refined = manager.execute_task(delegation_prompt)
 
-            # Worker executes with refined instructions
+            # Worker executa com instruções refinadas
             original_desc = task.description
             task.description = f"{refined}\n\nOriginal task: {original_desc}"
             try:
@@ -213,7 +213,7 @@ class Crew:
             finally:
                 task.description = original_desc
 
-            # Manager reviews
+            # Gerente revisa
             review_prompt = (
                 f"Review this worker output.\nTask: {original_desc}\n"
                 f"Output: {output.result[:2000]}\n"
@@ -225,7 +225,7 @@ class Crew:
         return outputs
 
     def _run_parallel(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
-        """Execute independent tasks concurrently using asyncio."""
+        """Executa tarefas independentes concorrentemente usando asyncio."""
 
         async def _run() -> List[TaskOutput]:
             coros = [task.aexecute(inputs) for task in self.tasks]
@@ -237,13 +237,13 @@ class Crew:
             loop = None
 
         if loop and loop.is_running():
-            # Already in an event loop — fall back to sequential
+            # Já em um event loop — voltar para execução sequencial
             return self._run_sequential(inputs)
 
         return asyncio.run(_run())
 
     def _run_consensual(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
-        """All agents independently execute each task; results are merged."""
+        """Todos os agentes executam independentemente cada tarefa; resultados são mesclados."""
         outputs: List[TaskOutput] = []
 
         for task in self.tasks:
@@ -257,7 +257,7 @@ class Crew:
                 finally:
                     task.agent = original_agent
 
-            # Use first agent to synthesise consensus
+            # Usar primeiro agente para sintetizar consenso
             synthesis_prompt = (
                 "Multiple experts provided their analysis. Synthesise a consensus.\n\n"
                 + "\n---\n".join(agent_results)

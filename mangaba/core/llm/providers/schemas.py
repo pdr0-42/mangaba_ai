@@ -1,4 +1,4 @@
-"""Schemas for LLM provider tool declarations"""
+"""Esquemas para declarações de ferramentas de provedores LLM"""
 
 from pydantic import BaseModel
 from typing import Any, Dict, List
@@ -23,55 +23,55 @@ class AnthropicToolSchemaDeclaration(BaseModel):
 
 
 def _tool_to_google_declaration(tool: Any) -> Dict[str, Any]:
-    """Convert a BaseTool to Google function declaration format.
+    """Converte um BaseTool para o formato de declaração de função Google.
 
     Args:
-        tool: A BaseTool instance with get_function_schema() method.
+        tool: Uma instância BaseTool com método get_function_schema().
 
     Returns:
-        Dictionary in Google function declaration format.
+        Dicionário no formato de declaração de função Google.
     """
     schema = tool.get_function_schema()
     return GoogleToolSchemaDeclaration(**schema).model_dump()
 
 
 def _tool_to_openai_schema(tool: Any) -> Dict[str, Any]:
-    """Convert a BaseTool to OpenAI function calling format.
+    """Converte um BaseTool para o formato de chamada de função OpenAI.
 
     Args:
-        tool: A BaseTool instance with get_function_schema() method.
+        tool: Uma instância BaseTool com método get_function_schema().
 
     Returns:
-        Dictionary in OpenAI function calling format.
+        Dicionário no formato de chamada de função OpenAI.
     """
     schema = tool.get_function_schema()
     return OpenAIToolSchemaDeclaration(**schema).model_dump()
 
 
 def _tool_to_anthropic_schema(tool: Any) -> Dict[str, Any]:
-    """Convert a BaseTool to Anthropic tool-use format.
+    """Converte um BaseTool para o formato de uso de ferramenta Anthropic.
 
     Args:
-        tool: A BaseTool instance with get_function_schema() method.
+        tool: Uma instância BaseTool com método get_function_schema().
 
     Returns:
-        Dictionary in Anthropic tool-use format.
+        Dicionário no formato de uso de ferramenta Anthropic.
     """
     schema = tool.get_function_schema()
     return AnthropicToolSchemaDeclaration(**schema).model_dump()
 
 
 def _tools_to_hf_prompt_section(tools: List[Any]) -> str:
-    """Render available tools as a system-prompt section for Hugging Face.
+    """Renderiza ferramentas disponíveis como uma seção de prompt de sistema para Hugging Face.
 
-    Creates a formatted text section describing available tools and their
-    parameters for Hugging Face models that use prompt-based tool calling.
+    Cria uma seção de texto formatada descrevendo ferramentas disponíveis e seus
+    parâmetros para modelos Hugging Face que usam chamada de ferramenta baseada em prompt.
 
     Args:
-        tools: List of BaseTool instances with get_function_schema() method.
+        tools: Lista de instâncias BaseTool com método get_function_schema().
 
     Returns:
-        Formatted string describing available tools, or empty string if no tools.
+        String formatada descrevendo ferramentas disponíveis, ou string vazia se não houver ferramentas.
     """
     if not tools:
         return ""

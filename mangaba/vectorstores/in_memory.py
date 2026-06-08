@@ -1,8 +1,8 @@
 """
-In-memory vector store using pure Python cosine similarity.
+Armazenamento de vetores em memória usando similaridade de cosseno em Python puro.
 
-No external dependencies — suitable as a default when numpy/faiss
-are not installed.
+Sem dependências externas — adequado como padrão quando numpy/faiss
+não estão instalados.
 """
 
 from __future__ import annotations
@@ -14,18 +14,18 @@ from mangaba.vectorstores.base import BaseVectorStore
 
 
 class InMemoryVectorStore(BaseVectorStore):
-    """Simple in-process vector store backed by a Python list.
+    """Armazenamento de vetores simples em processo apoiado por uma lista Python.
 
-    This implementation uses pure Python cosine similarity and requires no
-    external dependencies, making it suitable as a default when numpy/faiss
-    are not installed.
+    Esta implementação usa similaridade de cosseno em Python puro e não requer
+    dependências externas, tornando-a adequada como padrão quando numpy/faiss
+    não estão instalados.
 
     Attributes:
-        _entries: A list of dictionaries containing id, text, embedding, and metadata.
+        _entries: Uma lista de dicionários contendo id, text, embedding e metadata.
     """
 
     def __init__(self) -> None:
-        """Initialize the InMemoryVectorStore."""
+        """Inicializa o InMemoryVectorStore."""
         self._entries: List[Dict[str, Any]] = []  # {id, text, embedding, metadata}
 
     def add(
@@ -34,15 +34,15 @@ class InMemoryVectorStore(BaseVectorStore):
         embeddings: List[List[float]],
         metadatas: Optional[List[Dict[str, Any]]] = None,
     ) -> List[str]:
-        """Store texts with their embeddings in memory.
+        """Armazena textos com seus embeddings na memória.
 
         Args:
-            texts: A list of text strings to store.
-            embeddings: A list of embedding vectors corresponding to the texts.
-            metadatas: Optional list of metadata dictionaries for each text.
+            texts: Uma lista de strings de texto para armazenar.
+            embeddings: Uma lista de vetores de embedding correspondentes aos textos.
+            metadatas: Lista opcional de dicionários de metadados para cada texto.
 
         Returns:
-            A list of IDs for the stored entries.
+            Uma lista de IDs para as entradas armazenadas.
         """
         ids: List[str] = []
         for i, (text, emb) in enumerate(zip(texts, embeddings)):
@@ -63,15 +63,15 @@ class InMemoryVectorStore(BaseVectorStore):
     def search(
         self, query_embedding: List[float], top_k: int = 5
     ) -> List[Dict[str, Any]]:
-        """Search for similar entries using cosine similarity.
+        """Busca entradas similares usando similaridade de cosseno.
 
         Args:
-            query_embedding: The query embedding vector.
-            top_k: The maximum number of results to return (default: 5).
+            query_embedding: O vetor de embedding de consulta.
+            top_k: O número máximo de resultados para retornar (padrão: 5).
 
         Returns:
-            A list of dictionaries containing id, content, score, and metadata
-            for each result, sorted by similarity score.
+            Uma lista de dicionários contendo id, content, score e metadata
+            para cada resultado, ordenados por pontuação de similaridade.
         """
         scored = []
         for entry in self._entries:
@@ -89,37 +89,37 @@ class InMemoryVectorStore(BaseVectorStore):
         ]
 
     def delete(self, ids: List[str]) -> None:
-        """Delete entries by ID.
+        """Exclui entradas por ID.
 
         Args:
-            ids: A list of IDs to delete.
+            ids: Uma lista de IDs para excluir.
         """
         id_set = set(ids)
         self._entries = [e for e in self._entries if e["id"] not in id_set]
 
     def clear(self) -> None:
-        """Remove all entries from the store."""
+        """Remove todas as entradas do armazenamento."""
         self._entries.clear()
 
     @property
     def count(self) -> int:
-        """Return the number of stored entries.
+        """Retorna o número de entradas armazenadas.
 
         Returns:
-            The number of entries in the store.
+            O número de entradas no armazenamento.
         """
         return len(self._entries)
 
 
 def _cosine_similarity(a: List[float], b: List[float]) -> float:
-    """Calculate cosine similarity between two vectors.
+    """Calcula a similaridade de cosseno entre dois vetores.
 
     Args:
-        a: First vector.
-        b: Second vector.
+        a: Primeiro vetor.
+        b: Segundo vetor.
 
     Returns:
-        The cosine similarity score between 0 and 1.
+        A pontuação de similaridade de cosseno entre 0 e 1.
     """
     if len(a) != len(b):
         return 0.0

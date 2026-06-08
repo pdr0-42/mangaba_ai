@@ -1,7 +1,7 @@
 """
-Output parsers for Mangaba AI v3.0
+Analisadores de saída para Mangaba AI v3.0
 
-Parse raw LLM text output into structured Python objects.
+Analisa a saída de texto bruto do LLM em objetos Python estruturados.
 """
 
 from __future__ import annotations
@@ -15,55 +15,55 @@ from pydantic import BaseModel
 
 
 class BaseOutputParser(ABC):
-    """Abstract parser that converts raw text into a structured value.
+    """Analisador abstrato que converte texto bruto em um valor estruturado.
 
-    Subclasses must implement the parse() method to convert LLM output
-    into specific data types (JSON, Pydantic models, lists, etc.).
+    As subclasses devem implementar o método parse() para converter a saída do LLM
+    em tipos de dados específicos (JSON, modelos Pydantic, listas, etc.).
     """
 
     @abstractmethod
     def parse(self, text: str) -> Any:
-        """Parse raw text into a structured value.
+        """Analisa texto bruto em um valor estruturado.
 
         Args:
-            text: The raw text output from an LLM.
+            text: A saída de texto bruto de um LLM.
 
         Returns:
-            The parsed structured value (dict, list, model instance, etc.).
+            O valor estruturado analisado (dict, list, instância de modelo, etc.).
 
         Raises:
-            ValueError: If the text cannot be parsed into the expected format.
+            ValueError: Se o texto não puder ser analisado no formato esperado.
         """
         ...
 
     def get_format_instructions(self) -> str:
-        """Return instructions to include in the prompt so the LLM formats
-        its output correctly.
+        """Retorna instruções para incluir no prompt para que o LLM formate
+        sua saída corretamente.
 
         Returns:
-            String containing format instructions for the LLM.
+            String contendo instruções de formato para o LLM.
         """
         return ""
 
 
 class JSONOutputParser(BaseOutputParser):
-    """Extract the first JSON object or array from the text.
+    """Extrai o primeiro objeto ou array JSON do texto.
 
-    Attempts to find JSON in markdown code blocks or as the first
-    JSON-like structure in the text.
+    Tenta encontrar JSON em blocos de código markdown ou como a primeira
+    estrutura semelhante a JSON no texto.
     """
 
     def parse(self, text: str) -> Any:
-        """Extract and parse JSON from the text.
+        """Extrai e analisa JSON do texto.
 
         Args:
-            text: The raw text output from an LLM.
+            text: A saída de texto bruto de um LLM.
 
         Returns:
-            Parsed JSON object or array.
+            Objeto ou array JSON analisado.
 
         Raises:
-            ValueError: If no valid JSON is found in the text.
+            ValueError: Se nenhum JSON válido for encontrado no texto.
         """
         # Try to find JSON block
         for pattern in [r"```json\s*([\s\S]*?)```", r"```([\s\S]*?)```"]:
@@ -79,40 +79,40 @@ class JSONOutputParser(BaseOutputParser):
         raise ValueError("No JSON found in output")
 
     def get_format_instructions(self) -> str:
-        """Return format instructions for JSON output.
+        """Retorna instruções de formato para saída JSON.
 
         Returns:
-            Instructions string requesting JSON format.
+            String de instruções solicitando formato JSON.
         """
-        return "Respond with a valid JSON object."
+        return "Responda com um objeto JSON válido."
 
 
 class PydanticOutputParser(BaseOutputParser):
-    """Parse output into a Pydantic model instance.
+    """Analisa a saída em uma instância de modelo Pydantic.
 
-    Uses JSONOutputParser internally to extract JSON, then validates
-    it against the provided Pydantic model schema.
+    Usa JSONOutputParser internamente para extrair JSON, então valida
+    contra o esquema do modelo Pydantic fornecido.
     """
 
     def __init__(self, model: Type[BaseModel]) -> None:
-        """Initialize the Pydantic output parser.
+        """Inicializa o analisador de saída Pydantic.
 
         Args:
-            model: The Pydantic model class to parse output into.
+            model: A classe de modelo Pydantic para analisar a saída.
         """
         self.model = model
 
     def parse(self, text: str) -> BaseModel:
-        """Parse text into a Pydantic model instance.
+        """Analisa texto em uma instância de modelo Pydantic.
 
         Args:
-            text: The raw text output from an LLM.
+            text: A saída de texto bruto de um LLM.
 
         Returns:
-            An instance of the configured Pydantic model.
+            Uma instância do modelo Pydantic configurado.
 
         Raises:
-            ValueError: If the parsed JSON is not a dict or doesn't match the schema.
+            ValueError: Se o JSON analisado não for um dict ou não corresponder ao esquema.
         """
         json_parser = JSONOutputParser()
         data = json_parser.parse(text)
@@ -123,33 +123,33 @@ class PydanticOutputParser(BaseOutputParser):
         )
 
     def get_format_instructions(self) -> str:
-        """Return format instructions with the Pydantic schema.
+        """Retorna instruções de formato com o esquema Pydantic.
 
         Returns:
-            String containing the JSON schema for the model.
+            String contendo o esquema JSON para o modelo.
         """
         schema = self.model.model_json_schema()
         return (
-            f"Respond with a JSON object matching this schema:\n"
+            f"Responda com um objeto JSON correspondente a este esquema:\n"
             f"```json\n{json.dumps(schema, indent=2)}\n```"
         )
 
 
 class ListOutputParser(BaseOutputParser):
-    """Extract a list of items from the text (numbered or bulleted).
+    """Extrai uma lista de itens do texto (numerados ou com marcadores).
 
-    Parses numbered lists (1., 2., 3.) or bulleted lists (-, *, •) from
-    the text and returns them as a list of strings.
+    Analisa listas numeradas (1., 2., 3.) ou listas com marcadores (-, *, •) do
+    texto e as retorna como uma lista de strings.
     """
 
     def parse(self, text: str) -> List[str]:
-        """Extract list items from numbered or bulleted text.
+        """Extrai itens de lista de texto numerado ou com marcadores.
 
         Args:
-            text: The raw text output from an LLM.
+            text: A saída de texto bruto de um LLM.
 
         Returns:
-            List of extracted items as strings.
+            Lista de itens extraídos como strings.
         """
         lines = text.strip().splitlines()
         items: List[str] = []
@@ -160,29 +160,29 @@ class ListOutputParser(BaseOutputParser):
         return items
 
     def get_format_instructions(self) -> str:
-        """Return format instructions for list output.
+        """Retorna instruções de formato para saída de lista.
 
         Returns:
-            Instructions string requesting numbered list format.
+            String de instruções solicitando formato de lista numerada.
         """
-        return "Respond with a numbered list, one item per line."
+        return "Responda com uma lista numerada, um item por linha."
 
 
 class MarkdownOutputParser(BaseOutputParser):
-    """Split markdown text into sections by headings.
+    """Divide o texto markdown em seções por cabeçalhos.
 
-    Parses markdown text and returns a dictionary mapping heading
-    names to their content sections.
+    Analisa o texto markdown e retorna um dicionário mapeando nomes
+    de cabeçalhos para suas seções de conteúdo.
     """
 
     def parse(self, text: str) -> Dict[str, str]:
-        """Parse markdown text into sections by headings.
+        """Analisa o texto markdown em seções por cabeçalhos.
 
         Args:
-            text: The raw markdown text output from an LLM.
+            text: A saída de texto markdown bruto de um LLM.
 
         Returns:
-            Dictionary mapping heading names to their content sections.
+            Dicionário mapeando nomes de cabeçalhos para suas seções de conteúdo.
         """
         sections: Dict[str, str] = {}
         current_heading = "intro"
@@ -204,9 +204,9 @@ class MarkdownOutputParser(BaseOutputParser):
         return sections
 
     def get_format_instructions(self) -> str:
-        """Return format instructions for markdown output.
+        """Retorna instruções de formato para saída markdown.
 
         Returns:
-            Instructions string requesting markdown format with headings.
+            String de instruções solicitando formato markdown com cabeçalhos de seção.
         """
-        return "Respond in Markdown format with clear section headings."
+        return "Responda em formato Markdown com cabeçalhos de seção claros."

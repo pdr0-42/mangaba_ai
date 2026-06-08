@@ -1,8 +1,8 @@
 """
-Autonomous task planner for Mangaba AI v3.0
+Planejador de tarefas autônomo para Mangaba AI v3.0
 
-Uses the LLM to decompose a complex task into an ordered list of
-executable steps.
+Usa o LLM para decompor uma tarefa complexa em uma lista ordenada de
+etapas executáveis.
 """
 
 from __future__ import annotations
@@ -17,17 +17,17 @@ log = logging.getLogger(__name__)
 
 
 class PlanStep(BaseModel):
-    """A single step in an execution plan.
+    """Uma única etapa em um plano de execução.
 
-    Represents one actionable step in a decomposed task plan,
-    including which tool to use (if any) and expected results.
+    Representa uma etapa acionável em um plano de tarefa decomposto,
+    incluindo qual ferramenta usar (se houver) e resultados esperados.
 
     Attributes:
-        step_number: The sequential order of this step in the plan.
-        description: What this step should accomplish.
-        tool: Optional tool name to use for this step.
-        expected_result: What the output of this step should look like.
-        dependencies: List of step numbers this step depends on.
+        step_number: A ordem sequencial desta etapa no plano.
+        description: O que esta etapa deve realizar.
+        tool: Nome da ferramenta opcional para usar nesta etapa.
+        expected_result: Como a saída desta etapa deve parecer.
+        dependencies: Lista de números de etapa dos quais esta etapa depende.
     """
 
     step_number: int
@@ -38,13 +38,13 @@ class PlanStep(BaseModel):
 
 
 class ExecutionPlan(BaseModel):
-    """An ordered plan produced by the TaskPlanner.
+    """Um plano ordenado produzido pelo TaskPlanner.
 
-    Contains the overall goal and a sequence of PlanSteps to achieve it.
+    Contém o objetivo geral e uma sequência de PlanSteps para alcançá-lo.
 
     Attributes:
-        goal: The overall task or objective to accomplish.
-        steps: Ordered list of steps to execute.
+        goal: A tarefa ou objetivo geral a realizar.
+        steps: Lista ordenada de etapas para executar.
     """
 
     goal: str
@@ -52,24 +52,24 @@ class ExecutionPlan(BaseModel):
 
     @property
     def total_steps(self) -> int:
-        """Get the total number of steps in the plan.
+        """Obtém o número total de etapas no plano.
 
         Returns:
-            The number of steps in the plan.
+            O número de etapas no plano.
         """
         return len(self.steps)
 
 
 class TaskPlanner:
-    """Decomposes a complex task into a sequence of PlanSteps using an LLM.
+    """Decompõe uma tarefa complexa em uma sequência de PlanSteps usando um LLM.
 
-    Uses the LLM to analyze a task and break it down into concrete,
-    sequential steps that can be executed by agents or tools.
+    Usa o LLM para analisar uma tarefa e dividi-la em etapas
+    concretas e sequenciais que podem ser executadas por agentes ou ferramentas.
 
     Example::
 
         planner = TaskPlanner(llm=llm_client)
-        plan = planner.plan("Build a comprehensive market report for Q4")
+        plan = planner.plan("Construir um relatório de mercado abrangente para Q4")
     """
 
     PLAN_PROMPT = (
@@ -84,26 +84,26 @@ class TaskPlanner:
     )
 
     def __init__(self, llm: Any, tools: Optional[List[Any]] = None) -> None:
-        """Initialize the task planner.
+        """Inicializa o planejador de tarefas.
 
         Args:
-            llm: LLM client instance for generating plans.
-            tools: Optional list of available tools for the plan.
+            llm: Instância do cliente LLM para gerar planos.
+            tools: Lista opcional de ferramentas disponíveis para o plano.
         """
         self.llm = llm
         self.tools = tools or []
 
     def plan(self, task: str) -> ExecutionPlan:
-        """Generate an execution plan for the given task.
+        """Gera um plano de execução para a tarefa fornecida.
 
         Args:
-            task: The task description to decompose.
+            task: A descrição da tarefa para decompor.
 
         Returns:
-            An ExecutionPlan containing the goal and ordered steps.
+            Um ExecutionPlan contendo o objetivo e etapas ordenadas.
 
         Raises:
-            ValueError: If the plan cannot be generated or parsed.
+            ValueError: Se o plano não puder ser gerado ou analisado.
         """
         tools_str = ", ".join(t.name for t in self.tools) if self.tools else "none"
         prompt = self.PLAN_PROMPT.format(tools=tools_str, task=task)
@@ -114,16 +114,16 @@ class TaskPlanner:
 
     @staticmethod
     def _parse_steps(raw: str) -> List[PlanStep]:
-        """Parse the LLM response into PlanStep objects.
+        """Analisa a resposta do LLM em objetos PlanStep.
 
         Args:
-            raw: The raw text response from the LLM.
+            raw: A resposta de texto bruto do LLM.
 
         Returns:
-            List of PlanStep objects parsed from the response.
+            Lista de objetos PlanStep analisados da resposta.
 
         Raises:
-            ValueError: If the JSON cannot be parsed.
+            ValueError: Se o JSON não puder ser analisado.
         """
         # Try to find a JSON array in the response
         try:

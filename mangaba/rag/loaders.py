@@ -1,5 +1,5 @@
 """
-Document loaders for Mangaba AI RAG pipeline.
+Carregadores de documentos para pipeline RAG do Mangaba AI.
 """
 
 from __future__ import annotations
@@ -12,28 +12,28 @@ from mangaba.rag.document import Document
 
 
 class TextLoader:
-    """Load a plain-text file as a single Document.
+    """Carrega um arquivo de texto simples como um único Document.
 
     Attributes:
-        file_path: The path to the text file to load.
-        encoding: The file encoding (default: "utf-8").
+        file_path: O caminho para o arquivo de texto para carregar.
+        encoding: A codificação do arquivo (padrão: "utf-8").
     """
 
     def __init__(self, file_path: str, encoding: str = "utf-8") -> None:
-        """Initialize the TextLoader.
+        """Inicializa o TextLoader.
 
         Args:
-            file_path: The path to the text file to load.
-            encoding: The file encoding (default: "utf-8").
+            file_path: O caminho para o arquivo de texto para carregar.
+            encoding: A codificação do arquivo (padrão: "utf-8").
         """
         self.file_path = file_path
         self.encoding = encoding
 
     def load(self) -> List[Document]:
-        """Load the text file as a Document.
+        """Carrega o arquivo de texto como um Document.
 
         Returns:
-            A list containing a single Document with the file content.
+            Uma lista contendo um único Document com o conteúdo do arquivo.
         """
         path = Path(self.file_path)
         text = path.read_text(encoding=self.encoding)
@@ -41,13 +41,13 @@ class TextLoader:
 
 
 class CSVLoader:
-    """Load a CSV file, creating a Document for each row.
+    """Carrega um arquivo CSV, criando um Document para cada linha.
 
     Attributes:
-        file_path: The path to the CSV file to load.
-        content_columns: Optional list of column names to use as content.
-            If not provided, all columns are joined.
-        encoding: The file encoding (default: "utf-8").
+        file_path: O caminho para o arquivo CSV para carregar.
+        content_columns: Lista opcional de nomes de colunas para usar como conteúdo.
+            Se não fornecido, todas as colunas são unidas.
+        encoding: A codificação do arquivo (padrão: "utf-8").
     """
 
     def __init__(
@@ -56,23 +56,23 @@ class CSVLoader:
         content_columns: Optional[List[str]] = None,
         encoding: str = "utf-8",
     ) -> None:
-        """Initialize the CSVLoader.
+        """Inicializa o CSVLoader.
 
         Args:
-            file_path: The path to the CSV file to load.
-            content_columns: Optional list of column names to use as content.
-                If not provided, all columns are joined.
-            encoding: The file encoding (default: "utf-8").
+            file_path: O caminho para o arquivo CSV para carregar.
+            content_columns: Lista opcional de nomes de colunas para usar como conteúdo.
+                Se não fornecido, todas as colunas são unidas.
+            encoding: A codificação do arquivo (padrão: "utf-8").
         """
         self.file_path = file_path
         self.content_columns = content_columns
         self.encoding = encoding
 
     def load(self) -> List[Document]:
-        """Load the CSV file as Documents.
+        """Carrega o arquivo CSV como Documents.
 
         Returns:
-            A list of Documents, one for each row in the CSV file.
+            Uma lista de Documents, um para cada linha no arquivo CSV.
         """
         path = Path(self.file_path)
         docs: List[Document] = []
@@ -89,30 +89,30 @@ class CSVLoader:
 
 
 class WebPageLoader:
-    """Load a web page as a Document.
+    """Carrega uma página web como um Document.
 
-    This loader requires the requests and beautifulsoup4 packages.
+    Este carregador requer os pacotes requests e beautifulsoup4.
 
     Attributes:
-        url: The URL of the web page to load.
+        url: A URL da página web para carregar.
     """
 
     def __init__(self, url: str) -> None:
-        """Initialize the WebPageLoader.
+        """Inicializa o WebPageLoader.
 
         Args:
-            url: The URL of the web page to load.
+            url: A URL da página web para carregar.
         """
         self.url = url
 
     def load(self) -> List[Document]:
-        """Load the web page as a Document.
+        """Carrega a página web como um Document.
 
         Returns:
-            A list containing a single Document with the web page content.
+            Uma lista contendo um único Document com o conteúdo da página web.
 
         Raises:
-            requests.HTTPError: If the HTTP request fails.
+            requests.HTTPError: Se a solicitação HTTP falhar.
         """
         import requests  # already in dependencies
 

@@ -1,8 +1,8 @@
 """
-Exception hierarchy for Mangaba AI v3.0
+Hierarquia de exceções para Mangaba AI v3.0
 
-Typed exceptions for each subsystem, enabling granular error handling
-and automatic retry of transient failures.
+Exceções tipadas para cada subsistema, permitindo tratamento de erros granular
+e repetição automática de falhas transitórias.
 """
 
 from __future__ import annotations
@@ -11,24 +11,24 @@ from typing import Optional
 
 
 class MangabaError(Exception):
-    """Base exception for all Mangaba errors.
+    """Exceção base para todos os erros do Mangaba.
 
-    All custom exceptions in the framework inherit from this class,
-    enabling granular error handling and catching of framework-specific errors.
+    Todas as exceções personalizadas no framework herdam desta classe,
+    permitindo tratamento de erros granular e captura de erros específicos do framework.
 
     Attributes:
-        cause: Optional original exception that caused this error.
+        cause: Exceção original opcional que causou este erro.
     """
 
     def __init__(self, message: str, *, cause: Optional[Exception] = None) -> None:
-        """Initialize the base Mangaba error.
+        """Inicializa o erro base do Mangaba.
 
         Args:
-            message: Human-readable error message.
-            cause: Optional original exception that caused this error.
+            message: Mensagem de erro legível por humanos.
+            cause: Exceção original opcional que causou este erro.
 
         Attributes:
-            cause: The original exception if provided.
+            cause: A exceção original se fornecida.
         """
         self.cause = cause
         super().__init__(message)
@@ -40,10 +40,10 @@ class MangabaError(Exception):
 
 
 class ConfigurationError(MangabaError):
-    """Invalid or missing configuration.
+    """Configuração inválida ou ausente.
 
-    Raised when required configuration values are missing, invalid,
-    or cannot be loaded from environment variables or config files.
+    Levantada quando valores de configuração necessários estão ausentes, inválidos,
+    ou não podem ser carregados de variáveis de ambiente ou arquivos de configuração.
     """
 
 
@@ -53,37 +53,37 @@ class ConfigurationError(MangabaError):
 
 
 class LLMError(MangabaError):
-    """Generic LLM provider error.
+    """Erro genérico de provedor LLM.
 
-    Base class for all LLM-related errors including authentication,
-    rate limiting, token limits, and content filtering issues.
+    Classe base para todos os erros relacionados a LLM incluindo autenticação,
+    limitação de taxa, limites de token e problemas de filtragem de conteúdo.
     """
 
 
 class AuthenticationError(LLMError):
-    """Invalid or expired API key.
+    """Chave de API inválida ou expirada.
 
-    Raised when the API key provided to an LLM provider is invalid,
-    expired, or does not have sufficient permissions.
+    Levantada quando a chave de API fornecida a um provedor LLM é inválida,
+    expirada, ou não tem permissões suficientes.
     """
 
 
 class RetryableError(LLMError):
-    """Transient error that may succeed on retry.
+    """Erro transitório que pode ter sucesso ao repetir.
 
-    Indicates a temporary failure (network issues, timeout, service unavailable)
-    that may resolve if the request is retried with backoff.
+    Indica uma falha temporária (problemas de rede, timeout, serviço indisponível)
+    que pode ser resolvida se a solicitação for repetida com backoff.
     """
 
 
 class RateLimitError(RetryableError):
-    """Provider rate-limit hit.
+    """Limite de taxa do provedor atingido.
 
-    Raised when the LLM provider's rate limit has been exceeded.
-    Includes optional retry_after information for backoff timing.
+    Levantada quando o limite de taxa do provedor LLM foi excedido.
+    Inclui informação opcional retry_after para temporização de backoff.
 
     Attributes:
-        retry_after: Optional seconds to wait before retrying.
+        retry_after: Segundos opcionais para esperar antes de repetir.
     """
 
     def __init__(
@@ -93,49 +93,49 @@ class RateLimitError(RetryableError):
         retry_after: Optional[float] = None,
         cause: Optional[Exception] = None,
     ) -> None:
-        """Initialize the rate limit error.
+        """Inicializa o erro de limite de taxa.
 
         Args:
-            message: Human-readable error message.
-            retry_after: Optional seconds to wait before retrying.
-            cause: Optional original exception that caused this error.
+            message: Mensagem de erro legível por humanos.
+            retry_after: Segundos opcionais para esperar antes de repetir.
+            cause: Exceção original opcional que causou este erro.
 
         Attributes:
-            retry_after: The suggested retry delay in seconds.
+            retry_after: O atraso de repetição sugerido em segundos.
         """
         self.retry_after = retry_after
         super().__init__(message, cause=cause)
 
 
 class TokenLimitError(LLMError):
-    """Prompt or response exceeds token limit.
+    """Prompt ou resposta excede o limite de token.
 
-    Raised when the combined prompt and response would exceed the
-    model's maximum token context window.
+    Levantada quando o prompt e resposta combinados excederiam
+    a janela de contexto máximo de token do modelo.
     """
 
 
 class ContentFilterError(LLMError):
-    """Content blocked by safety filter.
+    """Conteúdo bloqueado por filtro de segurança.
 
-    Raised when the LLM provider's content moderation system
-    blocks the input or output for policy violations.
+    Levantada quando o sistema de moderação de conteúdo do provedor LLM
+    bloqueia a entrada ou saída por violações de política.
     """
 
 
 # ---------------------------------------------------------------------------
-# Tools
+# Ferramentas
 # ---------------------------------------------------------------------------
 
 
 class ToolError(MangabaError):
-    """Error during tool execution.
+    """Erro durante a execução da ferramenta.
 
-    Base class for errors that occur when executing tools,
-    including validation failures and execution errors.
+    Classe base para erros que ocorrem ao executar ferramentas,
+    incluindo falhas de validação e erros de execução.
 
     Attributes:
-        tool_name: Name of the tool that caused the error.
+        tool_name: Nome da ferramenta que causou o erro.
     """
 
     def __init__(
@@ -145,62 +145,62 @@ class ToolError(MangabaError):
         tool_name: str = "",
         cause: Optional[Exception] = None,
     ) -> None:
-        """Initialize the tool error.
+        """Inicializa o erro de ferramenta.
 
         Args:
-            message: Human-readable error message.
-            tool_name: Name of the tool that caused the error.
-            cause: Optional original exception that caused this error.
+            message: Mensagem de erro legível por humanos.
+            tool_name: Nome da ferramenta que causou o erro.
+            cause: Exceção original opcional que causou este erro.
 
         Attributes:
-            tool_name: The name of the tool that caused the error.
+            tool_name: O nome da ferramenta que causou o erro.
         """
         self.tool_name = tool_name
         super().__init__(message, cause=cause)
 
 
 class ToolValidationError(ToolError):
-    """Tool input validation failed.
+    """Validação de entrada de ferramenta falhou.
 
-    Raised when the provided input parameters do not match
-    the tool's expected schema or type constraints.
+    Levantada quando os parâmetros de entrada fornecidos não correspondem
+    ao esquema esperado ou restrições de tipo da ferramenta.
     """
 
 
 class ToolNotFoundError(ToolError):
-    """Requested tool does not exist.
+    """Ferramenta solicitada não existe.
 
-    Raised when attempting to use a tool that has not been
-    registered or is not available to the agent.
+    Levantada ao tentar usar uma ferramenta que não foi
+    registrada ou não está disponível para o agente.
     """
 
 
 # ---------------------------------------------------------------------------
-# Agent
+# Agente
 # ---------------------------------------------------------------------------
 
 
 class AgentError(MangabaError):
-    """Error in agent execution.
+    """Erro na execução do agente.
 
-    Base class for errors that occur during agent operations,
-    including iteration limits, delegation failures, and execution errors.
+    Classe base para erros que ocorrem durante operações de agente,
+    incluindo limites de iteração, falhas de delegação e erros de execução.
     """
 
 
 class MaxIterationsError(AgentError):
-    """Agent hit the maximum iteration limit.
+    """Agente atingiu o limite máximo de iteração.
 
-    Raised when the ReAct reasoning loop exceeds the configured
-    max_iterations without reaching a final answer.
+    Levantada quando o loop de raciocínio ReAct excede o
+    max_iterations configurado sem alcançar uma resposta final.
     """
 
 
 class DelegationError(AgentError):
-    """Failed to delegate task to another agent.
+    """Falha ao delegar tarefa para outro agente.
 
-    Raised when an agent attempts to delegate a task but the delegation
-    cannot be completed (e.g., no suitable delegate agent available).
+    Levantada quando um agente tenta delegar uma tarefa mas a delegação
+    não pode ser concluída (ex: nenhum agente delegado adequado disponível).
     """
 
 
@@ -210,26 +210,26 @@ class DelegationError(AgentError):
 
 
 class TaskError(MangabaError):
-    """Error during task execution.
+    """Erro durante a execução da tarefa.
 
-    Raised when a task cannot be completed successfully,
-    including agent failures, timeout, or execution errors.
+    Levantada quando uma tarefa não pode ser concluída com sucesso,
+    incluindo falhas de agente, timeout ou erros de execução.
     """
 
 
 class CrewError(MangabaError):
-    """Error in crew orchestration.
+    """Erro na orquestração da crew.
 
-    Raised when errors occur during crew-level operations such as
-    process execution, agent coordination, or task distribution.
+    Levantada quando erros ocorrem durante operações de nível de crew como
+    execução de processo, coordenação de agentes ou distribuição de tarefas.
     """
 
 
 class ValidationError(MangabaError):
-    """Generic data validation failure.
+    """Falha genérica de validação de dados.
 
-    Raised when input data fails validation checks, including
-    schema validation, type mismatches, or constraint violations.
+    Levantada quando dados de entrada falham nas verificações de validação, incluindo
+    validação de esquema, incompatibilidades de tipo ou violações de restrição.
     """
 
 
@@ -239,24 +239,24 @@ class ValidationError(MangabaError):
 
 
 class MemoryError(MangabaError):
-    """Error in memory subsystem.
+    """Erro no subsistema de memória.
 
-    Raised when errors occur in memory operations such as storage,
-    retrieval, or search in short-term or long-term memory systems.
+    Levantada quando erros ocorrem em operações de memória como armazenamento,
+    recuperação ou busca em sistemas de memória de curto ou longo prazo.
     """
 
 
 class EmbeddingError(MangabaError):
-    """Error computing embeddings.
+    """Erro ao computar embeddings.
 
-    Raised when the embedding model fails to generate embeddings
-    for text, due to model errors, API issues, or invalid input.
+    Levantada quando o modelo de embedding falha ao gerar embeddings
+    para texto, devido a erros de modelo, problemas de API ou entrada inválida.
     """
 
 
 class VectorStoreError(MangabaError):
-    """Error in vector storage subsystem.
+    """Erro no subsistema de armazenamento vetorial.
 
-    Raised when errors occur in vector database operations such as
-    insertion, search, or deletion of vector embeddings.
+    Levantada quando erros ocorrem em operações de banco de dados vetorial como
+    inserção, busca ou exclusão de embeddings vetoriais.
     """

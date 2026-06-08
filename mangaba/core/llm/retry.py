@@ -1,5 +1,5 @@
 """
-Retry logic with exponential back-off for LLM calls.
+Lógica de repetição com back-off exponencial para chamadas LLM.
 """
 
 from __future__ import annotations
@@ -31,50 +31,50 @@ def with_retry(
     jitter: bool = True,
     retryable_exceptions: Optional[Set[Type[Exception]]] = None,
 ) -> Callable[[F], F]:
-    """Decorator that retries a function on transient errors.
+    """Decorador que repete uma função em erros transitórios.
 
-    Uses exponential back-off with optional jitter to avoid thundering herd
-    problems. Emits LLM_RETRY events to the EventBus on each retry attempt.
+    Usa back-off exponencial com jitter opcional para evitar problemas
+    de thundering herd. Emite eventos LLM_RETRY para o EventBus em cada tentativa de repetição.
 
     Args:
-        max_retries: Maximum number of retry attempts (0 = no retries, default: 3).
-        backoff_factor: Multiplicative back-off factor between retries (default: 2.0).
-        max_delay: Upper bound on delay in seconds (default: 60.0).
-        jitter: Add random jitter to delay to avoid thundering herd (default: True).
-        retryable_exceptions: Set of exception types that trigger a retry.
-            Defaults to RetryableError, RateLimitError, ConnectionError, TimeoutError.
+        max_retries: Número máximo de tentativas de repetição (0 = sem repetições, padrão: 3).
+        backoff_factor: Fator de back-off multiplicativo entre repetições (padrão: 2.0).
+        max_delay: Limite superior no atraso em segundos (padrão: 60.0).
+        jitter: Adiciona jitter aleatório ao atraso para evitar thundering herd (padrão: True).
+        retryable_exceptions: Conjunto de tipos de exceção que acionam uma repetição.
+            Padrão para RetryableError, RateLimitError, ConnectionError, TimeoutError.
 
     Returns:
-        A decorator function that wraps the target function with retry logic.
+        Uma função decoradora que envolve a função alvo com lógica de repetição.
 
     Raises:
-        LLMError: If all retry attempts are exhausted.
+        LLMError: Se todas as tentativas de repetição forem esgotadas.
     """
     exceptions = retryable_exceptions or _DEFAULT_RETRYABLE
 
     def decorator(fn: F) -> F:
-        """Decorator that applies retry logic to the function.
+        """Decorador que aplica lógica de repetição à função.
 
         Args:
-            fn: The function to wrap with retry logic.
+            fn: A função para envolver com lógica de repetição.
 
         Returns:
-            The wrapped function with retry logic applied.
+            A função envolvida com lógica de repetição aplicada.
         """
 
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            """Wrapper function that implements the retry logic.
+            """Função wrapper que implementa a lógica de repetição.
 
             Args:
-                *args: Positional arguments to pass to the wrapped function.
-                **kwargs: Keyword arguments to pass to the wrapped function.
+                *args: Argumentos posicionais para passar para a função envolvida.
+                **kwargs: Argumentos de palavra-chave para passar para a função envolvida.
 
             Returns:
-                The return value of the wrapped function on success.
+                O valor de retorno da função envolvida em sucesso.
 
             Raises:
-                LLMError: If all retry attempts are exhausted.
+                LLMError: Se todas as tentativas de repetição forem esgotadas.
             """
             last_exc: Optional[Exception] = None
             for attempt in range(max_retries + 1):

@@ -1,4 +1,4 @@
-"""File callback — persist events as JSONL."""
+"""Callback de arquivo — persiste eventos como JSONL."""
 
 from __future__ import annotations
 
@@ -12,30 +12,30 @@ log = logging.getLogger(__name__)
 
 
 class FileCallback(BaseCallback):
-    """Callback handler that persists events to a JSONL log file.
+    """Manipulador de callback que persiste eventos em um arquivo de log JSONL.
 
-    This callback writes each event as a JSON line to a log file for
-    persistent storage and later analysis.
+    Este callback escreve cada evento como uma linha JSON em um arquivo de log
+    para armazenamento persistente e análise posterior.
 
     Attributes:
-        path: The file path where events will be written.
+        path: O caminho do arquivo onde os eventos serão escritos.
     """
 
     def __init__(self, path: str | Path = "mangaba_events.jsonl") -> None:
-        """Initialize the FileCallback.
+        """Inicializa o FileCallback.
 
         Args:
-            path: The file path where events will be written
-                (default: "mangaba_events.jsonl").
+            path: O caminho do arquivo onde os eventos serão escritos
+                (padrão: "mangaba_events.jsonl").
         """
         super().__init__()
         self.path = Path(path)
 
     def on_event(self, event: Event) -> None:
-        """Handle an event by appending it to the log file.
+        """Manipula um evento anexando-o ao arquivo de log.
 
         Args:
-            event: The event to log.
+            event: O evento a ser registrado.
         """
         record = {
             "event_type": event.event_type.value,

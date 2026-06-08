@@ -1,4 +1,4 @@
-"""Console callback — prints agent/task/tool events to stdout."""
+"""Callback de console — imprime eventos de agente/tarefa/ferramenta no stdout."""
 
 from __future__ import annotations
 
@@ -27,29 +27,29 @@ _ICONS = {
 
 
 class ConsoleCallback(BaseCallback):
-    """Callback handler that prints agent/task/tool events to the console.
+    """Manipulador de callback que imprime eventos de agente/tarefa/ferramenta no console.
 
-    This callback provides real-time visibility into the execution flow by
-    logging events with appropriate icons and formatting.
+    Este callback fornece visibilidade em tempo real do fluxo de execução
+    registrando eventos com ícones e formatação apropriados.
 
     Attributes:
-        level: The logging level to use for output (default: INFO).
+        level: O nível de logging a ser usado para saída (padrão: INFO).
     """
 
     def __init__(self, level: int = logging.INFO) -> None:
-        """Initialize the ConsoleCallback.
+        """Inicializa o ConsoleCallback.
 
         Args:
-            level: The logging level to use for output (default: INFO).
+            level: O nível de logging a ser usado para saída (padrão: INFO).
         """
         super().__init__()
         self.level = level
 
     def on_event(self, event: Event) -> None:
-        """Handle an event by logging it to the console.
+        """Manipula um evento registrando-o no console.
 
         Args:
-            event: The event to log.
+            event: O evento a ser registrado.
         """
         icon = _ICONS.get(event.event_type, "•")
         msg = f"{icon} [{event.event_type.value}]"

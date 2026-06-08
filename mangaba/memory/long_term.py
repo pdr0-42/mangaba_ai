@@ -1,8 +1,8 @@
 """
-Long-term memory backed by SQLite for Mangaba AI v3.0
+Memória de longo prazo apoiada por SQLite para Mangaba AI v3.0
 
-Persists memories to disk and supports optional vector-similarity search
-when an embedding provider is available (falls back to keyword search).
+Persiste memórias em disco e suporta busca de similaridade vetorial opcional
+quando um provedor de embedding está disponível (retorna para busca por palavras-chave).
 """
 
 from __future__ import annotations
@@ -28,16 +28,16 @@ CREATE TABLE IF NOT EXISTS memories (
 
 
 class LongTermMemory(BaseMemory):
-    """SQLite-backed persistent memory with optional embedding search.
+    """Memória persistente apoiada por SQLite com busca de embedding opcional.
 
-    This memory implementation persists memories to disk and supports
-    optional vector-similarity search when an embedding provider is
-    available (falls back to keyword search).
+    Esta implementação de memória persiste memórias em disco e suporta
+    busca de similaridade vetorial opcional quando um provedor de embedding
+    está disponível (retorna para busca por palavras-chave).
 
     Attributes:
-        db_path: The path to the SQLite database file.
-        embedding_fn: Optional callable that takes text and returns a vector.
-        _conn: The SQLite database connection.
+        db_path: O caminho para o arquivo de banco de dados SQLite.
+        embedding_fn: Callable opcional que recebe texto e retorna um vetor.
+        _conn: A conexão do banco de dados SQLite.
     """
 
     def __init__(
@@ -45,12 +45,12 @@ class LongTermMemory(BaseMemory):
         db_path: str = "mangaba_memory.db",
         embedding_fn: Optional[Any] = None,
     ) -> None:
-        """Initialize the LongTermMemory.
+        """Inicializa a LongTermMemory.
 
         Args:
-            db_path: The path to the SQLite database file (default: "mangaba_memory.db").
-            embedding_fn: Optional callable that takes text and returns a vector
-                for similarity search.
+            db_path: O caminho para o arquivo de banco de dados SQLite (padrão: "mangaba_memory.db").
+            embedding_fn: Callable opcional que recebe texto e retorna um vetor
+                para busca de similaridade.
         """
         self.db_path = db_path
         self.embedding_fn = embedding_fn  # callable(text) -> List[float]
@@ -61,14 +61,14 @@ class LongTermMemory(BaseMemory):
     # ── public API ─────────────────────────────────────────────────────
 
     def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
-        """Add a memory entry to the database.
+        """Adiciona uma entrada de memória ao banco de dados.
 
         Args:
-            content: The content to store.
-            metadata: Optional metadata associated with the content.
+            content: O conteúdo para armazenar.
+            metadata: Metadados opcionais associados ao conteúdo.
 
         Returns:
-            The unique ID of the stored memory entry.
+            O ID único da entrada de memória armazenada.
         """
         entry_id = uuid.uuid4().hex[:12]
         embedding_json: Optional[str] = None
@@ -90,24 +90,24 @@ class LongTermMemory(BaseMemory):
         return entry_id
 
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Search for memories relevant to the query.
+        """Busca por memórias relevantes para a consulta.
 
         Args:
-            query: The search query.
-            top_k: The maximum number of results to return (default: 5).
+            query: A consulta de busca.
+            top_k: O número máximo de resultados a retornar (padrão: 5).
 
         Returns:
-            A list of memory entries sorted by relevance.
+            Uma lista de entradas de memória ordenadas por relevância.
         """
         if self.embedding_fn:
             return self._vector_search(query, top_k)
         return self._keyword_search(query, top_k)
 
     def get_all(self) -> List[Dict[str, Any]]:
-        """Return all stored memories.
+        """Retorna todas as memórias armazenadas.
 
         Returns:
-            A list of all memory entries in the database, ordered by creation time.
+            Uma lista de todas as entradas de memória no banco de dados, ordenadas por tempo de criação.
         """
         rows = self._conn.execute(
             "SELECT id, content, metadata, created_at FROM memories ORDER BY created_at DESC"
@@ -115,25 +115,25 @@ class LongTermMemory(BaseMemory):
         return [self._row_to_dict(r) for r in rows]
 
     def clear(self) -> None:
-        """Clear all stored memories from the database."""
+        """Limpa todas as memórias armazenadas do banco de dados."""
         self._conn.execute("DELETE FROM memories")
         self._conn.commit()
 
     def close(self) -> None:
-        """Close the database connection."""
+        """Fecha a conexão do banco de dados."""
         self._conn.close()
 
     # ── internals ──────────────────────────────────────────────────────
 
     def _keyword_search(self, query: str, top_k: int) -> List[Dict[str, Any]]:
-        """Perform keyword-based search.
+        """Realiza busca baseada em palavras-chave.
 
         Args:
-            query: The search query.
-            top_k: The maximum number of results to return.
+            query: A consulta de busca.
+            top_k: O número máximo de resultados a retornar.
 
         Returns:
-            A list of memory entries sorted by keyword match score.
+            Uma lista de entradas de memória ordenadas por pontuação de correspondência de palavras-chave.
         """
         rows = self._conn.execute(
             "SELECT id, content, metadata, created_at FROM memories"
@@ -149,14 +149,14 @@ class LongTermMemory(BaseMemory):
         return [self._row_to_dict(r) for _, r in scored[:top_k]]
 
     def _vector_search(self, query: str, top_k: int) -> List[Dict[str, Any]]:
-        """Perform vector similarity search.
+        """Realiza busca de similaridade vetorial.
 
         Args:
-            query: The search query.
-            top_k: The maximum number of results to return.
+            query: A consulta de busca.
+            top_k: O número máximo de resultados a retornar.
 
         Returns:
-            A list of memory entries sorted by cosine similarity.
+            Uma lista de entradas de memória ordenadas por similaridade de cosseno.
         """
         query_vec = self.embedding_fn(query)
         rows = self._conn.execute(
@@ -172,14 +172,14 @@ class LongTermMemory(BaseMemory):
 
     @staticmethod
     def _cosine_similarity(a: List[float], b: List[float]) -> float:
-        """Calculate cosine similarity between two vectors.
+        """Calcula a similaridade de cosseno entre dois vetores.
 
         Args:
-            a: First vector.
-            b: Second vector.
+            a: Primeiro vetor.
+            b: Segundo vetor.
 
         Returns:
-            The cosine similarity score between 0 and 1.
+            A pontuação de similaridade de cosseno entre 0 e 1.
         """
         if len(a) != len(b):
             return 0.0
@@ -192,13 +192,13 @@ class LongTermMemory(BaseMemory):
 
     @staticmethod
     def _row_to_dict(row: tuple) -> Dict[str, Any]:
-        """Convert a database row to a dictionary.
+        """Converte uma linha do banco de dados para um dicionário.
 
         Args:
-            row: A tuple representing a database row.
+            row: Uma tupla representando uma linha do banco de dados.
 
         Returns:
-            A dictionary with keys: id, content, metadata, created_at.
+            Um dicionário com chaves: id, content, metadata, created_at.
         """
         return {
             "id": row[0],

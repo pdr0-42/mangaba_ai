@@ -1,10 +1,10 @@
 """
-Toolkit grouping for Mangaba AI v3.0
+Agrupamento de Toolkit para Mangaba AI v3.0
 
-A Toolkit bundles related tools together so they can be attached to an
-agent as a single unit.
+Um Toolkit agrupa ferramentas relacionadas para que possam ser anexadas a um
+agente como uma única unidade.
 
-Example::
+Exemplo::
 
     kit = FileToolkit()
     agent = Agent(role="...", tools=kit.get_tools(), ...)
@@ -21,46 +21,46 @@ from mangaba.tools.web_search import DuckDuckGoSearchTool
 
 
 class BaseToolkit(ABC):
-    """Abstract base class for grouping related tools together.
+    """Classe base abstrata para agrupar ferramentas relacionadas.
 
-    A Toolkit bundles related tools so they can be attached to an agent
-    as a single unit.
+    Um Toolkit agrupa ferramentas relacionadas para que possam ser anexadas
+    a um agente como uma única unidade.
     """
 
     @abstractmethod
     def get_tools(self) -> List[BaseTool]:
-        """Return the list of tools in this toolkit.
+        """Retorna a lista de ferramentas neste toolkit.
 
         Returns:
-            List of BaseTool instances.
+            Lista de instâncias BaseTool.
         """
 
 
 class FileToolkit(BaseToolkit):
-    """Toolkit containing file I/O tools.
+    """Toolkit contendo ferramentas de E/S de arquivos.
 
-    Includes tools for reading files, writing files, and listing directories.
+    Inclui ferramentas para ler arquivos, escrever arquivos e listar diretórios.
     """
 
     def get_tools(self) -> List[BaseTool]:
-        """Return the list of file I/O tools.
+        """Retorna a lista de ferramentas de E/S de arquivos.
 
         Returns:
-            List containing FileReaderTool, FileWriterTool, and DirectoryListTool.
+            Lista contendo FileReaderTool, FileWriterTool e DirectoryListTool.
         """
         return [FileReaderTool(), FileWriterTool(), DirectoryListTool()]
 
 
 class WebToolkit(BaseToolkit):
-    """Toolkit containing web search tools.
+    """Toolkit contendo ferramentas de busca na web.
 
-    Includes tools for searching the web using DuckDuckGo.
+    Inclui ferramentas para buscar na web usando DuckDuckGo.
     """
 
     def get_tools(self) -> List[BaseTool]:
-        """Return the list of web search tools.
+        """Retorna a lista de ferramentas de busca na web.
 
         Returns:
-            List containing DuckDuckGoSearchTool.
+            Lista contendo DuckDuckGoSearchTool.
         """
         return [DuckDuckGoSearchTool()]

@@ -1,8 +1,8 @@
 """
-ReAct reasoning engine for Mangaba AI v3.0
+Motor de raciocínio ReAct para Mangaba AI v3.0
 
-Implements the Thought → Action → Observation loop that enables agents
-to use tools intelligently via LLM function calling.
+Implementa o loop Pensamento → Ação → Observação que permite aos agentes
+usar ferramentas de forma inteligente via chamada de função do LLM.
 """
 
 from __future__ import annotations
@@ -26,21 +26,21 @@ log = logging.getLogger(__name__)
 
 
 class ReActEngine:
-    """ReAct (Reason + Act) loop executor.
+    """Executor de loop ReAct (Raciocínio + Ação).
 
-    Given an LLM client, a set of tools and a system prompt, the engine
-    iteratively:
-      1. Sends the conversation to the LLM (with tool declarations).
-      2. If the LLM returns tool_calls → executes them, appends results.
-      3. If the LLM returns text (finish_reason=stop) → returns the answer.
-      4. Repeats until ``max_iterations`` is reached.
+    Dado um cliente LLM, um conjunto de ferramentas e um prompt do sistema, o motor
+    iterativamente:
+      1. Envia a conversa para o LLM (com declarações de ferramenta).
+      2. Se o LLM retorna tool_calls → executa-os, anexa resultados.
+      3. Se o LLM retorna texto (finish_reason=stop) → retorna a resposta.
+      4. Repete até que ``max_iterations`` seja alcançado.
 
     Example::
 
         engine = ReActEngine(llm=llm_client, tools=[SearchTool(), CalcTool()])
         result = engine.run(
-            system_prompt="You are a research analyst.",
-            user_prompt="What is the GDP of Brazil?"
+            system_prompt="Você é um analista de pesquisa.",
+            user_prompt="Qual é o PIB do Brasil?"
         )
         print(result.content)
     """
@@ -69,7 +69,7 @@ class ReActEngine:
         context: Optional[str] = None,
         state: Optional[AgentState] = None,
     ) -> LLMResponse:
-        """Execute the full ReAct loop and return the final LLM response."""
+        """Executa o loop ReAct completo e retorna a resposta final do LLM."""
         messages = self._build_initial_messages(system_prompt, user_prompt, context)
         state = state or AgentState(agent_id="react")
         state.status = AgentStatus.RUNNING
@@ -93,7 +93,7 @@ class ReActEngine:
             step = ReActStep(step_number=iteration)
 
             if response.has_tool_calls:
-                # Agent wants to use tools
+                # Agente quer usar ferramentas
                 state.status = AgentStatus.WAITING_TOOL
                 step.thought = response.text or None
                 step.action = response.tool_calls[0]
@@ -110,7 +110,7 @@ class ReActEngine:
                     )
                 )
 
-                # Append assistant message (with tool calls)
+                # Adicionar mensagem do assistente (com chamadas de ferramentas)
                 messages.append(
                     {
                         "role": "assistant",
@@ -148,7 +148,7 @@ class ReActEngine:
                             finish_reason=FinishReason.STOP,
                         )
 
-                # Append tool results as a tool message
+                # Adicionar resultados das ferramentas como mensagem de ferramenta
                 observation_parts = []
                 for tr in tool_results:
                     if tr.success:
@@ -171,7 +171,7 @@ class ReActEngine:
                 )
 
             else:
-                # Agent is done reasoning — final answer
+                # Agente terminou o raciocínio — resposta final
                 state.status = AgentStatus.COMPLETED
                 step.thought = response.text
                 state.steps.append(step)

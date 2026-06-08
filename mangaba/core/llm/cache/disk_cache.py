@@ -1,5 +1,5 @@
 """
-Disk-based LLM response cache using SQLite.
+Cache de resposta LLM baseado em disco usando SQLite.
 """
 
 from .base import LLMCache
@@ -10,22 +10,22 @@ import time
 
 
 class DiskCache(LLMCache):
-    """Persistent SQLite-based cache."""
+    """Cache persistente baseado em SQLite."""
 
     def __init__(
         self, path: str = ".mangaba_cache.db", default_ttl: Optional[int] = None
     ) -> None:
-        """Initialize the disk-based SQLite cache.
+        """Inicializa o cache SQLite baseado em disco.
 
         Args:
-            path: Path to the SQLite database file (default: ".mangaba_cache.db").
-            default_ttl: Default time-to-live in seconds for all entries. None means
-                no expiration (default: None).
+            path: Caminho para o arquivo de banco de dados SQLite (padrão: ".mangaba_cache.db").
+            default_ttl: Time-to-live padrão em segundos para todas as entradas. None significa
+                sem expiração (padrão: None).
 
         Attributes:
-            _path: Path to the SQLite database file.
-            _default_ttl: Default TTL for cache entries.
-            _lock: Threading lock for thread-safe operations.
+            _path: Caminho para o arquivo de banco de dados SQLite.
+            _default_ttl: TTL padrão para entradas de cache.
+            _lock: Lock de threading para operações thread-safe.
         """
         self._path = path
         self._default_ttl = default_ttl
@@ -33,9 +33,9 @@ class DiskCache(LLMCache):
         self._init_db()
 
     def _init_db(self) -> None:
-        """Initialize the SQLite database schema.
+        """Inicializa o esquema do banco de dados SQLite.
 
-        Creates the cache table if it does not exist.
+        Cria a tabela de cache se ela não existir.
         """
         with self._connect() as conn:
             conn.execute(
@@ -45,23 +45,23 @@ class DiskCache(LLMCache):
             conn.commit()
 
     def _connect(self) -> sqlite3.Connection:
-        """Create a new SQLite connection.
+        """Cria uma nova conexão SQLite.
 
         Returns:
-            A sqlite3.Connection object for the database.
+            Um objeto sqlite3.Connection para o banco de dados.
         """
         return sqlite3.connect(self._path)
 
     def get(self, key: str) -> Optional[str]:
-        """Retrieve a value from the disk cache.
+        """Recupera um valor do cache de disco.
 
-        Expired entries are automatically deleted from the database.
+        Entradas expiradas são automaticamente excluídas do banco de dados.
 
         Args:
-            key: The cache key to look up.
+            key: A chave de cache para procurar.
 
         Returns:
-            The cached value if found and not expired, None otherwise.
+            O valor em cache se encontrado e não expirado, None caso contrário.
         """
         with self._lock, self._connect() as conn:
             row = conn.execute(
@@ -77,12 +77,12 @@ class DiskCache(LLMCache):
             return value
 
     def set(self, key: str, value: str, ttl: Optional[int] = None) -> None:
-        """Store a value in the disk cache.
+        """Armazena um valor no cache de disco.
 
         Args:
-            key: The cache key to store under.
-            value: The value to cache.
-            ttl: Time-to-live in seconds. Uses default_ttl if None (default: None).
+            key: A chave de cache para armazenar sob.
+            value: O valor para cachear.
+            ttl: Time-to-live em segundos. Usa default_ttl se None (padrão: None).
         """
         actual_ttl = ttl if ttl is not None else self._default_ttl
         expires_at = time.time() + actual_ttl if actual_ttl else None
@@ -94,17 +94,17 @@ class DiskCache(LLMCache):
             conn.commit()
 
     def invalidate(self, key: str) -> None:
-        """Remove a specific entry from the disk cache.
+        """Remove uma entrada específica do cache de disco.
 
         Args:
-            key: The cache key to invalidate.
+            key: A chave de cache para invalidar.
         """
         with self._lock, self._connect() as conn:
             conn.execute("DELETE FROM cache WHERE key = ?", (key,))
             conn.commit()
 
     def clear(self) -> None:
-        """Remove all entries from the disk cache."""
+        """Remove todas as entradas do cache de disco."""
         with self._lock, self._connect() as conn:
             conn.execute("DELETE FROM cache")
             conn.commit()

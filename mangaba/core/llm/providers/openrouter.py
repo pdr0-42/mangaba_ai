@@ -1,4 +1,4 @@
-"""OpenRouter provider."""
+"""Provedor OpenRouter."""
 
 from typing import Any, Dict, List, Union, Optional
 
@@ -10,9 +10,9 @@ from .schemas import _tool_to_openai_schema
 
 class OpenRouterLLMProvider(OpenAILLMProvider):
     """
-    OpenRouter provider implementation for Mangaba AI.
-    Handles native fallback routing by formatting the OpenAI SDK payload
-    specifically for OpenRouter's requirements.
+    Implementação do provedor OpenRouter para Mangaba AI.
+    Manipula o roteamento de fallback nativo formatando o payload do SDK OpenAI
+    especificamente para os requisitos do OpenRouter.
     """
 
     name = "openrouter"
@@ -21,27 +21,27 @@ class OpenRouterLLMProvider(OpenAILLMProvider):
     def __init__(
         self, api_key: str, model: Union[str, List[str]], **options: Any
     ) -> None:
-        """Initialize the OpenRouter LLM provider.
+        """Inicializa o provedor LLM OpenRouter.
 
-        OpenRouter provides access to multiple LLM providers through a unified API.
-        Supports model fallback routing by accepting a list of models.
+        O OpenRouter fornece acesso a múltiplos provedores LLM através de uma API unificada.
+        Suporta roteamento de fallback de modelo aceitando uma lista de modelos.
 
         Args:
-            api_key: OpenRouter API key.
-            model: Model name (string) or list of models for fallback routing.
-            **options: Additional provider-specific options (base_url, site_url, site_name).
+            api_key: Chave de API do OpenRouter.
+            model: Nome do modelo (string) ou lista de modelos para roteamento de fallback.
+            **options: Opções adicionais específicas do provedor (base_url, site_url, site_name).
         """
-        # Configuration defaults for the OpenRouter endpoint
+        # Padrões de configuração para o endpoint OpenRouter
         base_url = options.get("base_url") or "https://openrouter.ai/api/v1"
         site_url = options.get("site_url", "https://www.mangaba.ia.br/")
         site_name = options.get("site_name", "Mangaba AI")
 
-        # Initialize base OpenAI provider
+        # Inicializar provedor base OpenAI
         super().__init__(api_key, model, **options)
 
         from openai import OpenAI
 
-        # Re-initialize the client with OpenRouter's base_url and identity headers
+        # Reinicializar o cliente com base_url e cabeçalhos de identidade do OpenRouter
         self._client = OpenAI(
             api_key=api_key,
             base_url=base_url,
@@ -52,28 +52,28 @@ class OpenRouterLLMProvider(OpenAILLMProvider):
         )
 
     def _get_call_params(self, **kwargs: Any) -> Dict[str, Any]:
-        """Build API call parameters for OpenRouter.
+        """Constrói parâmetros de chamada de API para OpenRouter.
 
-        Ensures the 'model' is a single string and the fallback list
-        is moved to 'extra_body' to satisfy OpenRouter's API requirements.
+        Garante que o 'model' seja uma string única e a lista de fallback
+        seja movida para 'extra_body' para satisfazer os requisitos da API do OpenRouter.
 
         Args:
-            **kwargs: Additional parameters from the calling method.
+            **kwargs: Parâmetros adicionais do método chamador.
 
         Returns:
-            Dictionary of parameters formatted for OpenRouter API.
+            Dicionário de parâmetros formatados para a API do OpenRouter.
         """
-        # Ensure we have a string for the SDK's 'model' parameter
+        # Garantir que temos uma string para o parâmetro 'model' do SDK
         if isinstance(self.model, list):
             primary_model = self.model[0]
-            # OpenRouter fallback list goes into extra_body.models
+            # Lista de fallback do OpenRouter vai para extra_body.models
             extra_body = kwargs.get("extra_body", {})
             extra_body["models"] = self.model
             kwargs["extra_body"] = extra_body
         else:
             primary_model = self.model
 
-        # Extract standard generation options
+        # Extrair opções de geração padrão
         params = {
             "model": primary_model,
             "temperature": kwargs.get("temperature", self._temperature),
@@ -82,28 +82,28 @@ class OpenRouterLLMProvider(OpenAILLMProvider):
             "stream": kwargs.get("stream", False),
         }
 
-        # Merge any other extra arguments (like top_p, etc)
+        # Mesclar quaisquer outros argumentos extras (como top_p, etc)
         return {k: v for k, v in params.items() if v is not None}
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
-        """Generate a response from OpenRouter.
+        """Gera uma resposta a partir do OpenRouter.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (temperature, max_output_tokens, system_prompt).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (temperature, max_output_tokens, system_prompt).
 
         Returns:
-            LLMResponse containing the generated text, usage metadata, and raw response.
+            LLMResponse contendo o texto gerado, metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
-        # Build standard message format
+        # Construir formato de mensagem padrão
         messages = self._build_messages(prompt, kwargs.pop("system_prompt", None))
         params = self._get_call_params(**kwargs)
 
         try:
-            # We call the client directly to avoid parent class parameter conflicts
+            # Chamamos o cliente diretamente para evitar conflitos de parâmetros da classe pai
             resp = self._client.chat.completions.create(messages=messages, **params)
             usage = self._parse_usage(resp)
             return LLMResponse(
@@ -122,23 +122,23 @@ class OpenRouterLLMProvider(OpenAILLMProvider):
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        """Generate a response with tool/function calling support.
+        """Gera uma resposta com suporte a chamada de ferramentas/funções.
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            tools: Optional list of tool definitions for function calling.
-            **kwargs: Additional parameters (temperature, max_output_tokens).
+            messages: Lista de dicionários de mensagens com chaves 'role' e 'content'.
+            tools: Lista opcional de definições de ferramentas para chamada de função.
+            **kwargs: Parâmetros adicionais (temperature, max_output_tokens).
 
         Returns:
-            LLMResponse containing text, tool calls (if any), usage metadata, and raw response.
+            LLMResponse contendo texto, chamadas de ferramenta (se houver), metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
-        # Critical for the ReActEngine to work with fallbacks
+        # Crítico para o ReActEngine funcionar com fallbacks
         params = self._get_call_params(**kwargs)
 
-        # Convert Mangaba tools to OpenAI-compatible schemas
+        # Converter ferramentas Mangaba para esquemas compatíveis com OpenAI
         if tools:
             params["tools"] = [_tool_to_openai_schema(t) for t in tools]
 

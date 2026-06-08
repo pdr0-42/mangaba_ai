@@ -1,8 +1,8 @@
 """
-LLM provider engine for Mangaba AI v3.0
+Motor de provedor LLM para Mangaba AI v3.0
 
-Supports native function-calling (tool use), streaming, token counting
-and a unified response format across Google, OpenAI, Anthropic and
+Suporta chamada de função nativa (uso de ferramenta), streaming, contagem de tokens
+e um formato de resposta unificado em Google, OpenAI, Anthropic e
 Hugging Face.
 """
 
@@ -20,50 +20,50 @@ log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# High-level client
+# Cliente de alto nível
 # ---------------------------------------------------------------------------
 
 
 class LLMClient:
-    """Unified high-level LLM client with tool use and streaming support."""
+    """Cliente LLM de alto nível unificado com suporte a uso de ferramenta e streaming."""
 
     def __init__(self, provider: str, api_key: str, model: str, **options: Any) -> None:
-        """Initialize the LLM client with a specific provider.
+        """Inicializa o cliente LLM com um provedor específico.
 
         Args:
-            provider: Provider name (e.g., "google", "openai", "anthropic").
-            api_key: API key for the provider service.
-            model: Model name/identifier to use.
-            **options: Additional provider-specific options (e.g., temperature,
+            provider: Nome do provedor (ex: "google", "openai", "anthropic").
+            api_key: Chave de API para o serviço do provedor.
+            model: Nome/identificador do modelo a ser usado.
+            **options: Opções adicionais específicas do provedor (ex: temperature,
                 max_output_tokens, system_prompt).
 
         Attributes:
-            provider_name: The resolved provider name.
-            _provider: The underlying provider instance.
-            _usage_tracker: List tracking token usage across all calls.
+            provider_name: O nome do provedor resolvido.
+            _provider: A instância do provedor subjacente.
+            _usage_tracker: Lista rastreando uso de token em todas as chamadas.
         """
         provider_cls = _resolve_provider_class(provider)
         self.provider_name = provider_cls.name
         self._provider = provider_cls(api_key=api_key, model=model, **options)
         self._usage_tracker: List[TokenUsage] = []
 
-    # -- basic generation ---------------------------------------------------
+    # -- geração básica ---------------------------------------------------
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
-        """Generate a response from the LLM.
+        """Gera uma resposta do LLM.
 
-        Emits LLM_START, LLM_END, and LLM_ERROR events to the EventBus.
+        Emite eventos LLM_START, LLM_END e LLM_ERROR para o EventBus.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional provider-specific parameters.
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais específicos do provedor.
 
         Returns:
-            LLMResponse containing the generated text, usage metadata, and
-            additional information.
+            LLMResponse contendo o texto gerado, metadados de uso e
+            informações adicionais.
 
         Raises:
-            Exception: Propagates any exception from the underlying provider.
+            Exception: Propaga qualquer exceção do provedor subjacente.
         """
         EventBus.emit(
             Event(
@@ -91,20 +91,20 @@ class LLMClient:
             raise
 
     def generate_text(self, prompt: str, **kwargs: Any) -> str:
-        """Generate a response and return only the text content.
+        """Gera uma resposta e retorna apenas o conteúdo de texto.
 
-        Convenience method that returns the text field from the LLMResponse.
+        Método de conveniência que retorna o campo de texto do LLMResponse.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional provider-specific parameters.
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais específicos do provedor.
 
         Returns:
-            The generated text content.
+            O conteúdo de texto gerado.
         """
         return self.generate(prompt, **kwargs).text
 
-    # -- tool use -----------------------------------------------------------
+    # -- uso de ferramentas -----------------------------------------------------------
 
     def generate_with_tools(
         self,
@@ -112,22 +112,22 @@ class LLMClient:
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        """Generate a response with optional tool/function calling support.
+        """Gera uma resposta com suporte opcional de chamada de ferramenta/função.
 
-        Emits LLM_START, LLM_END, and LLM_ERROR events to the EventBus with
-        tool use metadata.
+        Emite eventos LLM_START, LLM_END e LLM_ERROR para o EventBus com
+        metadados de uso de ferramenta.
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            tools: Optional list of tool/function definitions for the LLM to use.
-            **kwargs: Additional provider-specific parameters.
+            messages: Lista de dicionários de mensagem com chaves 'role' e 'content'.
+            tools: Lista opcional de definições de ferramenta/função para o LLM usar.
+            **kwargs: Parâmetros adicionais específicos do provedor.
 
         Returns:
-            LLMResponse containing the generated text, tool calls (if any),
-            usage metadata, and additional information.
+            LLMResponse contendo o texto gerado, chamadas de ferramenta (se houver),
+            metadados de uso e informações adicionais.
 
         Raises:
-            Exception: Propagates any exception from the underlying provider.
+            Exception: Propaga qualquer exceção do provedor subjacente.
         """
         EventBus.emit(
             Event(
@@ -162,39 +162,39 @@ class LLMClient:
     # -- streaming ----------------------------------------------------------
 
     def stream(self, prompt: str, **kwargs: Any) -> Iterator[str]:
-        """Stream the response token-by-token.
+        """Transmite a resposta token por token.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional provider-specific parameters.
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais específicos do provedor.
 
         Yields:
-            str: Response tokens or chunks as they are generated.
+            str: Tokens ou chunks de resposta conforme são gerados.
         """
         return self._provider.stream(prompt, **kwargs)
 
-    # -- token counting -----------------------------------------------------
+    # -- contagem de tokens -----------------------------------------------------
 
     def count_tokens(self, text: str) -> int:
-        """Estimate the token count for the given text.
+        """Estima a contagem de tokens para o texto fornecido.
 
         Args:
-            text: The text to estimate token count for.
+            text: O texto para estimar a contagem de tokens.
 
         Returns:
-            Estimated number of tokens.
+            Número estimado de tokens.
         """
         return self._provider.count_tokens(text)
 
-    # -- usage tracking -----------------------------------------------------
+    # -- rastreamento de uso -----------------------------------------------------
 
     @property
     def total_usage(self) -> TokenUsage:
-        """Get the total token usage across all LLM calls.
+        """Obtém o uso total de token em todas as chamadas LLM.
 
         Returns:
-            TokenUsage object with accumulated prompt_tokens, completion_tokens,
-            and total_tokens.
+            Objeto TokenUsage com prompt_tokens, completion_tokens
+            e total_tokens acumulados.
         """
         total = TokenUsage()
         for u in self._usage_tracker:
@@ -204,10 +204,10 @@ class LLMClient:
         return total
 
     def _track_usage(self, usage: TokenUsage) -> None:
-        """Track token usage from a single LLM call.
+        """Rastreia o uso de token de uma única chamada LLM.
 
         Args:
-            usage: TokenUsage object from the LLM response.
+            usage: Objeto TokenUsage da resposta LLM.
         """
         if usage.total_tokens > 0:
             self._usage_tracker.append(usage)

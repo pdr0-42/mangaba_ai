@@ -1,5 +1,5 @@
 """
-Retriever: wraps an embedding + vector store to find relevant documents.
+Retriever: envolve um embedding + armazenamento vetorial para encontrar documentos relevantes.
 """
 
 from __future__ import annotations
@@ -12,10 +12,10 @@ from mangaba.vectorstores.base import BaseVectorStore
 
 
 class Retriever:
-    """Encapsulates embedding and vector store for similarity search.
+    """Encapsula embedding e armazenamento vetorial para busca de similaridade.
 
-    This class combines an embedding model with a vector store to provide
-    document retrieval functionality based on semantic similarity.
+    Esta classe combina um modelo de embedding com um armazenamento vetorial para fornecer
+    funcionalidade de recuperação de documentos baseada em similaridade semântica.
 
     Example::
 
@@ -24,28 +24,28 @@ class Retriever:
         results = retriever.search("What is AI?")
 
     Attributes:
-        embedding: The embedding model to use for text vectorization.
-        store: The vector store to use for document storage and search.
+        embedding: O modelo de embedding para usar na vetorização de texto.
+        store: O armazenamento vetorial para usar no armazenamento e busca de documentos.
     """
 
     def __init__(self, embedding: BaseEmbedding, store: BaseVectorStore) -> None:
-        """Initialize the Retriever.
+        """Inicializa o Retriever.
 
         Args:
-            embedding: The embedding model to use for text vectorization.
-            store: The vector store to use for document storage and search.
+            embedding: O modelo de embedding para usar na vetorização de texto.
+            store: O armazenamento vetorial para usar no armazenamento e busca de documentos.
         """
         self.embedding = embedding
         self.store = store
 
     def add_documents(self, documents: List[Document]) -> List[str]:
-        """Add documents to the vector store.
+        """Adiciona documentos ao armazenamento vetorial.
 
         Args:
-            documents: A list of Document objects to add.
+            documents: Uma lista de objetos Document para adicionar.
 
         Returns:
-            A list of IDs for the added documents.
+            Uma lista de IDs para os documentos adicionados.
         """
         texts = [d.content for d in documents]
         embeddings = self.embedding.embed_batch(texts)
@@ -53,14 +53,14 @@ class Retriever:
         return self.store.add(texts, embeddings, metadatas)
 
     def search(self, query: str, top_k: int = 5) -> List[Document]:
-        """Search for documents similar to the query.
+        """Busca por documentos semelhantes à consulta.
 
         Args:
-            query: The search query.
-            top_k: The maximum number of results to return (default: 5).
+            query: A consulta de busca.
+            top_k: O número máximo de resultados a retornar (padrão: 5).
 
         Returns:
-            A list of Document objects sorted by similarity score.
+            Uma lista de objetos Document ordenados por pontuação de similaridade.
         """
         query_emb = self.embedding.embed_text(query)
         results = self.store.search(query_emb, top_k=top_k)
@@ -73,5 +73,5 @@ class Retriever:
         ]
 
     def clear(self) -> None:
-        """Clear all documents from the vector store."""
+        """Limpa todos os documentos do armazenamento vetorial."""
         self.store.clear()

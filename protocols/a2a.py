@@ -1,17 +1,16 @@
-"""A2A (Agent-to-Agent) Protocol for Mangaba AI agent communication.
+"""Protocolo A2A (Agent-to-Agent) para comunicação de agentes Mangaba AI.
 
-This module implements the Agent-to-Agent communication protocol,
-enabling direct message passing, broadcasting, and agent discovery
-for multi-agent systems.
+Este módulo implementa o protocolo de comunicação Agente-para-Agente,
+habilitando passagem direta de mensagens, broadcasting e descoberta de agentes
+para sistemas multi-agentes.
 
 Classes:
-    MessageType: Enumeration of message types (request, response, broadcast, etc.)
-    A2AMessage: Standard message format for A2A communication
-    A2AProtocol: Protocol implementation for message handling
-    A2AAgent: Base agent class with A2A capabilities
+    MessageType: Enumeração de tipos de mensagens (request, response, broadcast, etc.)
+    A2AMessage: Formato padrão de mensagem para comunicação A2A
+    A2AProtocol: Implementação de protocolo para tratamento de mensagens
+    A2AAgent: Classe base de agente com capacidades A2A
 """
 
-import json
 import uuid
 import threading
 from datetime import datetime
@@ -20,17 +19,17 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 
 class MessageType(Enum):
-    """Enumeration of A2A message types.
+    """Enumeração de tipos de mensagens A2A.
 
-    Defines the various types of messages that can be sent between agents
-    in the Agent-to-Agent communication protocol.
+    Define os vários tipos de mensagens que podem ser enviadas entre agentes
+    no protocolo de comunicação Agente-para-Agente.
 
     Attributes:
-        REQUEST: A message requesting an action or information from another agent.
-        RESPONSE: A message responding to a previous request.
-        BROADCAST: A message sent to all connected agents.
-        NOTIFICATION: A message informing agents of an event or update.
-        ERROR: A message indicating an error occurred.
+        REQUEST: Uma mensagem solicitando uma ação ou informação de outro agente.
+        RESPONSE: Uma mensagem respondendo a uma solicitação anterior.
+        BROADCAST: Uma mensagem enviada a todos os agentes conectados.
+        NOTIFICATION: Uma mensagem informando agentes sobre um evento ou atualização.
+        ERROR: Uma mensagem indicando que ocorreu um erro.
     """
     REQUEST = "request"
     RESPONSE = "response"
@@ -40,21 +39,21 @@ class MessageType(Enum):
 
 @dataclass
 class A2AMessage:
-    """Standard message format for A2A communication.
+    """Formato padrão de mensagem para comunicação A2A.
 
-    Represents a message sent between agents in the Agent-to-Agent protocol.
-    Messages can be of various types including requests, responses, broadcasts,
-    notifications, and errors.
+    Representa uma mensagem enviada entre agentes no protocolo Agente-para-Agente.
+    Mensagens podem ser de vários tipos incluindo solicitações, respostas, broadcasts,
+    notificações e erros.
 
     Attributes:
-        id: Unique identifier for the message.
-        sender_id: ID of the agent sending the message.
-        receiver_id: ID of the agent receiving the message (None for broadcasts).
-        message_type: The type of message (request, response, broadcast, etc.).
-        content: The message payload as a dictionary.
-        timestamp: ISO format timestamp when the message was created.
-        correlation_id: ID of the related message for request-response pairs.
-        metadata: Additional metadata about the message.
+        id: Identificador único para a mensagem.
+        sender_id: ID do agente enviando a mensagem.
+        receiver_id: ID do agente recebendo a mensagem (None para broadcasts).
+        message_type: O tipo de mensagem (request, response, broadcast, etc.).
+        content: O payload da mensagem como um dicionário.
+        timestamp: Timestamp em formato ISO quando a mensagem foi criada.
+        correlation_id: ID da mensagem relacionada para pares solicitação-resposta.
+        metadata: Metadados adicionais sobre a mensagem.
     """
     id: str
     sender_id: str
@@ -68,19 +67,19 @@ class A2AMessage:
     @classmethod
     def create(cls, sender_id: str, message_type: MessageType, content: Dict[str, Any],
                receiver_id: Optional[str] = None, correlation_id: Optional[str] = None) -> 'A2AMessage':
-        """Creates a new A2A message.
+        """Cria uma nova mensagem A2A.
 
-        Factory method to create a new message with auto-generated ID and timestamp.
+        Método de fábrica para criar uma nova mensagem com ID e timestamp gerados automaticamente.
 
         Args:
-            sender_id: ID of the agent sending the message.
-            message_type: The type of message to create.
-            content: The message payload as a dictionary.
-            receiver_id: ID of the receiving agent (optional, None for broadcasts).
-            correlation_id: ID of related message for request-response pairs (optional).
+            sender_id: ID do agente enviando a mensagem.
+            message_type: O tipo de mensagem a criar.
+            content: O payload da mensagem como um dicionário.
+            receiver_id: ID do agente receptor (opcional, None para broadcasts).
+            correlation_id: ID da mensagem relacionada para pares solicitação-resposta (opcional).
 
         Returns:
-            A new A2AMessage instance with auto-generated ID and timestamp.
+            Uma nova instância A2AMessage com ID e timestamp gerados automaticamente.
         """
         return cls(
             id=str(uuid.uuid4()),
@@ -94,13 +93,13 @@ class A2AMessage:
         )
     
     def to_dict(self) -> Dict[str, Any]:
-        """Converts the message to a dictionary.
+        """Converte a mensagem para um dicionário.
 
-        Serializes the message to a dictionary format, converting the MessageType
-        enum to its string value.
+        Serializa a mensagem para um formato de dicionário, convertendo o enum MessageType
+        para seu valor string.
 
         Returns:
-            A dictionary representation of the message with enum values converted to strings.
+            Uma representação em dicionário da mensagem com valores de enum convertidos para strings.
         """
         data = asdict(self)
         data['message_type'] = self.message_type.value
@@ -108,43 +107,43 @@ class A2AMessage:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'A2AMessage':
-        """Creates a message from a dictionary.
+        """Cria uma mensagem a partir de um dicionário.
 
-        Deserializes a dictionary representation of a message back into an
-        A2AMessage instance, converting the message_type string back to MessageType enum.
+        Desserializa uma representação de dicionário de uma mensagem de volta em uma
+        instância A2AMessage, convertendo a string message_type de volta para o enum MessageType.
 
         Args:
-            data: A dictionary containing the message data with message_type as a string.
+            data: Um dicionário contendo os dados da mensagem com message_type como string.
 
         Returns:
-            An A2AMessage instance reconstructed from the dictionary data.
+            Uma instância A2AMessage reconstruída a partir dos dados do dicionário.
 
         Raises:
-            ValueError: If the message_type value is not a valid MessageType.
+            ValueError: Se o valor message_type não for um MessageType válido.
         """
         data['message_type'] = MessageType(data['message_type'])
         return cls(**data)
 
 class A2AProtocol:
-    """Agent-to-Agent communication protocol implementation.
+    """Implementação do protocolo de comunicação Agente-para-Agente.
 
-    Handles message passing between agents, including direct messaging,
-    broadcasting, and agent discovery. Manages message handlers and maintains
-    a history of sent and received messages.
+    Manipula a passagem de mensagens entre agentes, incluindo mensagens diretas,
+    broadcasting e descoberta de agentes. Gerencia manipuladores de mensagens e mantém
+    um histórico de mensagens enviadas e recebidas.
 
     Attributes:
-        agent_id: The ID of the agent using this protocol.
-        message_handlers: Dictionary mapping message types to lists of handler functions.
-        connected_agents: Dictionary of connected agents keyed by agent ID.
-        message_history: List of all messages sent and received by this protocol.
-        _lock: Reentrant lock for thread-safe operations.
+        agent_id: O ID do agente usando este protocolo.
+        message_handlers: Dicionário mapeando tipos de mensagens para listas de funções de manipulação.
+        connected_agents: Dicionário de agentes conectados chaveados por ID de agente.
+        message_history: Lista de todas as mensagens enviadas e recebidas por este protocolo.
+        _lock: Bloqueio reentrante para operações thread-safe.
     """
 
     def __init__(self, agent_id: str):
-        """Initializes the A2A protocol for an agent.
+        """Inicializa o protocolo A2A para um agente.
 
         Args:
-            agent_id: The unique identifier for the agent using this protocol.
+            agent_id: O identificador único para o agente usando este protocolo.
         """
         self.agent_id = agent_id
         self.message_handlers: Dict[MessageType, List[Callable]] = {
@@ -155,57 +154,57 @@ class A2AProtocol:
         self._lock = threading.RLock()  # Lock for thread-safe operations
         
     def register_handler(self, message_type: MessageType, handler: Callable):
-        """Registers a handler function for a specific message type.
+        """Registra uma função de manipulação para um tipo de mensagem específico.
 
-        When a message of the specified type is received, all registered handlers
-        for that type will be called.
+        Quando uma mensagem do tipo especificado é recebida, todos os manipuladores
+        registrados para aquele tipo serão chamados.
 
         Args:
-            message_type: The type of message this handler should process.
-            handler: A callable function that accepts an A2AMessage as its argument.
+            message_type: O tipo de mensagem que este manipulador deve processar.
+            handler: Uma função callable que aceita um A2AMessage como seu argumento.
         """
         self.message_handlers[message_type].append(handler)
     
     def connect_agent(self, agent: 'A2AAgent'):
-        """Connects another agent for communication.
+        """Conecta outro agente para comunicação.
 
-        Adds the specified agent to the list of connected agents, enabling
-        direct message passing between them.
+        Adiciona o agente especificado à lista de agentes conectados, habilitando
+        passagem direta de mensagens entre eles.
 
         Args:
-            agent: The A2AAgent instance to connect to.
+            agent: A instância A2AAgent para conectar.
         """
         with self._lock:
             self.connected_agents[agent.agent_id] = agent
         
     def disconnect_agent(self, agent_id: str):
-        """Disconnects an agent.
+        """Desconecta um agente.
 
-        Removes the specified agent from the list of connected agents,
-        preventing further message passing to that agent.
+        Remove o agente especificado da lista de agentes conectados,
+        prevenindo maior passagem de mensagens para aquele agente.
 
         Args:
-            agent_id: The ID of the agent to disconnect.
+            agent_id: O ID do agente para desconectar.
         """
         with self._lock:
             if agent_id in self.connected_agents:
                 del self.connected_agents[agent_id]
     
     def send_message(self, message: A2AMessage) -> bool:
-        """Sends a message to another agent or broadcasts to all connected agents.
+        """Envia uma mensagem para outro agente ou broadcast para todos os agentes conectados.
 
-        For direct messages, sends to the specified receiver if connected.
-        For broadcast messages, sends to all connected agents. Optionally filters
-        by tags specified in message metadata.
+        Para mensagens diretas, envia para o receptor especificado se conectado.
+        Para mensagens de broadcast, envia para todos os agentes conectados. Opcionalmente filtra
+        por tags especificadas nos metadados da mensagem.
 
         Args:
-            message: The A2AMessage to send.
+            message: O A2AMessage para enviar.
 
         Returns:
-            True if the message was sent successfully, False otherwise.
+            True se a mensagem foi enviada com sucesso, False caso contrário.
 
         Raises:
-            Exception: If an error occurs during message sending (caught and logged).
+            Exception: Se ocorrer um erro durante o envio da mensagem (capturado e registrado).
         """
         try:
             with self._lock:
@@ -234,13 +233,13 @@ class A2AProtocol:
             return False
     
     def receive_message(self, message: A2AMessage):
-        """Receives and processes an incoming message.
+        """Recebe e processa uma mensagem recebida.
 
-        Adds the message to history and executes all registered handlers
-        for the message type. Handler exceptions are caught and logged.
+        Adiciona a mensagem ao histórico e executa todos os manipuladores registrados
+        para o tipo de mensagem. Exceções de manipuladores são capturadas e registradas.
 
         Args:
-            message: The A2AMessage to receive and process.
+            message: O A2AMessage para receber e processar.
         """
         self.message_history.append(message)
 
@@ -252,17 +251,17 @@ class A2AProtocol:
                 print(f"Error in handler: {e}")
     
     def create_request(self, receiver_id: str, action: str, params: Dict[str, Any]) -> A2AMessage:
-        """Creates a request message.
+        """Cria uma mensagem de solicitação.
 
-        Creates a REQUEST type message with the specified action and parameters.
+        Cria uma mensagem do tipo REQUEST com a ação e parâmetros especificados.
 
         Args:
-            receiver_id: The ID of the agent to send the request to.
-            action: The action to be performed by the receiving agent.
-            params: Parameters for the action as a dictionary.
+            receiver_id: O ID do agente para enviar a solicitação.
+            action: A ação a ser executada pelo agente receptor.
+            params: Parâmetros para a ação como um dicionário.
 
         Returns:
-            An A2AMessage of type REQUEST containing the action and parameters.
+            Um A2AMessage do tipo REQUEST contendo a ação e parâmetros.
         """
         return A2AMessage.create(
             sender_id=self.agent_id,
@@ -275,18 +274,18 @@ class A2AProtocol:
         )
     
     def create_response(self, original_message: A2AMessage, result: Any, success: bool = True) -> A2AMessage:
-        """Creates a response message.
+        """Cria uma mensagem de resposta.
 
-        Creates a RESPONSE type message in reply to a previous request.
-        The correlation ID links the response to the original request.
+        Cria uma mensagem do tipo RESPONSE em resposta a uma solicitação anterior.
+        O ID de correlação vincula a resposta à solicitação original.
 
         Args:
-            original_message: The original request message to respond to.
-            result: The result data to include in the response.
-            success: Whether the request was successful (default: True).
+            original_message: A mensagem de solicitação original para responder.
+            result: Os dados de resultado para incluir na resposta.
+            success: Se a solicitação foi bem-sucedida (padrão: True).
 
         Returns:
-            An A2AMessage of type RESPONSE with the result and correlation ID.
+            Um A2AMessage do tipo RESPONSE com o resultado e ID de correlação.
         """
         return A2AMessage.create(
             sender_id=self.agent_id,
@@ -300,17 +299,17 @@ class A2AProtocol:
         )
     
     def broadcast(self, content: Dict[str, Any], target_tags: Optional[List[str]] = None) -> A2AMessage:
-        """Creates and sends a broadcast message with optional tag filtering.
+        """Cria e envia uma mensagem de broadcast com filtragem de tags opcional.
 
-        Creates a BROADCAST type message and sends it to all connected agents.
-        Target tags can be specified in metadata for filtering purposes.
+        Cria uma mensagem do tipo BROADCAST e envia para todos os agentes conectados.
+        Tags de destino podem ser especificadas nos metadados para fins de filtragem.
 
         Args:
-            content: The message content as a dictionary.
-            target_tags: Optional list of tags to filter recipients by.
+            content: O conteúdo da mensagem como um dicionário.
+            target_tags: Lista opcional de tags para filtrar destinatários.
 
         Returns:
-            The A2AMessage that was broadcast.
+            O A2AMessage que foi transmitido.
         """
         message = A2AMessage.create(
             sender_id=self.agent_id,
@@ -328,46 +327,45 @@ class A2AProtocol:
         return message
 
 class A2AAgent:
-    """Base agent class with A2A communication capabilities.
+    """Classe base de agente com capacidades de comunicação A2A.
 
-    Provides Agent-to-Agent communication functionality including message
-    sending, receiving, and handler management. Can connect to other agents
-    and participate in multi-agent systems.
+    Fornece funcionalidade de comunicação Agente-para-Agente incluindo envio,
+    recebimento e gerenciamento de manipuladores de mensagens. Pode conectar a outros agentes
+    e participar de sistemas multi-agentes.
 
     Attributes:
-        agent_id: The unique identifier for this agent.
-        a2a_protocol: The A2AProtocol instance handling communication.
+        agent_id: O identificador único para este agente.
+        a2a_protocol: A instância A2AProtocol manipulando comunicação.
     """
 
     def __init__(self, agent_id: str):
-        """Initializes the A2A agent.
+        """Inicializa o agente A2A.
 
         Args:
-            agent_id: The unique identifier for this agent.
+            agent_id: O identificador único para este agente.
         """
         self.agent_id = agent_id
         self.a2a_protocol = A2AProtocol(agent_id)
         self.setup_default_handlers()
     
     def setup_default_handlers(self):
-        """Sets up default message handlers.
+        """Configura manipuladores de mensagem padrão.
 
-        Registers the default handlers for REQUEST, RESPONSE, and NOTIFICATION
-        message types. These can be overridden in subclasses for custom behavior.
+        Registra os manipuladores padrão para os tipos de mensagem REQUEST, RESPONSE e NOTIFICATION.
+        Estes podem ser substituídos em subclasses para comportamento personalizado.
         """
         self.a2a_protocol.register_handler(MessageType.REQUEST, self.handle_request)
         self.a2a_protocol.register_handler(MessageType.RESPONSE, self.handle_response)
         self.a2a_protocol.register_handler(MessageType.NOTIFICATION, self.handle_notification)
     
     def handle_request(self, message: A2AMessage):
-        """Default handler for request messages.
+        """Manipulador padrão para mensagens de solicitação.
 
-        Processes a request message and sends a response. This is a simple
-        default implementation that should be overridden in subclasses for
-        specific agent behavior.
+        Processa uma mensagem de solicitação e envia uma resposta. Esta é uma implementação
+        padrão simples que deve ser substituída em subclasses para comportamento específico do agente.
 
         Args:
-            message: The REQUEST message to handle.
+            message: A mensagem REQUEST para manipular.
         """
         action = message.content.get("action")
 
@@ -378,74 +376,74 @@ class A2AAgent:
         self.a2a_protocol.send_message(response)
     
     def handle_response(self, message: A2AMessage):
-        """Default handler for response messages.
+        """Manipulador padrão para mensagens de resposta.
 
-        Prints the received response. This is a simple default implementation
-        that should be overridden in subclasses for specific agent behavior.
+        Imprime a resposta recebida. Esta é uma implementação padrão simples
+        que deve ser substituída em subclasses para comportamento específico do agente.
 
         Args:
-            message: The RESPONSE message to handle.
+            message: A mensagem RESPONSE para manipular.
         """
         print(f"Response received from {message.sender_id}: {message.content}")
     
     def handle_notification(self, message: A2AMessage):
-        """Default handler for notification messages.
+        """Manipulador padrão para mensagens de notificação.
 
-        Prints the received notification. This is a simple default implementation
-        that should be overridden in subclasses for specific agent behavior.
+        Imprime a notificação recebida. Esta é uma implementação padrão simples
+        que deve ser substituída em subclasses para comportamento específico do agente.
 
         Args:
-            message: The NOTIFICATION message to handle.
+            message: A mensagem NOTIFICATION para manipular.
         """
         print(f"Notification from {message.sender_id}: {message.content}")
     
     def receive_message(self, message: A2AMessage):
-        """Receives a message via the A2A protocol.
+        """Recebe uma mensagem via o protocolo A2A.
 
-        Delegates message reception to the underlying A2AProtocol instance.
+        Delega a recepção de mensagens para a instância A2AProtocol subjacente.
 
         Args:
-            message: The A2AMessage to receive.
+            message: O A2AMessage para receber.
         """
         self.a2a_protocol.receive_message(message)
     
     def connect_to(self, other_agent: 'A2AAgent'):
-        """Connects to another agent.
+        """Conecta a outro agente.
 
-        Establishes a bidirectional connection between this agent and another agent,
-        enabling message passing in both directions.
+        Estabelece uma conexão bidirecional entre este agente e outro agente,
+        habilitando passagem de mensagens em ambas as direções.
 
         Args:
-            other_agent: The A2AAgent to connect to.
+            other_agent: O A2AAgent para conectar.
         """
         self.a2a_protocol.connect_agent(other_agent)
         other_agent.a2a_protocol.connect_agent(self)
     
     def send_request(self, receiver_id: str, action: str, params: Dict[str, Any]):
-        """Sends a request to another agent.
+        """Envia uma solicitação para outro agente.
 
-        Creates and sends a REQUEST message to the specified agent.
+        Cria e envia uma mensagem REQUEST para o agente especificado.
 
         Args:
-            receiver_id: The ID of the agent to send the request to.
-            action: The action to be performed by the receiving agent.
-            params: Parameters for the action as a dictionary.
+            receiver_id: O ID do agente para enviar a solicitação.
+            action: A ação a ser executada pelo agente receptor.
+            params: Parâmetros para a ação como um dicionário.
 
         Returns:
-            True if the request was sent successfully, False otherwise.
+            True se a solicitação foi enviada com sucesso, False caso contrário.
         """
         message = self.a2a_protocol.create_request(receiver_id, action, params)
         return self.a2a_protocol.send_message(message)
     
     def notify_all(self, content: Dict[str, Any]):
-        """Sends a notification to all connected agents.
+        """Envia uma notificação para todos os agentes conectados.
 
-        Creates and broadcasts a NOTIFICATION message to all connected agents.
+        Cria e transmite uma mensagem NOTIFICATION para todos os agentes conectados.
 
         Args:
-            content: The notification content as a dictionary.
+            content: O conteúdo da notificação como um dicionário.
 
         Returns:
-            True if the notification was sent successfully, False otherwise.
+            True se a notificação foi enviada com sucesso, False caso contrário.
         """
         return self.a2a_protocol.broadcast(content)

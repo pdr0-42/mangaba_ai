@@ -1,5 +1,5 @@
 """
-Base memory abstraction for Mangaba AI v3.0
+Abstração base de memória para Mangaba AI v3.0
 """
 
 from __future__ import annotations
@@ -9,63 +9,63 @@ from typing import Any, Dict, List, Optional
 
 
 class BaseMemory(ABC):
-    """Abstract memory store that agents can read from and write to.
+    """Armazenamento de memória abstrato que agentes podem ler e escrever.
 
-    This base class defines the interface for all memory implementations,
-    providing methods for storing, retrieving, and managing memory entries.
+    Esta classe base define a interface para todas as implementações de memória,
+    fornecendo métodos para armazenar, recuperar e gerenciar entradas de memória.
     """
 
     @abstractmethod
     def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
-        """Store a piece of information in memory.
+        """Armazena uma informação na memória.
 
         Args:
-            content: The content to store in memory.
-            metadata: Optional metadata associated with the content.
+            content: O conteúdo para armazenar na memória.
+            metadata: Metadados opcionais associados ao conteúdo.
 
         Returns:
-            A unique identifier for the stored memory entry.
+            Um identificador único para a entrada de memória armazenada.
         """
         ...
 
     @abstractmethod
     def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """Retrieve the most relevant memories for a query.
+        """Recupera as memórias mais relevantes para uma consulta.
 
         Args:
-            query: The search query to find relevant memories.
-            top_k: The maximum number of results to return (default: 5).
+            query: A consulta de busca para encontrar memórias relevantes.
+            top_k: O número máximo de resultados a retornar (padrão: 5).
 
         Returns:
-            A list of memory entries, each as a dictionary containing
-            content and metadata.
+            Uma lista de entradas de memória, cada uma como um dicionário contendo
+            conteúdo e metadados.
         """
         ...
 
     @abstractmethod
     def get_all(self) -> List[Dict[str, Any]]:
-        """Return every stored memory entry.
+        """Retorna todas as entradas de memória armazenadas.
 
         Returns:
-            A list of all memory entries in the memory store.
+            Uma lista de todas as entradas de memória no armazenamento de memória.
         """
         ...
 
     @abstractmethod
     def clear(self) -> None:
-        """Erase all stored memories."""
+        """Apaga todas as memórias armazenadas."""
         ...
 
     def get_relevant(self, query: str, max_results: int = 5) -> str:
-        """Return relevant memories as a formatted string for prompt injection.
+        """Retorna memórias relevantes como uma string formatada para injeção de prompt.
 
         Args:
-            query: The search query to find relevant memories.
-            max_results: The maximum number of results to return (default: 5).
+            query: A consulta de busca para encontrar memórias relevantes.
+            max_results: O número máximo de resultados a retornar (padrão: 5).
 
         Returns:
-            A formatted string containing relevant memories, or an empty
-            string if no relevant memories are found.
+            Uma string formatada contendo memórias relevantes, ou uma string
+            vazia se nenhuma memória relevante for encontrada.
         """
         results = self.search(query, top_k=max_results)
         if not results:

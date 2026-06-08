@@ -1,20 +1,20 @@
-"""General constants for LLM providers"""
+"""Constantes gerais para provedores de LLM"""
 
 from typing import List, Dict, Any, Type
 from ..base import BaseLLMProvider
 
 
 def _resolve_provider_class(provider_name: str) -> Type[BaseLLMProvider]:
-    """Resolve the provider class from a provider name or alias.
+    """Resolve a classe do provedor a partir de um nome ou alias do provedor.
 
     Args:
-        provider_name: The provider name or alias (case-insensitive).
+        provider_name: O nome ou alias do provedor (insensível a maiúsculas/minúsculas).
 
     Returns:
-        The provider class that matches the given name or alias.
+        A classe do provedor que corresponde ao nome ou alias fornecido.
 
     Raises:
-        ValueError: If the provider name is not recognized.
+        ValueError: Se o nome do provedor não for reconhecido.
     """
     # Import here to avoid circular dependency
     from .google import GoogleLLMProvider
@@ -39,7 +39,7 @@ def _resolve_provider_class(provider_name: str) -> Type[BaseLLMProvider]:
 
 
 HF_OPEN_MODELS: List[Dict[str, Any]] = [
-    # ── Instruction-tuned general ──────────────────────────────────────────
+    # ── Geral com ajuste de instrução ──────────────────────────────────────────
     {
         "id": "mistralai/Mistral-7B-Instruct-v0.3",
         "name": "Mistral 7B Instruct v0.3",
@@ -301,18 +301,18 @@ HF_OPEN_MODELS: List[Dict[str, Any]] = [
     },
 ]
 
-# Index by category for quick lookup
+# Índice por categoria para busca rápida
 _HF_MODELS_BY_CATEGORY: Dict[str, List[Dict[str, Any]]] = {}
 for _m in HF_OPEN_MODELS:
     _HF_MODELS_BY_CATEGORY.setdefault(_m["category"], []).append(_m)
 
-# Set of model IDs with native function calling support
+# Conjunto de IDs de modelos com suporte nativo a chamada de função
 _HF_NATIVE_TOOL_MODELS: set = {m["id"] for m in HF_OPEN_MODELS if m["tool_calling"]}
 
 
-# PROVIDERS dict defined lazily to avoid circular imports
+# Dicionário PROVIDERS definido preguiçosamente para evitar importações circulares
 def get_providers_dict() -> Dict[str, Type[BaseLLMProvider]]:
-    """Get the providers dictionary, importing lazily to avoid circular dependency."""
+    """Obtém o dicionário de provedores, importando preguiçosamente para evitar dependência circular."""
     from .google import GoogleLLMProvider
     from .openai import OpenAILLMProvider
     from .anthropic import AnthropicLLMProvider
@@ -328,5 +328,5 @@ def get_providers_dict() -> Dict[str, Type[BaseLLMProvider]]:
     }
 
 
-# For backwards compatibility
+# Para compatibilidade retroativa
 PROVIDERS = get_providers_dict()

@@ -1,4 +1,4 @@
-"""Core components for Mangaba AI v3.0"""
+"""Componentes principais para Mangaba AI v3.0"""
 
 from mangaba.core.agent import Agent
 from mangaba.core.task import Task

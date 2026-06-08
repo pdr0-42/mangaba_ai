@@ -1,4 +1,4 @@
-"""Anthropic provider for LLM integration."""
+"""Provedor Anthropic para integração de LLM."""
 
 from typing import Any, Dict, Iterator, List, Optional
 
@@ -20,15 +20,15 @@ class AnthropicLLMProvider(BaseLLMProvider):
     aliases = ("claude",)
 
     def __init__(self, api_key: str, model: str, **options: Any) -> None:
-        """Initialize the Anthropic LLM provider.
+        """Inicializa o provedor LLM Anthropic.
 
         Args:
-            api_key: Anthropic API key.
-            model: Model name (e.g., "claude-3-haiku", "claude-3-opus").
-            **options: Additional provider-specific options.
+            api_key: Chave de API da Anthropic.
+            model: Nome do modelo (por exemplo, "claude-3-haiku", "claude-3-opus").
+            **options: Opções adicionais específicas do provedor.
 
         Raises:
-            ImportError: If the anthropic package is not installed.
+            ImportError: Se o pacote anthropic não estiver instalado.
         """
         super().__init__(api_key, model, **options)
         try:
@@ -40,17 +40,17 @@ class AnthropicLLMProvider(BaseLLMProvider):
         self._client = Anthropic(api_key=api_key)
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
-        """Generate a response from Anthropic Claude.
+        """Gera uma resposta do Anthropic Claude.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (max_output_tokens, temperature, system_prompt).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (max_output_tokens, temperature, system_prompt).
 
         Returns:
-            LLMResponse containing the generated text, usage metadata, and raw response.
+            LLMResponse contendo o texto gerado, metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         try:
             resp = self._client.messages.create(
@@ -79,23 +79,23 @@ class AnthropicLLMProvider(BaseLLMProvider):
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        """Generate a response with tool/function calling support.
+        """Gera uma resposta com suporte a chamada de ferramenta/função.
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            tools: Optional list of tool definitions for function calling.
-            **kwargs: Additional parameters (max_output_tokens, temperature).
+            messages: Lista de dicionários de mensagem com chaves 'role' e 'content'.
+            tools: Lista opcional de definições de ferramenta para chamada de função.
+            **kwargs: Parâmetros adicionais (max_output_tokens, temperature).
 
         Returns:
-            LLMResponse containing text, tool calls (if any), usage metadata, and raw response.
+            LLMResponse contendo texto, chamadas de ferramenta (se houver), metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         anthropic_tools = (
             [_tool_to_anthropic_schema(t) for t in tools] if tools else None
         )
-        # Extract system from messages
+        # Extrair system das mensagens
         system_text = ""
         api_messages = []
         for m in messages:
@@ -147,17 +147,17 @@ class AnthropicLLMProvider(BaseLLMProvider):
         )
 
     def stream(self, prompt: str, **kwargs: Any) -> Iterator[str]:
-        """Stream the response token-by-token.
+        """Transmite a resposta token por token.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (max_output_tokens, temperature, system_prompt).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (max_output_tokens, temperature, system_prompt).
 
         Yields:
-            str: Response tokens as they are generated.
+            str: Tokens de resposta conforme são gerados.
 
         Raises:
-            LLMError: If the streaming request fails.
+            LLMError: Se a solicitação de streaming falhar.
         """
         try:
             with self._client.messages.stream(
@@ -173,13 +173,13 @@ class AnthropicLLMProvider(BaseLLMProvider):
             raise LLMError(f"Anthropic streaming error: {exc}", cause=exc) from exc
 
     def _parse_usage(self, resp: Any) -> TokenUsage:
-        """Parse token usage from Anthropic response.
+        """Analisa o uso de tokens da resposta Anthropic.
 
         Args:
-            resp: The Anthropic API response object.
+            resp: O objeto de resposta da API Anthropic.
 
         Returns:
-            TokenUsage object with prompt_tokens, completion_tokens, and total_tokens.
+            Objeto TokenUsage com prompt_tokens, completion_tokens e total_tokens.
         """
         if hasattr(resp, "usage") and resp.usage:
             return TokenUsage(
@@ -191,15 +191,15 @@ class AnthropicLLMProvider(BaseLLMProvider):
         return TokenUsage()
 
     def _handle_anthropic_error(self, exc: Exception) -> None:
-        """Convert Anthropic exceptions to Mangaba exceptions.
+        """Converte exceções Anthropic em exceções Mangaba.
 
         Args:
-            exc: The original exception from the Anthropic SDK.
+            exc: A exceção original do SDK Anthropic.
 
         Raises:
-            AuthenticationError: If authentication fails.
-            RateLimitError: If rate limit is exceeded.
-            RetryableError: If the error is retryable (timeout, connection).
+            AuthenticationError: Se a autenticação falhar.
+            RateLimitError: Se o limite de taxa for excedido.
+            RetryableError: Se o erro for recuperável (timeout, conexão).
         """
         exc_name = type(exc).__name__
         if "AuthenticationError" in exc_name:

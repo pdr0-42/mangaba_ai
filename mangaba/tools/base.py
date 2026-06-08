@@ -1,9 +1,9 @@
 """
-Tool system for Mangaba AI v3.0
+Sistema de ferramentas para Mangaba AI v3.0
 
-Professional tool abstraction with Pydantic-based input validation,
-automatic JSON schema generation for LLM function calling, and
-support for both sync and async execution.
+Abstração profissional de ferramentas com validação de entrada baseada em Pydantic,
+geração automática de esquema JSON para chamada de função LLM e
+suporte para execução síncrona e assíncrona.
 """
 
 from __future__ import annotations
@@ -18,38 +18,38 @@ from mangaba.core.events import EventBus, Event, EventType
 
 
 class EmptyInput(BaseModel):
-    """Default input schema when a tool takes no structured input."""
+    """Esquema de entrada padrão quando uma ferramenta não aceita entrada estruturada."""
 
     pass
 
 
 class BaseTool(ABC):
-    """Base class for all Mangaba tools.
+    """Classe base para todas as ferramentas Mangaba.
 
-    Provides a professional tool abstraction with Pydantic-based input
-    validation, automatic JSON schema generation for LLM function calling,
-    and support for both sync and async execution.
+    Fornece uma abstração profissional de ferramentas com validação de entrada
+    baseada em Pydantic, geração automática de esquema JSON para chamada de
+    função LLM e suporte para execução síncrona e assíncrona.
 
-    Subclasses must:
-        - Set ``name`` and ``description`` as class attributes
-        - Optionally set ``args_schema`` to a Pydantic model describing inputs
-        - Implement ``_run(**kwargs)``
+    As subclasses devem:
+        - Definir ``name`` e ``description`` como atributos de classe
+        - Opcionalmente definir ``args_schema`` para um modelo Pydantic descrevendo entradas
+        - Implementar ``_run(**kwargs)``
 
-    Example::
+    Exemplo::
 
         class SearchTool(BaseTool):
             name = "web_search"
-            description = "Search the web for current information"
-            args_schema = SearchInput  # Pydantic model
+            description = "Busca informações atuais na web"
+            args_schema = SearchInput  # modelo Pydantic
 
             def _run(self, query: str, max_results: int = 5) -> str:
                 ...
 
-    Attributes:
-        name: The tool's name identifier.
-        description: Description of what the tool does.
-        args_schema: Optional Pydantic model for input validation.
-        return_direct: Whether to return output directly to the user.
+    Atributos:
+        name: O identificador de nome da ferramenta.
+        description: Descrição do que a ferramenta faz.
+        args_schema: Modelo Pydantic opcional para validação de entrada.
+        return_direct: Se deve retornar a saída diretamente ao usuário.
     """
 
     name: str = "base_tool"
@@ -60,16 +60,16 @@ class BaseTool(ABC):
     # -- public API ----------------------------------------------------------
 
     def run(self, **kwargs: Any) -> Any:
-        """Validate inputs and execute the tool.
+        """Valida entradas e executa a ferramenta.
 
         Args:
-            **kwargs: Input arguments for the tool.
+            **kwargs: Argumentos de entrada para a ferramenta.
 
         Returns:
-            The tool's execution result.
+            O resultado da execução da ferramenta.
 
         Raises:
-            Exception: If tool execution fails.
+            Exception: Se a execução da ferramenta falhar.
         """
         validated = self._validate_input(kwargs)
         EventBus.emit(
@@ -101,33 +101,33 @@ class BaseTool(ABC):
 
     @abstractmethod
     def _run(self, **kwargs: Any) -> Any:
-        """Tool-specific implementation. Override in subclasses.
+        """Implementação específica da ferramenta. Substituir nas subclasses.
 
         Args:
-            **kwargs: Validated input arguments.
+            **kwargs: Argumentos de entrada validados.
 
         Returns:
-            The tool's result.
+            O resultado da ferramenta.
 
         Raises:
-            NotImplementedError: If not implemented by subclass.
+            NotImplementedError: Se não implementado pela subclasse.
         """
         ...
 
     # -- schema / function calling helpers -----------------------------------
 
     def get_function_schema(self) -> Dict[str, Any]:
-        """Return a JSON-schema representation for LLM function calling.
+        """Retorna uma representação JSON-schema para chamada de função LLM.
 
         Returns:
-            Dictionary containing the function name, description, and parameters schema.
+            Dicionário contendo o nome da função, descrição e esquema de parâmetros.
         """
         if self.args_schema is not None:
             params = self.args_schema.model_json_schema()
-            # Remove the title to keep it concise
+            # Remover o título para manter conciso
             params.pop("title", None)
         else:
-            # Auto-detect from _run signature
+            # Detectar automaticamente da assinatura _run
             params = self._schema_from_signature()
         return {
             "name": self.name,
@@ -138,13 +138,13 @@ class BaseTool(ABC):
     # -- internal ------------------------------------------------------------
 
     def _validate_input(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate kwargs against args_schema if defined.
+        """Valida kwargs contra args_schema se definido.
 
         Args:
-            kwargs: Raw input arguments.
+            kwargs: Argumentos de entrada brutos.
 
         Returns:
-            Validated and potentially transformed arguments.
+            Argumentos validados e potencialmente transformados.
         """
         if self.args_schema is not None:
             validated = self.args_schema(**kwargs)
@@ -152,10 +152,10 @@ class BaseTool(ABC):
         return kwargs
 
     def _schema_from_signature(self) -> Dict[str, Any]:
-        """Infer a JSON schema from the ``_run`` method signature.
+        """Infere um esquema JSON a partir da assinatura do método ``_run``.
 
         Returns:
-            JSON Schema dictionary representing the function's parameters.
+            Dicionário JSON Schema representando os parâmetros da função.
         """
         sig = inspect.signature(self._run)
         properties: Dict[str, Any] = {}
@@ -192,9 +192,9 @@ class BaseTool(ABC):
         return schema
 
     def __repr__(self) -> str:
-        """Return string representation of the tool.
+        """Retorna a representação em string da ferramenta.
 
         Returns:
-            String representation showing the tool's class name and name.
+            Representação em string mostrando o nome da classe e o nome da ferramenta.
         """
         return f"{self.__class__.__name__}(name='{self.name}')"

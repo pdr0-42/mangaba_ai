@@ -1,4 +1,4 @@
-"""Mangaba AI v3.0 — Professional multi-agent orchestration framework."""
+"""Mangaba AI v3.0 — Framework de orquestração multi-agente profissional."""
 
 from mangaba.core.agent import Agent
 from mangaba.core.task import Task
@@ -21,12 +21,12 @@ from mangaba.tools.decorator import tool
 
 __version__ = "3.3.0"
 __all__ = [
-    # Core
+    # Núcleo
     "Agent",
     "Task",
     "Crew",
     "Process",
-    # Workflow
+    # Fluxo de trabalho
     "Pipeline",
     "Stage",
     "ParallelStage",
@@ -37,19 +37,19 @@ __all__ = [
     "list_huggingface_models",
     "hf_model_supports_tools",
     "HF_OPEN_MODELS",
-    # Events
+    # Eventos
     "EventBus",
     "Event",
     "EventType",
-    # Reasoning
+    # Raciocínio
     "ReActEngine",
-    # Guardrails & Parsers
+    # Guardrails e Parsers
     "GuardrailChain",
     "JSONOutputParser",
     "PydanticOutputParser",
-    # Tools
+    # Ferramentas
     "BaseTool",
     "tool",
-    # Exceptions
+    # Exceções
     "MangabaError",
 ]

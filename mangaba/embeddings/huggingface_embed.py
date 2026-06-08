@@ -1,8 +1,8 @@
 """
-HuggingFace embedding provider for Mangaba AI v3.0
+Provedor de embedding HuggingFace para Mangaba AI v3.0
 
-Supports both local models (via sentence-transformers) and HF Inference API.
-Optimized with LRU caching and batch processing.
+Suporta modelos locais (via sentence-transformers) e API de Inferência HF.
+Otimizado com cache LRU e processamento em lote.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from mangaba.embeddings.base import BaseEmbedding
 
 
 class HuggingFaceEmbedding(BaseEmbedding):
-    """Embeddings via HuggingFace models (local or API)."""
+    """Embeddings via modelos HuggingFace (locais ou API)."""
 
     def __init__(
         self,

@@ -1,4 +1,4 @@
-"""OpenAI provider for LLM integration."""
+"""Provedor OpenAI para integração de LLM."""
 
 import json
 
@@ -20,15 +20,15 @@ class OpenAILLMProvider(BaseLLMProvider):
     aliases = ("gpt", "chatgpt")
 
     def __init__(self, api_key: str, model: str, **options: Any) -> None:
-        """Initialize the OpenAI LLM provider.
+        """Inicializa o provedor LLM OpenAI.
 
         Args:
-            api_key: OpenAI API key.
-            model: Model name (e.g., "gpt-4o", "gpt-4o-mini").
-            **options: Additional provider-specific options.
+            api_key: Chave de API da OpenAI.
+            model: Nome do modelo (ex: "gpt-4o", "gpt-4o-mini").
+            **options: Opções adicionais específicas do provedor.
 
         Raises:
-            ImportError: If the openai package is not installed.
+            ImportError: Se o pacote openai não estiver instalado.
         """
         super().__init__(api_key, model, **options)
         try:
@@ -42,14 +42,14 @@ class OpenAILLMProvider(BaseLLMProvider):
     def _build_messages(
         self, prompt: str, system_prompt: Optional[str] = None
     ) -> List[Dict[str, str]]:
-        """Build chat messages from a simple prompt.
+        """Constrói mensagens de chat a partir de um prompt simples.
 
         Args:
-            prompt: The user prompt.
-            system_prompt: Optional system prompt to override the default.
+            prompt: O prompt do usuário.
+            system_prompt: Prompt de sistema opcional para substituir o padrão.
 
         Returns:
-            List of message dictionaries with system prompt (if set) and user message.
+            Lista de dicionários de mensagens com prompt de sistema (se definido) e mensagem do usuário.
         """
         msgs: List[Dict[str, str]] = []
         sp = system_prompt or self._system_prompt
@@ -59,17 +59,17 @@ class OpenAILLMProvider(BaseLLMProvider):
         return msgs
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
-        """Generate a response from OpenAI.
+        """Gera uma resposta a partir da OpenAI.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (temperature, max_output_tokens, system_prompt).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (temperature, max_output_tokens, system_prompt).
 
         Returns:
-            LLMResponse containing the generated text, usage metadata, and raw response.
+            LLMResponse contendo o texto gerado, metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         msgs = self._build_messages(prompt, kwargs.pop("system_prompt", None))
         try:
@@ -93,18 +93,18 @@ class OpenAILLMProvider(BaseLLMProvider):
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        """Generate a response with tool/function calling support.
+        """Gera uma resposta com suporte a chamada de ferramentas/funções.
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            tools: Optional list of tool definitions for function calling.
-            **kwargs: Additional parameters (temperature, max_output_tokens).
+            messages: Lista de dicionários de mensagens com chaves 'role' e 'content'.
+            tools: Lista opcional de definições de ferramentas para chamada de função.
+            **kwargs: Parâmetros adicionais (temperature, max_output_tokens).
 
         Returns:
-            LLMResponse containing text, tool calls (if any), usage metadata, and raw response.
+            LLMResponse contendo texto, chamadas de ferramenta (se houver), metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         openai_tools = [_tool_to_openai_schema(t) for t in tools] if tools else None
         try:
@@ -145,17 +145,17 @@ class OpenAILLMProvider(BaseLLMProvider):
         )
 
     def stream(self, prompt: str, **kwargs: Any) -> Iterator[str]:
-        """Stream the response token-by-token.
+        """Transmite a resposta token por token.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (temperature, max_output_tokens, system_prompt).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (temperature, max_output_tokens, system_prompt).
 
         Yields:
-            str: Response tokens as they are generated.
+            str: Tokens de resposta conforme são gerados.
 
         Raises:
-            LLMError: If the streaming request fails.
+            LLMError: Se a solicitação de streaming falhar.
         """
         msgs = self._build_messages(prompt, kwargs.pop("system_prompt", None))
         try:
@@ -174,13 +174,13 @@ class OpenAILLMProvider(BaseLLMProvider):
             raise LLMError(f"OpenAI streaming error: {exc}", cause=exc) from exc
 
     def count_tokens(self, text: str) -> int:
-        """Count tokens using tiktoken for accurate OpenAI model tokenization.
+        """Conta tokens usando tiktoken para tokenização precisa do modelo OpenAI.
 
         Args:
-            text: The text to count tokens for.
+            text: O texto para contar os tokens.
 
         Returns:
-            Accurate token count using tiktoken, or rough estimate if tiktoken fails.
+            Contagem precisa de tokens usando tiktoken, ou estimativa aproximada se o tiktoken falhar.
         """
         try:
             import tiktoken  # type: ignore
@@ -191,13 +191,13 @@ class OpenAILLMProvider(BaseLLMProvider):
             return super().count_tokens(text)
 
     def _parse_usage(self, resp: Any) -> TokenUsage:
-        """Parse token usage from OpenAI response.
+        """Analisa o uso de tokens da resposta OpenAI.
 
         Args:
-            resp: The OpenAI API response object.
+            resp: O objeto de resposta da API OpenAI.
 
         Returns:
-            TokenUsage object with prompt_tokens, completion_tokens, and total_tokens.
+            Objeto TokenUsage com prompt_tokens, completion_tokens e total_tokens.
         """
         if resp.usage:
             return TokenUsage(
@@ -208,15 +208,15 @@ class OpenAILLMProvider(BaseLLMProvider):
         return TokenUsage()
 
     def _handle_openai_error(self, exc: Exception) -> None:
-        """Convert OpenAI exceptions to Mangaba exceptions.
+        """Converte exceções OpenAI para exceções Mangaba.
 
         Args:
-            exc: The original exception from the OpenAI SDK.
+            exc: A exceção original do SDK OpenAI.
 
         Raises:
-            AuthenticationError: If authentication fails.
-            RateLimitError: If rate limit is exceeded.
-            RetryableError: If the error is retryable (timeout, connection).
+            AuthenticationError: Se a autenticação falhar.
+            RateLimitError: Se o limite de taxa for excedido.
+            RetryableError: Se o erro for recuperável (timeout, conexão).
         """
         exc_name = type(exc).__name__
         if "AuthenticationError" in exc_name:

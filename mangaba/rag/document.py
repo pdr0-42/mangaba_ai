@@ -1,5 +1,5 @@
 """
-Document model for Mangaba AI RAG pipeline.
+Modelo de Documento para pipeline RAG do Mangaba AI.
 """
 
 from __future__ import annotations
@@ -10,15 +10,15 @@ from pydantic import BaseModel, Field
 
 
 class Document(BaseModel):
-    """A chunk of content with associated metadata.
+    """Um pedaço de conteúdo com metadados associados.
 
-    This class represents a document or document chunk in the RAG pipeline,
-    containing the text content, optional metadata, and optional embedding vector.
+    Esta classe representa um documento ou pedaço de documento no pipeline RAG,
+    contendo o conteúdo de texto, metadados opcionais e vetor de embedding opcional.
 
     Attributes:
-        content: The text content of the document.
-        metadata: Optional metadata dictionary associated with the document.
-        embedding: Optional embedding vector for the document content.
+        content: O conteúdo de texto do documento.
+        metadata: Dicionário de metadados opcional associado ao documento.
+        embedding: Vetor de embedding opcional para o conteúdo do documento.
     """
 
     content: str
@@ -27,17 +27,17 @@ class Document(BaseModel):
 
     @property
     def page_content(self) -> str:
-        """Alias for content, kept for LangChain-style compatibility.
+        """Alias para content, mantido para compatibilidade com estilo LangChain.
 
         Returns:
-            The document content.
+            O conteúdo do documento.
         """
         return self.content
 
     def __str__(self) -> str:
-        """Return a string representation of the document.
+        """Retorna uma representação em string do documento.
 
         Returns:
-            The first 120 characters of the document content.
+            Os primeiros 120 caracteres do conteúdo do documento.
         """
         return self.content[:120]

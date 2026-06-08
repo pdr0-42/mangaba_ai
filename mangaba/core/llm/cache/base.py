@@ -1,7 +1,7 @@
 """
-LLM Cache Base Module
+Módulo Base de Cache LLM
 
-This module defines the abstract base class for LLM response caching implementations.
+Este módulo define a classe base abstrata para implementações de cache de resposta LLM.
 """
 
 from abc import ABC, abstractmethod
@@ -11,18 +11,18 @@ import json
 
 
 class LLMCache(ABC):
-    """Abstract base class for LLM response caching implementations."""
+    """Classe base abstrata para implementações de cache de resposta LLM."""
 
     @staticmethod
     def _cache_key(prompt: str, config: Dict[str, Any]) -> str:
-        """Generate a deterministic cache key from prompt and configuration.
+        """Gera uma chave de cache determinística a partir do prompt e configuração.
 
         Args:
-            prompt: The input prompt string.
-            config: Configuration dictionary including model, temperature, etc.
+            prompt: A string do prompt de entrada.
+            config: Dicionário de configuração incluindo modelo, temperatura, etc.
 
         Returns:
-            A SHA256 hash string that uniquely identifies the prompt+config combination.
+            Uma string de hash SHA256 que identifica exclusivamente a combinação prompt+config.
         """
         serialised = json.dumps(
             {"prompt": prompt, **config}, sort_keys=True, default=str
@@ -31,81 +31,81 @@ class LLMCache(ABC):
 
     @abstractmethod
     def get(self, key: str) -> Optional[str]:
-        """Retrieve a cached value by key.
+        """Recupera um valor em cache por chave.
 
         Args:
-            key: The cache key to look up.
+            key: A chave de cache para procurar.
 
         Returns:
-            The cached value if found and not expired, None otherwise.
+            O valor em cache se encontrado e não expirado, None caso contrário.
 
         Raises:
-            NotImplementedError: This method must be implemented by subclasses.
+            NotImplementedError: Este método deve ser implementado por subclasses.
         """
         raise NotImplementedError("get() must be implemented by subclass")
 
     @abstractmethod
     def set(self, key: str, value: str, ttl: Optional[int] = None) -> None:
-        """Store a value in the cache with an optional TTL.
+        """Armazena um valor no cache com um TTL opcional.
 
         Args:
-            key: The cache key to store under.
-            value: The value to cache.
-            ttl: Time-to-live in seconds. None means no expiration.
+            key: A chave de cache para armazenar sob.
+            value: O valor para cachear.
+            ttl: Time-to-live em segundos. None significa sem expiração.
 
         Raises:
-            NotImplementedError: This method must be implemented by subclasses.
+            NotImplementedError: Este método deve ser implementado por subclasses.
         """
         raise NotImplementedError("set() must be implemented by subclass")
 
     @abstractmethod
     def invalidate(self, key: str) -> None:
-        """Remove a specific entry from the cache.
+        """Remove uma entrada específica do cache.
 
         Args:
-            key: The cache key to invalidate.
+            key: A chave de cache para invalidar.
 
         Raises:
-            NotImplementedError: This method must be implemented by subclasses.
+            NotImplementedError: Este método deve ser implementado por subclasses.
         """
         raise NotImplementedError("invalidate() must be implemented by subclass")
 
     @abstractmethod
     def clear(self) -> None:
-        """Clear all entries from the cache.
+        """Limpa todas as entradas do cache.
 
         Raises:
-            NotImplementedError: This method must be implemented by subclasses.
+            NotImplementedError: Este método deve ser implementado por subclasses.
         """
         raise NotImplementedError("clear() must be implemented by subclass")
 
-    # Convenience ---------------------------------------------------------
+    # Conveniência ---------------------------------------------------------
 
     def get_or_none(self, prompt: str, config: Dict[str, Any]) -> Optional[str]:
-        """Get a cached response by prompt and configuration.
+        """Obtém uma resposta em cache por prompt e configuração.
 
-        Convenience method that generates the cache key from prompt and config.
+        Método de conveniência que gera a chave de cache a partir do prompt e config.
 
         Args:
-            prompt: The input prompt string.
-            config: Configuration dictionary including model, temperature, etc.
+            prompt: A string do prompt de entrada.
+            config: Dicionário de configuração incluindo modelo, temperatura, etc.
 
         Returns:
-            The cached response if found and not expired, None otherwise.
+            A resposta em cache se encontrada e não expirada, None caso contrário.
         """
         return self.get(self._cache_key(prompt, config))
 
     def store(
         self, prompt: str, config: Dict[str, Any], value: str, ttl: Optional[int] = None
     ) -> None:
-        """Store a response in the cache by prompt and configuration.
+        """Armazena uma resposta no cache por prompt e configuração.
 
-        Convenience method that generates the cache key from prompt and config.
+        Método de conveniência que gera a chave de cache a partir do prompt e config.
 
         Args:
-            prompt: The input prompt string.
-            config: Configuration dictionary including model, temperature, etc.
-            value: The response value to cache.
-            ttl: Time-to-live in seconds. None means no expiration.
+            prompt: A string do prompt de entrada.
+            config: Dicionário de configuração incluindo modelo, temperatura, etc.
+            value: O valor de resposta para cachear.
+            ttl: Time-to-live em segundos. None significa sem expiração.
         """
         self.set(self._cache_key(prompt, config), value, ttl)

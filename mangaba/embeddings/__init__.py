@@ -1,13 +1,13 @@
-"""Embedding providers for Mangaba AI v3.0.
+"""Provedores de embedding para Mangaba AI v3.0.
 
-This module provides text embedding functionality for semantic search
-and RAG applications, with support for multiple providers:
+Este módulo fornece funcionalidade de embedding de texto para busca semântica
+e aplicações RAG, com suporte para múltiplos provedores:
 
-- OpenAIEmbedding: OpenAI's text-embedding models
-- GoogleEmbedding: Google's embedding API
-- HuggingFaceEmbedding: Open-source models via HuggingFace
+- OpenAIEmbedding: Modelos de text-embedding da OpenAI
+- GoogleEmbedding: API de embedding do Google
+- HuggingFaceEmbedding: Modelos de código aberto via HuggingFace
 
-All providers implement the BaseEmbedding interface for consistency.
+Todos os provedores implementam a interface BaseEmbedding para consistência.
 """
 
 from mangaba.embeddings.base import BaseEmbedding

@@ -1,5 +1,5 @@
 """
-Task v3.0 — structured workflow unit with guardrails and output parsing.
+Task v3.0 — unidade de fluxo de trabalho estruturada com guardrails e análise de saída.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class TaskOutput:
-    """Result of a task execution."""
+    """Resultado de uma execução de tarefa."""
 
     def __init__(
         self,
@@ -44,13 +44,13 @@ class TaskOutput:
 
 
 class Task:
-    """A structured task assigned to an Agent.
+    """Uma tarefa estruturada atribuída a um Agente.
 
     Example::
 
         task = Task(
-            description="Research {topic} for our report",
-            expected_output="A detailed report with 10 key findings",
+            description="Pesquisar {topic} para nosso relatório",
+            expected_output="Um relatório detalhado com 10 principais descobertas",
             agent=researcher,
             context=[previous_task],
             output_file="report.md",
@@ -100,7 +100,7 @@ class Task:
     # ── sync execution ─────────────────────────────────────────────────
 
     def execute(self, inputs: Optional[Dict[str, Any]] = None) -> TaskOutput:
-        """Execute the task synchronously."""
+        """Executa a tarefa de forma síncrona."""
         if not self.agent:
             raise TaskError("No agent assigned to this task")
 
@@ -182,7 +182,7 @@ class Task:
     # ── async execution ────────────────────────────────────────────────
 
     async def aexecute(self, inputs: Optional[Dict[str, Any]] = None) -> TaskOutput:
-        """Execute the task asynchronously (runs in a thread executor)."""
+        """Executa a tarefa de forma assíncrona (executa em um executor de thread)."""
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self.execute, inputs)
 

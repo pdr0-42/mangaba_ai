@@ -1,4 +1,4 @@
-"""LLM cache implementations."""
+"""Implementações de cache LLM."""
 
 from .base import LLMCache
 from .in_memory import InMemoryCache

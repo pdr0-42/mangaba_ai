@@ -1,5 +1,5 @@
 """
-Guardrails for input/output validation in Mangaba AI v3.0
+Guardrails para validação de entrada/saída em Mangaba AI v3.0
 """
 
 from __future__ import annotations
@@ -14,60 +14,60 @@ from mangaba.core.events import EventBus, Event, EventType
 
 
 class BaseGuardrail(ABC):
-    """Abstract guardrail that validates and optionally transforms text.
+    """Guardrail abstrato que valida e opcionalmente transforma texto.
 
-    Guardrails are validation rules that can be applied to agent inputs
-    or outputs to ensure they meet certain criteria (length, content filters,
-    schema validation, etc.).
+    Guardrails são regras de validação que podem ser aplicadas a entradas
+    ou saídas de agentes para garantir que atendam a certos critérios (comprimento,
+    filtros de conteúdo, validação de esquema, etc.).
 
-    Subclasses must implement the validate() method.
+    Subclasses devem implementar o método validate().
     """
 
     @abstractmethod
     def validate(self, text: str) -> str:
-        """Validate text and optionally transform it.
+        """Valida texto e opcionalmente o transforma.
 
         Args:
-            text: The text to validate.
+            text: O texto a ser validado.
 
         Returns:
-            The validated (and possibly modified) text.
+            O texto validado (e possivelmente modificado).
 
         Raises:
-            ValueError: If the text fails validation.
-            NotImplementedError: If not implemented by subclass.
+            ValueError: Se o texto falhar na validação.
+            NotImplementedError: Se não implementado pela subclasse.
         """
         raise NotImplementedError("validate() must be implemented")
 
 
 class LengthGuardrail(BaseGuardrail):
-    """Ensures output length is within bounds.
+    """Garante que o comprimento da saída esteja dentro dos limites.
 
-    Validates that text length is between min_length and max_length.
-    If text is too long, it is truncated to max_length.
+    Valida que o comprimento do texto esteja entre min_length e max_length.
+    Se o texto for muito longo, é truncado para max_length.
     """
 
     def __init__(self, min_length: int = 0, max_length: int = 50_000) -> None:
-        """Initialize the length guardrail.
+        """Inicializa o guardrail de comprimento.
 
         Args:
-            min_length: Minimum allowed length (default 0).
-            max_length: Maximum allowed length (default 50,000).
+            min_length: Comprimento mínimo permitido (padrão 0).
+            max_length: Comprimento máximo permitido (padrão 50.000).
         """
         self.min_length = min_length
         self.max_length = max_length
 
     def validate(self, text: str) -> str:
-        """Validate text length and truncate if too long.
+        """Valida o comprimento do texto e trunca se muito longo.
 
         Args:
-            text: The text to validate.
+            text: O texto a ser validado.
 
         Returns:
-            The validated text, truncated if too long.
+            O texto validado, truncado se muito longo.
 
         Raises:
-            ValueError: If text is shorter than min_length.
+            ValueError: Se o texto for mais curto que min_length.
         """
         if len(text) < self.min_length:
             EventBus.emit(
@@ -92,18 +92,18 @@ class LengthGuardrail(BaseGuardrail):
 
 
 class ContentFilterGuardrail(BaseGuardrail):
-    """Block output containing specific patterns.
+    """Bloqueia saída contendo padrões específicos.
 
-    Scans text for regex patterns (e.g., passwords, API keys) and
-    redacts any matches with [REDACTED].
+    Examina o texto em busca de padrões regex (ex: senhas, chaves de API) e
+    redige qualquer correspondência com [REDACTED].
     """
 
     def __init__(self, blocked_patterns: Optional[List[str]] = None) -> None:
-        """Initialize the content filter guardrail.
+        """Inicializa o guardrail de filtro de conteúdo.
 
         Args:
-            blocked_patterns: Optional list of regex patterns to block.
-                Defaults to common sensitive patterns (passwords, API keys).
+            blocked_patterns: Lista opcional de padrões regex para bloquear.
+                Padrão para padrões sensíveis comuns (senhas, chaves de API).
         """
         defaults = [
             r"\b(?:password|secret|api[_-]?key)\s*[:=]\s*\S+",
@@ -113,13 +113,13 @@ class ContentFilterGuardrail(BaseGuardrail):
         ]
 
     def validate(self, text: str) -> str:
-        """Validate text and redact any blocked patterns.
+        """Valida texto e redige qualquer padrão bloqueado.
 
         Args:
-            text: The text to validate.
+            text: O texto a ser validado.
 
         Returns:
-            The text with any blocked patterns redacted.
+            O texto com quaisquer padrões bloqueados redigidos.
         """
         for pattern in self.patterns:
             if pattern.search(text):
@@ -129,7 +129,7 @@ class ContentFilterGuardrail(BaseGuardrail):
                         data={"guardrail": "content_filter"},
                     )
                 )
-                # Redact matches
+                # Redigir correspondências
                 text = pattern.sub("[REDACTED]", text)
         EventBus.emit(
             Event(
@@ -141,31 +141,31 @@ class ContentFilterGuardrail(BaseGuardrail):
 
 
 class SchemaGuardrail(BaseGuardrail):
-    """Validate that output can be parsed into a Pydantic model.
+    """Valida que a saída pode ser analisada em um modelo Pydantic.
 
-    Extracts JSON from the text and validates it against the provided
-    Pydantic schema, raising an error if validation fails.
+    Extrai JSON do texto e valida contra o esquema Pydantic fornecido,
+    levantando um erro se a validação falhar.
     """
 
     def __init__(self, schema: Type[BaseModel]) -> None:
-        """Initialize the schema guardrail.
+        """Inicializa o guardrail de esquema.
 
         Args:
-            schema: The Pydantic model class to validate against.
+            schema: A classe de modelo Pydantic para validar contra.
         """
         self.schema = schema
 
     def validate(self, text: str) -> str:
-        """Validate text can be parsed into the Pydantic schema.
+        """Valida que o texto pode ser analisado no esquema Pydantic.
 
         Args:
-            text: The text to validate.
+            text: O texto a ser validado.
 
         Returns:
-            The original text if validation succeeds.
+            O texto original se a validação tiver sucesso.
 
         Raises:
-            ValueError: If the text cannot be parsed or doesn't match the schema.
+            ValueError: Se o texto não puder ser analisado ou não corresponder ao esquema.
         """
         import json as _json
 
@@ -191,31 +191,31 @@ class SchemaGuardrail(BaseGuardrail):
 
 
 class GuardrailChain(BaseGuardrail):
-    """Compose multiple guardrails sequentially.
+    """Compõe múltiplos guardrails sequencialmente.
 
-    Applies a chain of guardrails in order, passing the output of each
-    as input to the next. Useful for combining multiple validation rules.
+    Aplica uma cadeia de guardrails em ordem, passando a saída de cada
+    como entrada para o próximo. Útil para combinar múltiplas regras de validação.
     """
 
     def __init__(self, guardrails: List[BaseGuardrail]) -> None:
-        """Initialize the guardrail chain.
+        """Inicializa a cadeia de guardrails.
 
         Args:
-            guardrails: List of guardrails to apply in sequence.
+            guardrails: Lista de guardrails para aplicar em sequência.
         """
         self.guardrails = guardrails
 
     def validate(self, text: str) -> str:
-        """Apply all guardrails in sequence.
+        """Aplica todos os guardrails em sequência.
 
         Args:
-            text: The text to validate.
+            text: O texto a ser validado.
 
         Returns:
-            The text after passing through all guardrails.
+            O texto após passar por todos os guardrails.
 
         Raises:
-            ValueError: If any guardrail in the chain fails validation.
+            ValueError: Se qualquer guardrails na cadeia falhar na validação.
         """
         for g in self.guardrails:
             text = g.validate(text)

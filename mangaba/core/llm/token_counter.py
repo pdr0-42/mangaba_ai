@@ -1,5 +1,5 @@
 """
-Token counting and usage tracking across providers.
+Contagem de tokens e rastreamento de uso em provedores.
 """
 
 from __future__ import annotations
@@ -13,22 +13,22 @@ log = logging.getLogger(__name__)
 
 
 class TokenCounter:
-    """Estimate token counts for various providers."""
+    """Estima contagens de tokens para vários provedores."""
 
     @staticmethod
     def count(text: str, provider: str = "openai", model: str = "") -> int:
-        """Estimate token count for text using provider-specific tokenization.
+        """Estima contagem de tokens para texto usando tokenização específica do provedor.
 
-        For OpenAI, uses tiktoken library for accurate counts. For other providers,
-        uses a rough heuristic (~4 characters per token).
+        Para OpenAI, usa a biblioteca tiktoken para contagens precisas. Para outros provedores,
+        usa uma heurística aproximada (~4 caracteres por token).
 
         Args:
-            text: The text to count tokens for.
-            provider: The provider name (default: "openai").
-            model: The model name for provider-specific tokenization (default: "").
+            text: O texto para contar tokens.
+            provider: O nome do provedor (padrão: "openai").
+            model: O nome do modelo para tokenização específica do provedor (padrão: "").
 
         Returns:
-            Estimated token count (minimum 1).
+            Contagem de tokens estimada (mínimo 1).
         """
         if provider == "openai":
             return TokenCounter._count_openai(text, model)
@@ -37,14 +37,14 @@ class TokenCounter:
 
     @staticmethod
     def _count_openai(text: str, model: str) -> int:
-        """Count tokens for OpenAI models using tiktoken.
+        """Conta tokens para modelos OpenAI usando tiktoken.
 
         Args:
-            text: The text to count tokens for.
-            model: The model name to determine the encoding (default: "gpt-4o-mini").
+            text: O texto para contar tokens.
+            model: O nome do modelo para determinar a codificação (padrão: "gpt-4o-mini").
 
         Returns:
-            Accurate token count using tiktoken, or rough estimate if tiktoken fails.
+            Contagem de tokens precisa usando tiktoken, ou estimativa aproximada se tiktoken falhar.
         """
         try:
             import tiktoken  # type: ignore
@@ -60,17 +60,17 @@ class TokenCounter:
         provider: str = "openai",
         model: str = "",
     ) -> int:
-        """Estimate total tokens for a list of chat messages.
+        """Estima tokens totais para uma lista de mensagens de chat.
 
-        Includes overhead for message structure (role, separators, etc.).
+        Inclui sobrecarga para estrutura de mensagem (role, separadores, etc.).
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            provider: The provider name (default: "openai").
-            model: The model name for provider-specific tokenization (default: "").
+            messages: Lista de dicionários de mensagem com chaves 'role' e 'content'.
+            provider: O nome do provedor (padrão: "openai").
+            model: O nome do modelo para tokenização específica do provedor (padrão: "").
 
         Returns:
-            Estimated total token count for all messages including overhead.
+            Contagem total de tokens estimada para todas as mensagens incluindo sobrecarga.
         """
         total = 0
         overhead_per_msg = 4  # role + separators
@@ -82,24 +82,24 @@ class TokenCounter:
 
 
 class UsageTracker:
-    """Accumulates token usage across calls, optionally per agent."""
+    """Acumula uso de token em chamadas, opcionalmente por agente."""
 
     def __init__(self) -> None:
-        """Initialize the usage tracker.
+        """Inicializa o rastreador de uso.
 
         Attributes:
-            _records: List of all TokenUsage records tracked.
-            _by_agent: Dictionary mapping agent IDs to their TokenUsage records.
+            _records: Lista de todos os registros TokenUsage rastreados.
+            _by_agent: Dicionário mapeando IDs de agente para seus registros TokenUsage.
         """
         self._records: List[TokenUsage] = []
         self._by_agent: Dict[str, List[TokenUsage]] = {}
 
     def track(self, usage: TokenUsage, agent_id: Optional[str] = None) -> None:
-        """Track a token usage record.
+        """Rastreia um registro de uso de token.
 
         Args:
-            usage: TokenUsage object to track.
-            agent_id: Optional agent ID to associate the usage with.
+            usage: Objeto TokenUsage para rastrear.
+            agent_id: ID de agente opcional para associar o uso.
         """
         if usage.total_tokens <= 0:
             return
@@ -109,11 +109,11 @@ class UsageTracker:
 
     @property
     def total(self) -> TokenUsage:
-        """Get the total accumulated token usage across all calls.
+        """Obtém o uso total de token acumulado em todas as chamadas.
 
         Returns:
-            TokenUsage object with accumulated prompt_tokens, completion_tokens,
-            and total_tokens.
+            Objeto TokenUsage com prompt_tokens, completion_tokens
+            e total_tokens acumulados.
         """
         t = TokenUsage()
         for u in self._records:
@@ -123,13 +123,13 @@ class UsageTracker:
         return t
 
     def total_for_agent(self, agent_id: str) -> TokenUsage:
-        """Get the total token usage for a specific agent.
+        """Obtém o uso total de token para um agente específico.
 
         Args:
-            agent_id: The agent ID to get usage for.
+            agent_id: O ID do agente para obter uso.
 
         Returns:
-            TokenUsage object with accumulated usage for the specified agent.
+            Objeto TokenUsage com uso acumulado para o agente especificado.
         """
         t = TokenUsage()
         for u in self._by_agent.get(agent_id, []):
@@ -140,14 +140,14 @@ class UsageTracker:
 
     @property
     def call_count(self) -> int:
-        """Get the total number of tracked calls.
+        """Obtém o número total de chamadas rastreadas.
 
         Returns:
-            Number of usage records tracked.
+            Número de registros de uso rastreados.
         """
         return len(self._records)
 
     def reset(self) -> None:
-        """Reset all tracked usage data."""
+        """Redefine todos os dados de uso rastreados."""
         self._records.clear()
         self._by_agent.clear()

@@ -1,5 +1,5 @@
 """
-Web search tool using multiple search engines
+Ferramenta de busca na web usando múltiplos mecanismos de busca
 """
 
 import os
@@ -9,27 +9,27 @@ from mangaba.tools.base import BaseTool
 
 
 class SerperSearchTool(BaseTool):
-    """Web search tool using Serper API.
+    """Ferramenta de busca na web usando API Serper.
 
-    Requires: SERPER_API_KEY as an environment variable.
+    Requer: SERPER_API_KEY como variável de ambiente.
 
-    Example:
+    Exemplo:
         tool = SerperSearchTool()
-        results = tool.run("latest AI trends 2024")
+        results = tool.run("últimas tendências de IA 2024")
     """
 
     name = "serper_search"
-    description = "Search the web using Serper API for current information and news"
+    description = "Busca na web usando API Serper para informações e notícias atuais"
 
     def __init__(self, api_key: Optional[str] = None):
-        """Initialize the Serper search tool.
+        """Inicializa a ferramenta de busca Serper.
 
         Args:
-            api_key: Optional API key for Serper. If not provided,
-                looks for SERPER_API_KEY environment variable.
+            api_key: Chave de API opcional para Serper. Se não fornecida,
+                procura pela variável de ambiente SERPER_API_KEY.
 
         Raises:
-            ValueError: If no API key is found.
+            ValueError: Se nenhuma chave de API for encontrada.
         """
         self.api_key = api_key or os.getenv("SERPER_API_KEY")
         if not self.api_key:
@@ -38,14 +38,14 @@ class SerperSearchTool(BaseTool):
         self.endpoint = "https://google.serper.dev/search"
 
     def _run(self, query: str, num_results: int = 10) -> str:
-        """Perform a web search and return formatted results.
+        """Realiza uma busca na web e retorna resultados formatados.
 
         Args:
-            query: Search query.
-            num_results: Number of results to return (default: 10).
+            query: Consulta de busca.
+            num_results: Número de resultados para retornar (padrão: 10).
 
         Returns:
-            Formatted string with the search results.
+            String formatada com os resultados da busca.
         """
         headers = {"X-API-KEY": self.api_key, "Content-Type": "application/json"}
 
@@ -59,10 +59,10 @@ class SerperSearchTool(BaseTool):
 
             data = response.json()
 
-            # Format results
+            # Formatar resultados
             results = []
 
-            # Organic results
+            # Resultados orgânicos
             if "organic" in data:
                 for i, result in enumerate(data["organic"][:num_results], 1):
                     title = result.get("title", "No title")
@@ -83,28 +83,28 @@ class SerperSearchTool(BaseTool):
 
 
 class DuckDuckGoSearchTool(BaseTool):
-    """Web search tool using DuckDuckGo (no API key required).
+    """Ferramenta de busca na web usando DuckDuckGo (não requer chave de API).
 
-    Example:
+    Exemplo:
         tool = DuckDuckGoSearchTool()
-        results = tool.run("Python programming tips")
+        results = tool.run("Dicas de programação Python")
     """
 
     name = "duckduckgo_search"
-    description = "Search the web using DuckDuckGo (no API key required)"
+    description = "Busca na web usando DuckDuckGo (não requer chave de API)"
 
     def _run(self, query: str, max_results: int = 5) -> str:
-        """Perform a search using DuckDuckGo.
+        """Realiza uma busca usando DuckDuckGo.
 
         Args:
-            query: Search query.
-            max_results: Maximum number of results to return (default: 5).
+            query: Consulta de busca.
+            max_results: Número máximo de resultados para retornar (padrão: 5).
 
         Returns:
-            Formatted string with the search results.
+            String formatada com os resultados da busca.
         """
         try:
-            # Try to import duckduckgo_search
+            # Tentar importar duckduckgo_search
             try:
                 from duckduckgo_search import DDGS
             except ImportError:

@@ -1,4 +1,4 @@
-"""Hugging Face Inference API provider."""
+"""Provedor da API de Inferência do Hugging Face."""
 
 import json
 from typing import Any, Dict, Iterator, List, Optional, Tuple
@@ -10,13 +10,13 @@ from .schemas import _tools_to_hf_prompt_section
 
 
 def list_huggingface_models(category: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Return curated HuggingFace open models, optionally filtered by category.
+    """Retorna modelos abertos curados do HuggingFace, opcionalmente filtrados por categoria.
 
     Args:
-        category: Optional category filter (general, code, reasoning, embedding).
+        category: Filtro de categoria opcional (general, code, reasoning, embedding).
 
     Returns:
-        List of model dictionaries with metadata (id, name, category, context, etc.).
+        Lista de dicionários de modelos com metadados (id, name, category, context, etc.).
     """
     from .constants import HF_OPEN_MODELS
 
@@ -26,13 +26,13 @@ def list_huggingface_models(category: Optional[str] = None) -> List[Dict[str, An
 
 
 def hf_model_supports_tools(model_id: str) -> bool:
-    """Check if a model supports native function calling via chat_completion.
+    """Verifica se um modelo suporta chamada de função nativa via chat_completion.
 
     Args:
-        model_id: The HuggingFace model ID to check.
+        model_id: O ID do modelo HuggingFace para verificar.
 
     Returns:
-        True if the model supports native function calling, False otherwise.
+        True se o modelo suporta chamada de função nativa, False caso contrário.
     """
     from .constants import _HF_NATIVE_TOOL_MODELS
 
@@ -40,28 +40,28 @@ def hf_model_supports_tools(model_id: str) -> bool:
 
 
 class HuggingFaceLLMProvider(BaseLLMProvider):
-    """Hugging Face Inference API. Uses prompt-engineering for tool use."""
+    """API de Inferência do Hugging Face. Usa engenharia de prompt para uso de ferramentas."""
 
     name = "huggingface"
     aliases = ("hf", "hugging-face")
 
     @property
     def SUPPORTED_MODELS(self) -> Tuple[str, ...]:
-        """Supported models excluding embeddings."""
+        """Modelos suportados excluindo embeddings."""
         from .constants import HF_OPEN_MODELS
 
         return tuple(m["id"] for m in HF_OPEN_MODELS if m["category"] != "embedding")
 
     def __init__(self, api_key: str, model: str, **options: Any) -> None:
-        """Initialize the HuggingFace Inference API provider.
+        """Inicializa o provedor da API de Inferência do HuggingFace.
 
         Args:
-            api_key: HuggingFace API token.
-            model: Model ID (e.g., "mistralai/Mistral-7B-Instruct-v0.3").
-            **options: Additional provider-specific options.
+            api_key: Token de API do HuggingFace.
+            model: ID do modelo (por exemplo, "mistralai/Mistral-7B-Instruct-v0.3").
+            **options: Opções adicionais específicas do provedor.
 
         Raises:
-            ImportError: If the huggingface-hub package is not installed.
+            ImportError: Se o pacote huggingface-hub não estiver instalado.
         """
         super().__init__(api_key, model, **options)
         try:
@@ -74,24 +74,24 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
 
     @classmethod
     def list_models(cls, category: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Return curated open models available via HuggingFace Inference API.
+        """Retorna modelos abertos curados disponíveis via API de Inferência do HuggingFace.
 
         Args:
-            category: Optional category filter (general, code, reasoning, embedding).
+            category: Filtro de categoria opcional (general, code, reasoning, embedding).
 
         Returns:
-            List of model dictionaries with metadata.
+            Lista de dicionários de modelos com metadados.
         """
         return list_huggingface_models(category=category)
 
     def _chat_messages(self, prompt: str) -> List[Dict[str, str]]:
-        """Build chat messages from a simple prompt.
+        """Constrói mensagens de chat a partir de um prompt simples.
 
         Args:
-            prompt: The user prompt.
+            prompt: O prompt do usuário.
 
         Returns:
-            List of message dictionaries with system prompt (if set) and user message.
+            Lista de dicionários de mensagem com prompt do sistema (se definido) e mensagem do usuário.
         """
         msgs: List[Dict[str, str]] = []
         if self._system_prompt:
@@ -100,17 +100,17 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         return msgs
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
-        """Generate a response from HuggingFace Inference API.
+        """Gera uma resposta da API de Inferência do HuggingFace.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (max_output_tokens, temperature).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (max_output_tokens, temperature).
 
         Returns:
-            LLMResponse containing the generated text, usage metadata, and raw response.
+            LLMResponse contendo o texto gerado, metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         try:
             response = self._client.chat_completion(
@@ -139,21 +139,21 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         )
 
     def _supports_native_tools(self) -> bool:
-        """Check if the current model supports native function calling.
+        """Verifica se o modelo atual suporta chamada de função nativa.
 
         Returns:
-            True if the model supports native function calling, False otherwise.
+            True se o modelo suporta chamada de função nativa, False caso contrário.
         """
         return hf_model_supports_tools(self.model)
 
     def _openai_tool_schema(self, tool: Any) -> Dict[str, Any]:
-        """Convert a tool to OpenAI-compatible function schema format.
+        """Converte uma ferramenta para o formato de esquema de função compatível com OpenAI.
 
         Args:
-            tool: A BaseTool instance with get_function_schema() method.
+            tool: Uma instância BaseTool com método get_function_schema().
 
         Returns:
-            Dictionary in OpenAI function calling format.
+            Dicionário no formato de chamada de função OpenAI.
         """
         schema = tool.get_function_schema()
         return {
@@ -173,26 +173,26 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        """Generate a response with tool/function calling support.
+        """Gera uma resposta com suporte a chamada de ferramenta/função.
 
-        Uses native function calling if the model supports it, otherwise falls back
-        to prompt-based tool calling by injecting tool descriptions into the system message.
+        Usa chamada de função nativa se o modelo suportar, caso contrário usa
+        chamada de ferramenta baseada em prompt injetando descrições de ferramentas na mensagem do sistema.
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            tools: Optional list of tool definitions for function calling.
-            **kwargs: Additional parameters (max_output_tokens, temperature).
+            messages: Lista de dicionários de mensagem com chaves 'role' e 'content'.
+            tools: Lista opcional de definições de ferramenta para chamada de função.
+            **kwargs: Parâmetros adicionais (max_output_tokens, temperature).
 
         Returns:
-            LLMResponse containing text, tool calls (if any), usage metadata, and raw response.
+            LLMResponse contendo texto, chamadas de ferramenta (se houver), metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         tool_list = tools or []
 
         if self._supports_native_tools() and tool_list:
-            # Native function calling via chat_completion tools parameter
+            # Chamada de função nativa via parâmetro de ferramentas chat_completion
             hf_tools = [self._openai_tool_schema(t) for t in tool_list]
             try:
                 response = self._client.chat_completion(
@@ -228,7 +228,7 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
                 content=choice.message.content or "", model=self.model, raw=response
             )
 
-        # Fallback: inject tool descriptions into system message (prompt-based)
+        # Fallback: injetar descrições de ferramentas na mensagem do sistema (baseado em prompt)
         tool_section = _tools_to_hf_prompt_section(tool_list)
         enriched: List[Dict[str, Any]] = []
         injected = False
@@ -266,17 +266,17 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
         return LLMResponse(content=text, model=self.model, raw=response)
 
     def stream(self, prompt: str, **kwargs: Any) -> Iterator[str]:
-        """Stream the response token-by-token.
+        """Transmite a resposta token por token.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters (max_output_tokens, temperature).
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais (max_output_tokens, temperature).
 
         Yields:
-            str: Response tokens as they are generated.
+            str: Tokens de resposta conforme são gerados.
 
         Raises:
-            LLMError: If the streaming request fails.
+            LLMError: Se a solicitação de streaming falhar.
         """
         try:
             for chunk in self._client.chat_completion(
@@ -294,19 +294,19 @@ class HuggingFaceLLMProvider(BaseLLMProvider):
 
     @staticmethod
     def _try_parse_tool_calls(text: str) -> List[ToolCall]:
-        """Attempt to extract tool_calls JSON from model output.
+        """Tenta extrair JSON de tool_calls da saída do modelo.
 
-        Used for prompt-based tool calling fallback. Extracts JSON blocks
-        containing tool calls from the model's text response.
+        Usado para fallback de chamada de ferramenta baseada em prompt. Extrai blocos JSON
+        contendo chamadas de ferramenta da resposta de texto do modelo.
 
         Args:
-            text: The model's text output to parse.
+            text: A saída de texto do modelo para analisar.
 
         Returns:
-            List of ToolCall objects extracted from the text, or empty list if parsing fails.
+            Lista de objetos ToolCall extraídos do texto, ou lista vazia se a análise falhar.
         """
         try:
-            # Find JSON block in output
+            # Encontrar bloco JSON na saída
             start = text.find("{")
             end = text.rfind("}") + 1
             if start < 0 or end <= start:

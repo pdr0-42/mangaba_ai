@@ -1,5 +1,5 @@
 """
-Text splitters for Mangaba AI RAG pipeline.
+Divisores de texto para pipeline RAG do Mangaba AI.
 """
 
 from __future__ import annotations
@@ -10,16 +10,16 @@ from mangaba.rag.document import Document
 
 
 class RecursiveTextSplitter:
-    """Split text recursively using a hierarchy of separators.
+    """Divide texto recursivamente usando uma hierarquia de separadores.
 
-    This splitter tries the first separator; if any chunk is still too large,
-    it falls back to subsequent separators in the hierarchy. This approach
-    helps maintain semantic coherence in the resulting chunks.
+    Este divisor tenta o primeiro separador; se qualquer pedaço ainda for muito grande,
+    retorna para separadores subsequentes na hierarquia. Esta abordagem
+    ajuda a manter a coerência semântica nos pedaços resultantes.
 
     Attributes:
-        chunk_size: The maximum size of each chunk.
-        chunk_overlap: The number of characters to overlap between chunks.
-        separators: A list of separators to try in order, from coarse to fine.
+        chunk_size: O tamanho máximo de cada pedaço.
+        chunk_overlap: O número de caracteres para sobrepor entre pedaços.
+        separators: Uma lista de separadores para tentar em ordem, de grosso a fino.
     """
 
     def __init__(
@@ -28,28 +28,28 @@ class RecursiveTextSplitter:
         chunk_overlap: int = 200,
         separators: List[str] | None = None,
     ) -> None:
-        """Initialize the RecursiveTextSplitter.
+        """Inicializa o RecursiveTextSplitter.
 
         Args:
-            chunk_size: The maximum size of each chunk in characters (default: 1000).
-            chunk_overlap: The number of characters to overlap between chunks
-                (default: 200).
-            separators: A list of separators to try in order. If not provided,
-                uses ["\n\n", "\n", ". ", " ", ""].
+            chunk_size: O tamanho máximo de cada pedaço em caracteres (padrão: 1000).
+            chunk_overlap: O número de caracteres para sobrepor entre pedaços
+                (padrão: 200).
+            separators: Uma lista de separadores para tentar em ordem. Se não fornecido,
+                usa ["\n\n", "\n", ". ", " ", ""].
         """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.separators = separators or ["\n\n", "\n", ". ", " ", ""]
 
     def split_documents(self, documents: List[Document]) -> List[Document]:
-        """Split a list of documents into smaller chunks.
+        """Divide uma lista de documentos em pedaços menores.
 
         Args:
-            documents: A list of Document objects to split.
+            documents: Uma lista de objetos Document para dividir.
 
         Returns:
-            A list of Document chunks with updated metadata including chunk_index
-            and total_chunks.
+            Uma lista de pedaços de Document com metadados atualizados incluindo chunk_index
+            e total_chunks.
         """
         result: List[Document] = []
         for doc in documents:
@@ -60,25 +60,25 @@ class RecursiveTextSplitter:
         return result
 
     def split_text(self, text: str) -> List[str]:
-        """Split text into smaller chunks.
+        """Divide texto em pedaços menores.
 
         Args:
-            text: The text to split.
+            text: O texto para dividir.
 
         Returns:
-            A list of text chunks.
+            Uma lista de pedaços de texto.
         """
         return self._split(text, self.separators)
 
     def _split(self, text: str, separators: List[str]) -> List[str]:
-        """Recursively split text using the given separators.
+        """Divide texto recursivamente usando os separadores dados.
 
         Args:
-            text: The text to split.
-            separators: A list of separators to try in order.
+            text: O texto para dividir.
+            separators: Uma lista de separadores para tentar em ordem.
 
         Returns:
-            A list of text chunks.
+            Uma lista de pedaços de texto.
         """
         if len(text) <= self.chunk_size:
             return [text.strip()] if text.strip() else []
@@ -109,7 +109,7 @@ class RecursiveTextSplitter:
             else:
                 chunks.append(current.strip())
 
-        # Apply overlap
+        # Aplicar sobreposição
         if self.chunk_overlap > 0 and len(chunks) > 1:
             overlapped: List[str] = [chunks[0]]
             for i in range(1, len(chunks)):

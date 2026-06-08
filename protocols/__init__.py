@@ -1,15 +1,15 @@
 """Protocolos A2A e MCP para Mangaba AI.
 
-This module provides inter-agent communication protocols:
+Este módulo fornece protocolos de comunicação entre agentes:
 
-- A2A (Agent-to-Agent): Protocol for direct agent communication
-  with message passing and agent discovery.
+- A2A (Agent-to-Agent): Protocolo para comunicação direta de agentes
+  com passagem de mensagens e descoberta de agentes.
 
-- MCP (Model Context Protocol): Protocol for context sharing
-  and session management between agents and tools.
+- MCP (Model Context Protocol): Protocolo para compartilhamento de contexto
+  e gerenciamento de sessões entre agentes e ferramentas.
 
-These protocols enable multi-agent systems where agents can
-communicate, share context, and coordinate actions.
+Estes protocolos permitem sistemas multi-agentes onde agentes podem
+comunicar, compartilhar contexto e coordenar ações.
 """
 
 from .a2a import A2AProtocol, A2AMessage, A2AAgent

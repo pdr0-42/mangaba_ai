@@ -1,8 +1,8 @@
 """
-PostgreSQL vector store using pgvector extension for vector similarity search.
+Armazenamento de vetores PostgreSQL usando extensão pgvector para busca de similaridade de vetores.
 
-Requires PostgreSQL server with pgvector extension enabled.
-Install with: pip install mangaba[postgres]
+Requer servidor PostgreSQL com extensão pgvector habilitada.
+Instale com: pip install mangaba[postgres]
 """
 
 from __future__ import annotations
@@ -28,15 +28,15 @@ except ImportError:
 
 
 class PostgresVectorStore(BaseVectorStore):
-    """Vector store backed by PostgreSQL with pgvector extension.
+    """Armazenamento de vetores apoiado por PostgreSQL com extensão pgvector.
 
-    This implementation uses PostgreSQL's pgvector extension for efficient
-    vector similarity search using HNSW indexes.
+    Esta implementação usa a extensão pgvector do PostgreSQL para busca
+    eficiente de similaridade de vetores usando índices HNSW.
 
     Attributes:
-        _table_name: The name of the table storing vectors.
-        _vector_dimensions: The dimensionality of the vectors.
-        _conn: The PostgreSQL database connection.
+        _table_name: O nome da tabela que armazena vetores.
+        _vector_dimensions: A dimensionalidade dos vetores.
+        _conn: A conexão com o banco de dados PostgreSQL.
     """
 
     def __init__(
@@ -47,19 +47,19 @@ class PostgresVectorStore(BaseVectorStore):
         create_table: bool = True,
         **kwargs: Any,
     ) -> None:
-        """Initialize the PostgresVectorStore.
+        """Inicializa o PostgresVectorStore.
 
         Args:
-            url: PostgreSQL connection URL. If not provided, will try to read from
-                MANGABA_VECTORSTORE_URL or DATABASE_URL environment variables.
-            table_name: The name of the table to use (default: "mangaba_vectors").
-            vector_dimensions: The dimensionality of the vectors (default: 1536).
-            create_table: Whether to create the table if it doesn't exist (default: True).
-            **kwargs: Additional arguments passed to psycopg.connect.
+            url: URL de conexão PostgreSQL. Se não fornecido, tentará ler das
+                variáveis de ambiente MANGABA_VECTORSTORE_URL ou DATABASE_URL.
+            table_name: O nome da tabela para usar (padrão: "mangaba_vectors").
+            vector_dimensions: A dimensionalidade dos vetores (padrão: 1536).
+            create_table: Se deve criar a tabela se ela não existir (padrão: True).
+            **kwargs: Argumentos adicionais passados para psycopg.connect.
 
         Raises:
-            ImportError: If psycopg package is not installed.
-            ValueError: If no connection URL is provided.
+            ImportError: Se o pacote psycopg não estiver instalado.
+            ValueError: Se nenhuma URL de conexão for fornecida.
         """
         if psycopg is None:
             raise ImportError(
@@ -85,7 +85,7 @@ class PostgresVectorStore(BaseVectorStore):
             self._ensure_table()
 
     def _ensure_table(self) -> None:
-        """Ensure the required table and extensions exist."""
+        """Garante que a tabela e extensões necessárias existam."""
         with self._conn.cursor() as cur:
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
             cur.execute(f"""
@@ -109,15 +109,15 @@ class PostgresVectorStore(BaseVectorStore):
         embeddings: List[List[float]],
         metadatas: Optional[List[Dict[str, Any]]] = None,
     ) -> List[str]:
-        """Store texts with their embeddings in PostgreSQL.
+        """Armazena textos com seus embeddings no PostgreSQL.
 
         Args:
-            texts: A list of text strings to store.
-            embeddings: A list of embedding vectors corresponding to the texts.
-            metadatas: Optional list of metadata dictionaries for each text.
+            texts: Uma lista de strings de texto para armazenar.
+            embeddings: Uma lista de vetores de embedding correspondentes aos textos.
+            metadatas: Lista opcional de dicionários de metadados para cada texto.
 
         Returns:
-            A list of IDs for the stored entries.
+            Uma lista de IDs para as entradas armazenadas.
         """
         ids: List[str] = []
         rows = []
@@ -141,15 +141,15 @@ class PostgresVectorStore(BaseVectorStore):
     def search(
         self, query_embedding: List[float], top_k: int = 5
     ) -> List[Dict[str, Any]]:
-        """Search for similar entries using vector similarity.
+        """Busca entradas similares usando similaridade de vetores.
 
         Args:
-            query_embedding: The query embedding vector.
-            top_k: The maximum number of results to return (default: 5).
+            query_embedding: O vetor de embedding de consulta.
+            top_k: O número máximo de resultados para retornar (padrão: 5).
 
         Returns:
-            A list of dictionaries containing id, content, score, and metadata
-            for each result, sorted by similarity score.
+            Uma lista de dicionários contendo id, content, score e metadata
+            para cada resultado, ordenados por pontuação de similaridade.
         """
         emb_str = json.dumps(query_embedding)
         with self._conn.cursor() as cur:
@@ -180,10 +180,10 @@ class PostgresVectorStore(BaseVectorStore):
         return output
 
     def delete(self, ids: List[str]) -> None:
-        """Delete entries by ID.
+        """Exclui entradas por ID.
 
         Args:
-            ids: A list of IDs to delete.
+            ids: Uma lista de IDs para excluir.
         """
         with self._conn.cursor() as cur:
             cur.execute(
@@ -193,28 +193,28 @@ class PostgresVectorStore(BaseVectorStore):
         self._conn.commit()
 
     def clear(self) -> None:
-        """Remove all entries from the table."""
+        """Remove todas as entradas da tabela."""
         with self._conn.cursor() as cur:
             cur.execute(f"DELETE FROM {self._table_name}")
         self._conn.commit()
 
     @property
     def count(self) -> int:
-        """Return the number of stored entries.
+        """Retorna o número de entradas armazenadas.
 
         Returns:
-            The number of entries in the table.
+            O número de entradas na tabela.
         """
         with self._conn.cursor() as cur:
             cur.execute(f"SELECT COUNT(*) FROM {self._table_name}")
             return cur.fetchone()["count"]
 
     def close(self) -> None:
-        """Close the database connection."""
+        """Fecha a conexão com o banco de dados."""
         self._conn.close()
 
     def __del__(self) -> None:
-        """Cleanup when the object is deleted."""
+        """Limpeza quando o objeto é excluído."""
         try:
             self.close()
         except Exception:

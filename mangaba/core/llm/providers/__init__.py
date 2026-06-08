@@ -1,4 +1,4 @@
-"""LLM providers package"""
+"""Pacote de provedores de LLM"""
 
 from .constants import (
     HF_OPEN_MODELS,

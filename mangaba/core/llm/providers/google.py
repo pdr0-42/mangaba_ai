@@ -1,4 +1,4 @@
-"""Google (Gemini) LLM provider."""
+"""Provedor de LLM Google (Gemini)."""
 
 from typing import Any, List, Dict, Optional, Iterator
 from mangaba.core.llm.base import BaseLLMProvider
@@ -12,15 +12,15 @@ class GoogleLLMProvider(BaseLLMProvider):
     aliases = ("gemini", "google-ai", "googleai")
 
     def __init__(self, api_key: str, model: str, **options: Any) -> None:
-        """Initialize the Google Gemini LLM provider.
+        """Inicializa o provedor LLM Google Gemini.
 
         Args:
-            api_key: Google AI API key.
-            model: Model name (e.g., "gemini-2.5-flash", "gemini-2.5-pro").
-            **options: Additional provider-specific options (generation_config, safety_settings).
+            api_key: Chave de API do Google AI.
+            model: Nome do modelo (por exemplo, "gemini-2.5-flash", "gemini-2.5-pro").
+            **options: Opções adicionais específicas do provedor (generation_config, safety_settings).
 
         Raises:
-            ImportError: If the google-generativeai package is not installed.
+            ImportError: Se o pacote google-generativeai não estiver instalado.
         """
         super().__init__(api_key, model, **options)
         try:
@@ -48,17 +48,17 @@ class GoogleLLMProvider(BaseLLMProvider):
         self._genai = genai
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResponse:
-        """Generate a response from Google Gemini.
+        """Gera uma resposta do Google Gemini.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters to pass to the API.
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais para passar à API.
 
         Returns:
-            LLMResponse containing the generated text, usage metadata, and raw response.
+            LLMResponse contendo o texto gerado, metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         try:
             response = self._model.generate_content(
@@ -77,18 +77,18 @@ class GoogleLLMProvider(BaseLLMProvider):
         tools: Optional[List[Any]] = None,
         **kwargs: Any,
     ) -> LLMResponse:
-        """Generate a response with tool/function calling support.
+        """Gera uma resposta com suporte a chamada de ferramenta/função.
 
         Args:
-            messages: List of message dictionaries with 'role' and 'content' keys.
-            tools: Optional list of tool definitions for function calling.
-            **kwargs: Additional parameters to pass to the API.
+            messages: Lista de dicionários de mensagem com chaves 'role' e 'content'.
+            tools: Lista opcional de definições de ferramenta para chamada de função.
+            **kwargs: Parâmetros adicionais para passar à API.
 
         Returns:
-            LLMResponse containing text, tool calls (if any), usage metadata, and raw response.
+            LLMResponse contendo texto, chamadas de ferramenta (se houver), metadados de uso e resposta bruta.
 
         Raises:
-            LLMError: If the API request fails.
+            LLMError: Se a solicitação da API falhar.
         """
         try:
             genai_tools = None
@@ -103,7 +103,7 @@ class GoogleLLMProvider(BaseLLMProvider):
                     )
                 ]
 
-            # Build contents from messages
+            # Construir conteúdos a partir das mensagens
             contents = []
             for m in messages:
                 role = "model" if m["role"] == "assistant" else m["role"]
@@ -150,17 +150,17 @@ class GoogleLLMProvider(BaseLLMProvider):
         )
 
     def stream(self, prompt: str, **kwargs: Any) -> Iterator[str]:
-        """Stream the response token-by-token.
+        """Transmite a resposta token por token.
 
         Args:
-            prompt: The input prompt to generate a response for.
-            **kwargs: Additional parameters to pass to the API.
+            prompt: O prompt de entrada para gerar uma resposta.
+            **kwargs: Parâmetros adicionais para passar à API.
 
         Yields:
-            str: Response tokens as they are generated.
+            str: Tokens de resposta conforme são gerados.
 
         Raises:
-            LLMError: If the streaming request fails.
+            LLMError: Se a solicitação de streaming falhar.
         """
         try:
             response = self._model.generate_content(prompt, stream=True)
@@ -172,13 +172,13 @@ class GoogleLLMProvider(BaseLLMProvider):
             raise LLMError(f"Google streaming error: {exc}", cause=exc) from exc
 
     def _parse_usage(self, response: Any) -> TokenUsage:
-        """Parse token usage from Google response.
+        """Analisa o uso de tokens da resposta Google.
 
         Args:
-            response: The Google API response object.
+            response: O objeto de resposta da API Google.
 
         Returns:
-            TokenUsage object with prompt_tokens, completion_tokens, and total_tokens.
+            Objeto TokenUsage com prompt_tokens, completion_tokens e total_tokens.
         """
         try:
             um = response.usage_metadata

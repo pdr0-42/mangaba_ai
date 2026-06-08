@@ -1,8 +1,8 @@
 """
-Core type definitions for Mangaba AI v3.0
+Definições de tipos principais para Mangaba AI v3.0
 
-Pydantic v2 models used across the entire framework for validation,
-serialization, and JSON schema generation.
+Modelos Pydantic v2 usados em todo o framework para validação,
+serialização e geração de esquema JSON.
 """
 
 from __future__ import annotations
@@ -21,13 +21,13 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class Role(str, Enum):
-    """Message role in a conversation.
+    """Papel da mensagem em uma conversa.
 
-    Defines who sent a message in a chat conversation:
-    - SYSTEM: System instructions/prompt
-    - USER: Human user input
-    - ASSISTANT: AI agent response
-    - TOOL: Tool execution result
+    Define quem enviou uma mensagem em uma conversa de chat:
+    - SYSTEM: Instruções/prompt do sistema
+    - USER: Entrada do usuário humano
+    - ASSISTANT: Resposta do agente de IA
+    - TOOL: Resultado da execução da ferramenta
     """
     SYSTEM = "system"
     USER = "user"
@@ -36,13 +36,13 @@ class Role(str, Enum):
 
 
 class AgentStatus(str, Enum):
-    """Current execution status of an agent.
+    """Status atual de execução de um agente.
 
-    - IDLE: Agent is not currently executing any task
-    - RUNNING: Agent is actively processing a task
-    - WAITING_TOOL: Agent is waiting for a tool to complete
-    - COMPLETED: Agent successfully finished the task
-    - ERROR: Agent encountered an error during execution
+    - IDLE: O agente não está executando nenhuma tarefa no momento
+    - RUNNING: O agente está processando ativamente uma tarefa
+    - WAITING_TOOL: O agente está esperando uma ferramenta ser concluída
+    - COMPLETED: O agente concluiu a tarefa com sucesso
+    - ERROR: O agente encontrou um erro durante a execução
     """
     IDLE = "idle"
     RUNNING = "running"
@@ -52,13 +52,13 @@ class AgentStatus(str, Enum):
 
 
 class TaskStatus(str, Enum):
-    """Execution status of a task.
+    """Status de execução de uma tarefa.
 
-    - PENDING: Task is queued and waiting to start
-    - RUNNING: Task is currently being executed
-    - COMPLETED: Task finished successfully
-    - FAILED: Task failed with an error
-    - SKIPPED: Task was skipped (e.g., due to conditional logic)
+    - PENDING: A tarefa está na fila e esperando para começar
+    - RUNNING: A tarefa está sendo executada no momento
+    - COMPLETED: A tarefa foi concluída com sucesso
+    - FAILED: A tarefa falhou com um erro
+    - SKIPPED: A tarefa foi pulada (por exemplo, devido a lógica condicional)
     """
     PENDING = "pending"
     RUNNING = "running"
@@ -68,13 +68,13 @@ class TaskStatus(str, Enum):
 
 
 class FinishReason(str, Enum):
-    """Reason why an LLM stopped generating.
+    """Motivo pelo qual um LLM parou de gerar.
 
-    - STOP: Model naturally stopped generation
-    - TOOL_CALLS: Model stopped to request tool calls
-    - LENGTH: Model hit max token limit
-    - ERROR: Generation failed due to an error
-    - CONTENT_FILTER: Content was blocked by safety filters
+    - STOP: O modelo parou naturalmente a geração
+    - TOOL_CALLS: O modelo parou para solicitar chamadas de ferramenta
+    - LENGTH: O modelo atingiu o limite máximo de tokens
+    - ERROR: A geração falhou devido a um erro
+    - CONTENT_FILTER: O conteúdo foi bloqueado por filtros de segurança
     """
     STOP = "stop"
     TOOL_CALLS = "tool_calls"
@@ -89,18 +89,18 @@ class FinishReason(str, Enum):
 
 
 class LLMConfig(BaseModel):
-    """Configuration for an LLM provider.
+    """Configuração para um provedor de LLM.
 
     Attributes:
-        provider: LLM provider name (e.g., 'openai', 'anthropic', 'google').
-        model: Model name or list of models for fallback (for OpenRouter).
-        api_key: API key for the provider (can be None if from env var).
-        temperature: Sampling temperature (0.0 to 2.0, default 0.7).
-        max_tokens: Maximum tokens in response (default 1024).
-        top_p: Nucleus sampling parameter (0.0 to 1.0, default 1.0).
-        stop_sequences: Optional list of sequences that stop generation.
-        timeout: Request timeout in seconds (default 60).
-        base_url: Optional custom API base URL.
+        provider: Nome do provedor de LLM (por exemplo, 'openai', 'anthropic', 'google').
+        model: Nome do modelo ou lista de modelos para fallback (para OpenRouter).
+        api_key: Chave de API para o provedor (pode ser None se for de variável de ambiente).
+        temperature: Temperatura de amostragem (0.0 a 2.0, padrão 0.7).
+        max_tokens: Máximo de tokens na resposta (padrão 1024).
+        top_p: Parâmetro de amostragem de núcleo (0.0 a 1.0, padrão 1.0).
+        stop_sequences: Lista opcional de sequências que param a geração.
+        timeout: Tempo limite de solicitação em segundos (padrão 60).
+        base_url: URL base de API personalizada opcional.
     """
 
     provider: str = "google"
@@ -116,13 +116,13 @@ class LLMConfig(BaseModel):
     @field_validator("provider")
     @classmethod
     def normalize_provider(cls, v: str) -> str:
-        """Normalize provider name by resolving aliases.
+        """Normaliza o nome do provedor resolvendo aliases.
 
         Args:
-            v: Provider name or alias.
+            v: Nome do provedor ou alias.
 
         Returns:
-            Normalized provider name.
+            Nome do provedor normalizado.
         """
         aliases = {
             "gemini": "google",
@@ -141,17 +141,17 @@ class LLMConfig(BaseModel):
 
 
 class OpenRouterConfig(LLMConfig):
-    """Specialized configuration for OpenRouter with fallback support.
+    """Configuração especializada para OpenRouter com suporte a fallback.
 
-    Extends LLMConfig to support OpenRouter's multi-model fallback
-    routing and custom headers.
+    Estende LLMConfig para suportar o roteamento de fallback multi-modelo
+    do OpenRouter e cabeçalhos personalizados.
 
     Attributes:
-        provider: Always 'openrouter'.
-        model: List of models for fallback routing (primary first).
-        site_name: Application name for OpenRouter headers.
-        site_url: Application URL for OpenRouter headers.
-        route: Optional routing preference (cheap, fast, etc).
+        provider: Sempre 'openrouter'.
+        model: Lista de modelos para roteamento de fallback (principal primeiro).
+        site_name: Nome do aplicativo para cabeçalhos do OpenRouter.
+        site_url: URL do aplicativo para cabeçalhos do OpenRouter.
+        route: Preferência de roteamento opcional (barato, rápido, etc).
     """
 
     provider: str = "openrouter"
@@ -173,12 +173,12 @@ class OpenRouterConfig(LLMConfig):
 
 
 class TokenUsage(BaseModel):
-    """Token usage statistics from an LLM call.
+    """Estatísticas de uso de tokens de uma chamada de LLM.
 
     Attributes:
-        prompt_tokens: Number of tokens in the prompt.
-        completion_tokens: Number of tokens in the completion.
-        total_tokens: Total tokens used (prompt + completion).
+        prompt_tokens: Número de tokens no prompt.
+        completion_tokens: Número de tokens na conclusão.
+        total_tokens: Total de tokens usados (prompt + conclusão).
     """
 
     prompt_tokens: int = 0
@@ -187,12 +187,12 @@ class TokenUsage(BaseModel):
 
 
 class ToolCall(BaseModel):
-    """A tool call requested by the LLM.
+    """Uma chamada de ferramenta solicitada pelo LLM.
 
     Attributes:
-        id: Unique identifier for this tool call.
-        tool_name: Name of the tool to call.
-        arguments: Dictionary of arguments to pass to the tool.
+        id: Identificador único para esta chamada de ferramenta.
+        tool_name: Nome da ferramenta a ser chamada.
+        arguments: Dicionário de argumentos para passar à ferramenta.
     """
 
     id: str = Field(default_factory=lambda: f"call_{uuid.uuid4().hex[:12]}")
@@ -201,14 +201,14 @@ class ToolCall(BaseModel):
 
 
 class ToolResult(BaseModel):
-    """Result from executing a tool.
+    """Resultado da execução de uma ferramenta.
 
     Attributes:
-        call_id: ID of the tool call this result corresponds to.
-        tool_name: Name of the tool that was executed.
-        output: The output from the tool execution.
-        error: Error message if execution failed.
-        success: Whether the tool execution succeeded.
+        call_id: ID da chamada de ferramenta a que este resultado corresponde.
+        tool_name: Nome da ferramenta que foi executada.
+        output: A saída da execução da ferramenta.
+        error: Mensagem de erro se a execução falhou.
+        success: Se a execução da ferramenta foi bem-sucedida.
     """
 
     call_id: str
@@ -219,15 +219,15 @@ class ToolResult(BaseModel):
 
 
 class Message(BaseModel):
-    """A single message in a conversation.
+    """Uma única mensagem em uma conversa.
 
     Attributes:
-        role: The role of the message sender (SYSTEM, USER, ASSISTANT, TOOL).
-        content: The text content of the message.
-        tool_calls: List of tool calls requested by the assistant.
-        tool_results: List of tool execution results.
-        metadata: Additional metadata about the message.
-        timestamp: ISO format timestamp of when the message was created.
+        role: O papel do remetente da mensagem (SYSTEM, USER, ASSISTANT, TOOL).
+        content: O conteúdo de texto da mensagem.
+        tool_calls: Lista de chamadas de ferramenta solicitadas pelo assistente.
+        tool_results: Lista de resultados de execução de ferramenta.
+        metadata: Metadados adicionais sobre a mensagem.
+        timestamp: Timestamp em formato ISO de quando a mensagem foi criada.
     """
 
     role: Role
@@ -239,25 +239,25 @@ class Message(BaseModel):
 
     @classmethod
     def system(cls, content: str) -> Message:
-        """Create a system message.
+        """Cria uma mensagem de sistema.
 
         Args:
-            content: The system instruction content.
+            content: O conteúdo da instrução do sistema.
 
         Returns:
-            A Message with role=SYSTEM.
+            Uma Message com role=SYSTEM.
         """
         return cls(role=Role.SYSTEM, content=content)
 
     @classmethod
     def user(cls, content: str) -> Message:
-        """Create a user message.
+        """Cria uma mensagem de usuário.
 
         Args:
-            content: The user's input content.
+            content: O conteúdo de entrada do usuário.
 
         Returns:
-            A Message with role=USER.
+            Uma Message com role=USER.
         """
         return cls(role=Role.USER, content=content)
 
@@ -265,40 +265,40 @@ class Message(BaseModel):
     def assistant(
         cls, content: Optional[str] = None, tool_calls: Optional[List[ToolCall]] = None
     ) -> Message:
-        """Create an assistant message.
+        """Cria uma mensagem de assistente.
 
         Args:
-            content: The assistant's response content.
-            tool_calls: Optional tool calls requested by the assistant.
+            content: O conteúdo de resposta do assistente.
+            tool_calls: Chamadas de ferramenta opcionais solicitadas pelo assistente.
 
         Returns:
-            A Message with role=ASSISTANT.
+            Uma Message com role=ASSISTANT.
         """
         return cls(role=Role.ASSISTANT, content=content, tool_calls=tool_calls)
 
     @classmethod
     def tool(cls, results: List[ToolResult]) -> Message:
-        """Create a tool result message.
+        """Cria uma mensagem de resultado de ferramenta.
 
         Args:
-            results: List of tool execution results.
+            results: Lista de resultados de execução de ferramenta.
 
         Returns:
-            A Message with role=TOOL containing tool results.
+            Uma Message com role=TOOL contendo resultados de ferramenta.
         """
         return cls(role=Role.TOOL, tool_results=results)
 
 
 class LLMResponse(BaseModel):
-    """Standardised response from any LLM provider.
+    """Resposta padronizada de qualquer provedor de LLM.
 
     Attributes:
-        content: The text content of the response.
-        tool_calls: List of tool calls requested by the LLM.
-        usage: Token usage statistics.
-        model: The model that generated the response.
-        finish_reason: Why the LLM stopped generating.
-        raw: Raw response object from the provider (excluded from serialization).
+        content: O conteúdo de texto da resposta.
+        tool_calls: Lista de chamadas de ferramenta solicitadas pelo LLM.
+        usage: Estatísticas de uso de tokens.
+        model: O modelo que gerou a resposta.
+        finish_reason: Por que o LLM parou de gerar.
+        raw: Objeto de resposta bruto do provedor (excluído da serialização).
     """
 
     content: Optional[str] = None
@@ -310,37 +310,37 @@ class LLMResponse(BaseModel):
 
     @property
     def text(self) -> str:
-        """Get the text content, defaulting to empty string.
+        """Obtém o conteúdo de texto, padrão para string vazia.
 
         Returns:
-            The content as a string, or empty string if content is None.
+            O conteúdo como uma string, ou string vazia se content for None.
         """
         return self.content or ""
 
     @property
     def has_tool_calls(self) -> bool:
-        """Check if the response contains tool calls.
+        """Verifica se a resposta contém chamadas de ferramenta.
 
         Returns:
-            True if there are tool calls, False otherwise.
+            True se houver chamadas de ferramenta, False caso contrário.
         """
         return len(self.tool_calls) > 0
 
 
 # ---------------------------------------------------------------------------
-# Agent / Task / Crew configuration
+# Configuração de Agente / Tarefa / Crew
 # ---------------------------------------------------------------------------
 
 
 class MemoryConfig(BaseModel):
-    """Memory configuration for an agent.
+    """Configuração de memória para um agente.
 
     Attributes:
-        short_term: Enable short-term memory (in-conversation context).
-        long_term: Enable long-term persistent memory storage.
-        entity: Enable entity extraction and tracking.
-        max_short_term_items: Maximum items in short-term memory.
-        storage_path: Optional path for persistent storage.
+        short_term: Habilita memória de curto prazo (contexto na conversa).
+        long_term: Habilita armazenamento de memória persistente de longo prazo.
+        entity: Habilita extração e rastreamento de entidades.
+        max_short_term_items: Máximo de itens na memória de curto prazo.
+        storage_path: Caminho opcional para armazenamento persistente.
     """
 
     short_term: bool = True
@@ -351,22 +351,22 @@ class MemoryConfig(BaseModel):
 
 
 class AgentConfig(BaseModel):
-    """Full configuration for an Agent.
+    """Configuração completa para um Agente.
 
     Attributes:
-        role: The agent's role/profession.
-        goal: The agent's primary objective.
-        backstory: Context and background about the agent.
-        llm_config: Optional LLM provider configuration.
-        tools: List of tool names available to the agent.
-        memory_config: Memory configuration for the agent.
-        max_iterations: Maximum ReAct reasoning loop iterations.
-        max_retry_on_error: Maximum retry attempts on errors.
-        verbose: Enable verbose logging.
-        allow_delegation: Allow agent to delegate to other agents.
-        step_callback: Optional callback function for each step.
-        guardrails: List of guardrail names to apply.
-        output_parser: Optional output parser name to use.
+        role: O papel/profissão do agente.
+        goal: O objetivo principal do agente.
+        backstory: Contexto e histórico sobre o agente.
+        llm_config: Configuração opcional do provedor de LLM.
+        tools: Lista de nomes de ferramentas disponíveis para o agente.
+        memory_config: Configuração de memória para o agente.
+        max_iterations: Máximo de iterações do loop de raciocínio ReAct.
+        max_retry_on_error: Máximo de tentativas de retry em erros.
+        verbose: Habilita registro detalhado.
+        allow_delegation: Permite que o agente delegue para outros agentes.
+        step_callback: Função de callback opcional para cada etapa.
+        guardrails: Lista de nomes de guardrails para aplicar.
+        output_parser: Nome do analisador de saída opcional para usar.
     """
 
     role: str
@@ -386,16 +386,16 @@ class AgentConfig(BaseModel):
     @field_validator("role", "goal", "backstory")
     @classmethod
     def not_empty(cls, v: str) -> str:
-        """Validate that string fields are not empty or whitespace-only.
+        """Valida que campos de string não estão vazios ou apenas com espaços em branco.
 
         Args:
-            v: The string value to validate.
+            v: O valor de string para validar.
 
         Returns:
-            The stripped string value.
+            O valor de string sem espaços.
 
         Raises:
-            ValueError: If the string is empty or whitespace-only.
+            ValueError: Se a string estiver vazia ou apenas com espaços em branco.
         """
         if not v or not v.strip():
             raise ValueError("Field cannot be empty")
@@ -403,20 +403,20 @@ class AgentConfig(BaseModel):
 
 
 class TaskConfig(BaseModel):
-    """Full configuration for a Task.
+    """Configuração completa para uma Tarefa.
 
     Attributes:
-        description: What the task should accomplish.
-        expected_output: Expected format of the task output.
-        agent_id: Optional ID of the agent assigned to this task.
-        context_ids: List of context IDs to include as input.
-        tools: List of tool names available for this task.
-        output_file: Optional file path to save output to.
-        async_execution: Whether the task should run asynchronously.
-        human_input: Whether human input is required during execution.
-        guardrails: List of guardrail names to apply.
-        output_parser: Optional output parser name to use.
-        retry_on_failure: Number of retries on failure (0 = no retry).
+        description: O que a tarefa deve realizar.
+        expected_output: Formato esperado da saída da tarefa.
+        agent_id: ID opcional do agente atribuído a esta tarefa.
+        context_ids: Lista de IDs de contexto para incluir como entrada.
+        tools: Lista de nomes de ferramentas disponíveis para esta tarefa.
+        output_file: Caminho de arquivo opcional para salvar a saída.
+        async_execution: Se a tarefa deve ser executada de forma assíncrona.
+        human_input: Se a entrada humana é necessária durante a execução.
+        guardrails: Lista de nomes de guardrails para aplicar.
+        output_parser: Nome do analisador de saída opcional para usar.
+        retry_on_failure: Número de tentativas em caso de falha (0 = sem retry).
     """
 
     description: str
@@ -434,16 +434,16 @@ class TaskConfig(BaseModel):
     @field_validator("description", "expected_output")
     @classmethod
     def not_empty(cls, v: str) -> str:
-        """Validate that string fields are not empty or whitespace-only.
+        """Valida que campos de string não estão vazios ou apenas com espaços em branco.
 
         Args:
-            v: The string value to validate.
+            v: O valor de string para validar.
 
         Returns:
-            The stripped string value.
+            O valor de string sem espaços.
 
         Raises:
-            ValueError: If the string is empty or whitespace-only.
+            ValueError: Se a string estiver vazia ou apenas com espaços em branco.
         """
         if not v or not v.strip():
             raise ValueError("Field cannot be empty")
@@ -451,24 +451,24 @@ class TaskConfig(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Agent runtime state
+# Estado de execução do agente
 # ---------------------------------------------------------------------------
 
 
 class ReActStep(BaseModel):
-    """A single step in the ReAct reasoning loop.
+    """Uma única etapa no loop de raciocínio ReAct.
 
-    Represents one iteration of the Thought-Action-Observation cycle:
-    - Thought: What the agent is thinking
-    - Action: What tool the agent decides to use
-    - Observation: The result from the tool execution
+    Representa uma iteração do ciclo Pensamento-Ação-Observação:
+    - Thought: O que o agente está pensando
+    - Action: Qual ferramenta o agente decide usar
+    - Observation: O resultado da execução da ferramenta
 
     Attributes:
-        step_number: The step number in the reasoning sequence.
-        thought: The agent's reasoning at this step.
-        action: The tool call (if any) made at this step.
-        observation: The result from tool execution (if any).
-        timestamp: ISO format timestamp of when this step occurred.
+        step_number: O número da etapa na sequência de raciocínio.
+        thought: O raciocínio do agente nesta etapa.
+        action: A chamada de ferramenta (se houver) feita nesta etapa.
+        observation: O resultado da execução da ferramenta (se houver).
+        timestamp: Timestamp em formato ISO de quando esta etapa ocorreu.
     """
 
     step_number: int
@@ -479,19 +479,19 @@ class ReActStep(BaseModel):
 
 
 class AgentState(BaseModel):
-    """Runtime state of an agent during task execution.
+    """Estado de tempo de execução de um agente durante a execução da tarefa.
 
-    Tracks the agent's progress, conversation history, and reasoning steps
-    throughout the execution of a task.
+    Rastreia o progresso do agente, histórico de conversa e etapas de raciocínio
+    durante toda a execução de uma tarefa.
 
     Attributes:
-        agent_id: Unique identifier for the agent.
-        messages: Complete conversation history including all messages.
-        steps: List of ReAct reasoning steps taken so far.
-        current_step: Current step number in the reasoning sequence.
-        iteration_count: Total number of iterations completed.
-        status: Current execution status of the agent.
-        metadata: Additional runtime information.
+        agent_id: Identificador único para o agente.
+        messages: Histórico completo da conversa incluindo todas as mensagens.
+        steps: Lista de etapas de raciocínio ReAct tomadas até agora.
+        current_step: Número da etapa atual na sequência de raciocínio.
+        iteration_count: Número total de iterações concluídas.
+        status: Status atual de execução do agente.
+        metadata: Informações adicionais de tempo de execução.
     """
 
     agent_id: str
