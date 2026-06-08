@@ -374,3 +374,4 @@ class MangabaAgent(A2AAgent):
     def explain_code(self, code: str, language: str = "Python") -> str:
         """Explica o que o código faz."""
         prompt = f"Explique o que este código {language} faz:\n\n```{language.lower()}\n{code}\n```"
+        return self.chat(prompt)
