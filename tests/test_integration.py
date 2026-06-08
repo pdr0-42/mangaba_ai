@@ -14,8 +14,8 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mangaba_agent import MangabaAgent
-from protocols.a2a import A2AMessage, A2AProtocol, A2AAgent, MessageType
-from protocols.mcp import MCPContext, MCPProtocol, ContextType, ContextPriority
+from mangaba.protocols.a2a import A2AMessage, A2AProtocol, A2AAgent, MessageType
+from mangaba.protocols.mcp import MCPContext, MCPProtocol, ContextType, ContextPriority
 
 
 class TestMangabaAgentIntegration:

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 # Adiciona o diretório pai ao path para imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from protocols.mcp import (
+from mangaba.protocols.mcp import (
     MCPContext,
     MCPSession,
     MCPProtocol,

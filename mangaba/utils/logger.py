@@ -1,6 +1,6 @@
 from loguru import logger
 import sys
-from config import config
+from mangaba.config import config
 
 
 def get_logger(name: str = "MangabaAI"):

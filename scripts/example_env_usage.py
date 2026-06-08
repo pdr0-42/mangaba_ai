@@ -228,8 +228,8 @@ def demonstrate_usage():
     example_code = """
 # Exemplo de como usar as configurações
 from mangaba_agent import MangabaAgent
-from protocols.mcp import MCPProtocol
-from protocols.a2a import A2AProtocol
+from mangaba.protocols.mcp import MCPProtocol
+from mangaba.protocols.a2a import A2AProtocol
 
 # Carrega configurações
 config = load_environment_config()

@@ -13,7 +13,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mangaba_agent import MangabaAgent
-from protocols.a2a import A2AMessage, MessageType
+from mangaba.protocols.a2a import A2AMessage, MessageType
 
 
 class TestMangabaAgent:

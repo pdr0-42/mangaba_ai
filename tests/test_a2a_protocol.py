@@ -14,7 +14,7 @@ import uuid
 # Adiciona o diretório pai ao path para imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from protocols.a2a import A2AMessage, A2AProtocol, A2AAgent, MessageType
+from mangaba.protocols.a2a import A2AMessage, A2AProtocol, A2AAgent, MessageType
 
 
 class TestA2AMessage:

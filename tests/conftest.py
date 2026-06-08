@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from mangaba_agent import MangabaAgent
-    from protocols.a2a import A2AProtocol
-    from protocols.mcp import MCPProtocol, MCPContext, ContextType, ContextPriority
+    from mangaba.protocols.a2a import A2AProtocol
+    from mangaba.protocols.mcp import MCPProtocol, MCPContext, ContextType, ContextPriority
 
     _LEGACY_AVAILABLE = True
 except (ImportError, ValueError):
