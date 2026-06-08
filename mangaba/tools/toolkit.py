@@ -21,22 +21,46 @@ from mangaba.tools.web_search import DuckDuckGoSearchTool
 
 
 class BaseToolkit(ABC):
-    """Abstract grouping of related tools."""
+    """Abstract base class for grouping related tools together.
+
+    A Toolkit bundles related tools so they can be attached to an agent
+    as a single unit.
+    """
 
     @abstractmethod
     def get_tools(self) -> List[BaseTool]:
-        ...
+        """Return the list of tools in this toolkit.
+
+        Returns:
+            List of BaseTool instances.
+        """
 
 
 class FileToolkit(BaseToolkit):
-    """File I/O tools: read, write, list directories."""
+    """Toolkit containing file I/O tools.
+
+    Includes tools for reading files, writing files, and listing directories.
+    """
 
     def get_tools(self) -> List[BaseTool]:
+        """Return the list of file I/O tools.
+
+        Returns:
+            List containing FileReaderTool, FileWriterTool, and DirectoryListTool.
+        """
         return [FileReaderTool(), FileWriterTool(), DirectoryListTool()]
 
 
 class WebToolkit(BaseToolkit):
-    """Web search tools."""
+    """Toolkit containing web search tools.
+
+    Includes tools for searching the web using DuckDuckGo.
+    """
 
     def get_tools(self) -> List[BaseTool]:
+        """Return the list of web search tools.
+
+        Returns:
+            List containing DuckDuckGoSearchTool.
+        """
         return [DuckDuckGoSearchTool()]
