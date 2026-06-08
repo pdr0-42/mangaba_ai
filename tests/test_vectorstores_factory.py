@@ -1,4 +1,4 @@
-"""Tests for vector store factory"""
+"""Testes para fábrica de armazenamento de vetores"""
 
 import pytest
 from unittest.mock import patch, MagicMock

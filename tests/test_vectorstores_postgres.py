@@ -1,4 +1,4 @@
-"""Tests for PostgresVectorStore"""
+"""Testes para PostgresVectorStore"""
 
 import pytest
 from unittest.mock import MagicMock, patch

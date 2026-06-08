@@ -1,4 +1,4 @@
-"""Tests for RedisVectorStore"""
+"""Testes para RedisVectorStore"""
 
 import json
 import pytest

@@ -1,4 +1,4 @@
-"""Tests for Mangaba AI v3.0 core modules."""
+"""Testes para módulos principais do Mangaba AI v3.0."""
 
 import pytest
 from unittest.mock import Mock, patch
