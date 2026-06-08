@@ -1,5 +1,3 @@
-
-
 """
 Disk-based LLM response cache using SQLite.
 """
@@ -10,10 +8,13 @@ import sqlite3
 import threading
 import time
 
+
 class DiskCache(LLMCache):
     """Persistent SQLite-based cache."""
 
-    def __init__(self, path: str = ".mangaba_cache.db", default_ttl: Optional[int] = None) -> None:
+    def __init__(
+        self, path: str = ".mangaba_cache.db", default_ttl: Optional[int] = None
+    ) -> None:
         """Initialize the disk-based SQLite cache.
 
         Args:
@@ -63,7 +64,9 @@ class DiskCache(LLMCache):
             The cached value if found and not expired, None otherwise.
         """
         with self._lock, self._connect() as conn:
-            row = conn.execute("SELECT value, expires_at FROM cache WHERE key = ?", (key,)).fetchone()
+            row = conn.execute(
+                "SELECT value, expires_at FROM cache WHERE key = ?", (key,)
+            ).fetchone()
             if row is None:
                 return None
             value, expires_at = row

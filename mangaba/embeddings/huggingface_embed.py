@@ -7,7 +7,7 @@ Optimized with LRU caching and batch processing.
 
 from __future__ import annotations
 
-from typing import List, Optional, Dict
+from typing import List, Optional
 import hashlib
 from collections import OrderedDict
 
@@ -22,7 +22,7 @@ class HuggingFaceEmbedding(BaseEmbedding):
         model: str = "sentence-transformers/all-MiniLM-L6-v2",
         api_key: Optional[str] = None,
         use_local: bool = True,
-        cache_size: int = 1000
+        cache_size: int = 1000,
     ) -> None:
         self.model = model
         self._api_key = api_key
@@ -36,6 +36,7 @@ class HuggingFaceEmbedding(BaseEmbedding):
         if use_local:
             try:
                 from sentence_transformers import SentenceTransformer
+
                 self._model = SentenceTransformer(model)
                 self._dim = self._model.get_sentence_embedding_dimension()
             except ImportError as exc:
@@ -46,9 +47,7 @@ class HuggingFaceEmbedding(BaseEmbedding):
             try:
                 from huggingface_hub import InferenceClient
             except ImportError as exc:
-                raise ImportError(
-                    "pip install huggingface-hub"
-                ) from exc
+                raise ImportError("pip install huggingface-hub") from exc
             self._client = InferenceClient(token=api_key)
             self._dim = self._get_dimension_from_model(model)
 
@@ -94,10 +93,14 @@ class HuggingFaceEmbedding(BaseEmbedding):
         else:
             embedding = self._client.feature_extraction(text, model=self.model)
             # Convert numpy arrays to Python lists
-            if hasattr(embedding, 'tolist'):
+            if hasattr(embedding, "tolist"):
                 embedding = embedding.tolist()
             # Handle single text response (list of floats) or batch (list of lists)
-            if isinstance(embedding, list) and len(embedding) > 0 and isinstance(embedding[0], list):
+            if (
+                isinstance(embedding, list)
+                and len(embedding) > 0
+                and isinstance(embedding[0], list)
+            ):
                 embedding = embedding[0]  # Take first if batch response
 
         self._cache_set(text, embedding)
@@ -121,12 +124,14 @@ class HuggingFaceEmbedding(BaseEmbedding):
                 embeddings = self._model.encode(to_embed, convert_to_list=True)
             else:
                 raw = self._client.feature_extraction(to_embed, model=self.model)
-                if hasattr(raw, 'tolist'):
+                if hasattr(raw, "tolist"):
                     raw = raw.tolist()
                 if isinstance(raw, list) and raw and isinstance(raw[0], float):
                     embeddings = [raw]
                 else:
-                    embeddings = [list(e) if not isinstance(e, list) else e for e in raw]
+                    embeddings = [
+                        list(e) if not isinstance(e, list) else e for e in raw
+                    ]
 
             for idx, emb in zip(to_embed_indices, embeddings):
                 self._cache_set(texts[idx], emb)

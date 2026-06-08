@@ -41,6 +41,7 @@ class CrewOutput:
         self.duration = duration
         self.crew_id = crew_id
         from datetime import datetime
+
         self.timestamp = datetime.now().isoformat()
 
     @property
@@ -94,7 +95,13 @@ class Crew:
         self._connect_agents()
 
         if self.verbose:
-            log.info("Crew %s: %d agents, %d tasks, process=%s", self.crew_id, len(agents), len(tasks), process.value)
+            log.info(
+                "Crew %s: %d agents, %d tasks, process=%s",
+                self.crew_id,
+                len(agents),
+                len(tasks),
+                process.value,
+            )
 
     # ── public API ─────────────────────────────────────────────────────
 
@@ -102,11 +109,17 @@ class Crew:
         """Start the crew execution."""
         start = time.monotonic()
 
-        EventBus.emit(Event(
-            event_type=EventType.CREW_START,
-            source_id=self.crew_id,
-            data={"process": self.process.value, "agents": len(self.agents), "tasks": len(self.tasks)},
-        ))
+        EventBus.emit(
+            Event(
+                event_type=EventType.CREW_START,
+                source_id=self.crew_id,
+                data={
+                    "process": self.process.value,
+                    "agents": len(self.agents),
+                    "tasks": len(self.tasks),
+                },
+            )
+        )
 
         try:
             if self.process == Process.SEQUENTIAL:
@@ -121,17 +134,30 @@ class Crew:
                 raise CrewError(f"Unknown process: {self.process}")
 
             duration = time.monotonic() - start
-            result = CrewOutput(tasks_outputs=outputs, process=self.process, duration=duration, crew_id=self.crew_id)
+            result = CrewOutput(
+                tasks_outputs=outputs,
+                process=self.process,
+                duration=duration,
+                crew_id=self.crew_id,
+            )
 
-            EventBus.emit(Event(
-                event_type=EventType.CREW_END,
-                source_id=self.crew_id,
-                data={"duration": duration, "tasks_completed": len(outputs)},
-            ))
+            EventBus.emit(
+                Event(
+                    event_type=EventType.CREW_END,
+                    source_id=self.crew_id,
+                    data={"duration": duration, "tasks_completed": len(outputs)},
+                )
+            )
             return result
 
         except Exception as exc:
-            EventBus.emit(Event(event_type=EventType.CREW_ERROR, source_id=self.crew_id, data={"error": str(exc)}))
+            EventBus.emit(
+                Event(
+                    event_type=EventType.CREW_ERROR,
+                    source_id=self.crew_id,
+                    data={"error": str(exc)},
+                )
+            )
             raise
 
     # ── process implementations ────────────────────────────────────────
@@ -140,21 +166,35 @@ class Crew:
         outputs: List[TaskOutput] = []
         for i, task in enumerate(self.tasks, 1):
             if self.verbose:
-                log.info("[%d/%d] %s → %s", i, len(self.tasks), task.agent.role, task.description[:60])
+                log.info(
+                    "[%d/%d] %s → %s",
+                    i,
+                    len(self.tasks),
+                    task.agent.role,
+                    task.description[:60],
+                )
             output = task.execute(inputs)
             outputs.append(output)
         return outputs
 
     def _run_hierarchical(self, inputs: Dict[str, Any]) -> List[TaskOutput]:
         if len(self.agents) < 2:
-            raise CrewError("Hierarchical process needs >= 2 agents (1 manager + workers)")
+            raise CrewError(
+                "Hierarchical process needs >= 2 agents (1 manager + workers)"
+            )
 
         manager = self.agents[0]
         outputs: List[TaskOutput] = []
 
         for i, task in enumerate(self.tasks, 1):
             if self.verbose:
-                log.info("[%d/%d] Manager %s delegates to %s", i, len(self.tasks), manager.role, task.agent.role)
+                log.info(
+                    "[%d/%d] Manager %s delegates to %s",
+                    i,
+                    len(self.tasks),
+                    manager.role,
+                    task.agent.role,
+                )
 
             # Manager refines instructions
             delegation_prompt = (
@@ -223,12 +263,14 @@ class Crew:
                 + "\n---\n".join(agent_results)
             )
             consensus = self.agents[0].execute_task(synthesis_prompt)
-            outputs.append(TaskOutput(
-                description=task.description,
-                result=consensus,
-                agent="consensus",
-                success=True,
-            ))
+            outputs.append(
+                TaskOutput(
+                    description=task.description,
+                    result=consensus,
+                    agent="consensus",
+                    success=True,
+                )
+            )
         return outputs
 
     # ── internal ───────────────────────────────────────────────────────
@@ -236,12 +278,18 @@ class Crew:
     def _validate_setup(self) -> None:
         for task in self.tasks:
             if not task.agent:
-                raise CrewError(f"Task '{task.description[:50]}...' has no agent assigned")
+                raise CrewError(
+                    f"Task '{task.description[:50]}...' has no agent assigned"
+                )
             if task.agent not in self.agents:
-                raise CrewError(f"Task agent '{task.agent.role}' not in crew's agent list")
+                raise CrewError(
+                    f"Task agent '{task.agent.role}' not in crew's agent list"
+                )
             for dep in task.context:
                 if dep not in self.tasks:
-                    raise CrewError("Task has a dependency on a task that is not in this crew")
+                    raise CrewError(
+                        "Task has a dependency on a task that is not in this crew"
+                    )
 
     def _connect_agents(self) -> None:
         for i, a1 in enumerate(self.agents):

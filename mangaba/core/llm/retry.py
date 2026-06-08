@@ -16,7 +16,12 @@ from mangaba.core.events import EventBus, Event, EventType
 log = logging.getLogger(__name__)
 F = TypeVar("F", bound=Callable[..., Any])
 
-_DEFAULT_RETRYABLE: Set[Type[Exception]] = {RetryableError, RateLimitError, ConnectionError, TimeoutError}
+_DEFAULT_RETRYABLE: Set[Type[Exception]] = {
+    RetryableError,
+    RateLimitError,
+    ConnectionError,
+    TimeoutError,
+}
 
 
 def with_retry(
@@ -56,6 +61,7 @@ def with_retry(
         Returns:
             The wrapped function with retry logic applied.
         """
+
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """Wrapper function that implements the retry logic.
@@ -80,17 +86,30 @@ def with_retry(
                         break
 
                     # Compute delay
-                    delay = min(backoff_factor ** attempt, max_delay)
+                    delay = min(backoff_factor**attempt, max_delay)
                     if isinstance(exc, RateLimitError) and exc.retry_after:
                         delay = max(delay, exc.retry_after)
                     if jitter:
                         delay *= 0.5 + random.random()
 
-                    EventBus.emit(Event(
-                        event_type=EventType.LLM_RETRY,
-                        data={"attempt": attempt + 1, "max_retries": max_retries, "delay": round(delay, 2), "error": str(exc)},
-                    ))
-                    log.warning("Retry %d/%d after %.1fs – %s", attempt + 1, max_retries, delay, exc)
+                    EventBus.emit(
+                        Event(
+                            event_type=EventType.LLM_RETRY,
+                            data={
+                                "attempt": attempt + 1,
+                                "max_retries": max_retries,
+                                "delay": round(delay, 2),
+                                "error": str(exc),
+                            },
+                        )
+                    )
+                    log.warning(
+                        "Retry %d/%d after %.1fs – %s",
+                        attempt + 1,
+                        max_retries,
+                        delay,
+                        exc,
+                    )
                     time.sleep(delay)
 
             raise LLMError(

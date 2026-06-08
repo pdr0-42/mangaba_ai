@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # Event types
 # ---------------------------------------------------------------------------
 
+
 class EventType(str, Enum):
     # Agent
     AGENT_START = "agent_start"
@@ -73,6 +74,7 @@ class EventType(str, Enum):
 # Event model
 # ---------------------------------------------------------------------------
 
+
 class Event(BaseModel):
     """Immutable event emitted by framework components."""
 
@@ -89,6 +91,7 @@ class Event(BaseModel):
 # Callback ABC
 # ---------------------------------------------------------------------------
 
+
 class BaseCallback(ABC):
     """Abstract base for event handlers."""
 
@@ -101,12 +104,13 @@ class BaseCallback(ABC):
 
     @abstractmethod
     def on_event(self, event: Event) -> None:
-        ...
+        raise NotImplementedError("on_event() must be implemented")
 
 
 # ---------------------------------------------------------------------------
 # Callback manager
 # ---------------------------------------------------------------------------
+
 
 class CallbackManager:
     """Manages a collection of callbacks and dispatches events to them."""
@@ -126,7 +130,11 @@ class CallbackManager:
                 if cb.should_handle(event):
                     cb.on_event(event)
             except Exception:
-                logger.exception("Callback %s raised an error for event %s", type(cb).__name__, event.event_type)
+                logger.exception(
+                    "Callback %s raised an error for event %s",
+                    type(cb).__name__,
+                    event.event_type,
+                )
 
     @property
     def callbacks(self) -> List[BaseCallback]:
@@ -136,6 +144,7 @@ class CallbackManager:
 # ---------------------------------------------------------------------------
 # Global EventBus singleton
 # ---------------------------------------------------------------------------
+
 
 class EventBus:
     """Process-wide EventBus singleton.
@@ -177,7 +186,9 @@ class EventBus:
 class _FunctionCallback(BaseCallback):
     """Wraps a plain function as a BaseCallback."""
 
-    def __init__(self, fn: Callable[[Event], None], event_filter: Optional[Set[EventType]] = None) -> None:
+    def __init__(
+        self, fn: Callable[[Event], None], event_filter: Optional[Set[EventType]] = None
+    ) -> None:
         self._fn = fn
         self.event_filter = event_filter
 

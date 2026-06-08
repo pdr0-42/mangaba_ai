@@ -3,6 +3,7 @@ LLM Factory Module
 
 This module provides a factory function to create LLM clients for different providers.
 """
+
 from __future__ import annotations
 
 from typing import Any, Tuple
@@ -11,8 +12,9 @@ from .providers.constants import get_providers_dict
 from .client import LLMClient
 
 
-
-def create_llm_client(provider: str, api_key: str, model: str, **options: Any) -> "LLMClient":
+def create_llm_client(
+    provider: str, api_key: str, model: str, **options: Any
+) -> "LLMClient":
     """Create a unified LLM client for the specified provider.
 
     Supported providers:
@@ -39,15 +41,15 @@ def create_llm_client(provider: str, api_key: str, model: str, **options: Any) -
     Raises:
         ValueError: If provider, api_key, or model is not provided.
     """
+    from .client import LLMClient
+
     if not provider:
         raise ValueError("LLM provider name is required")
     if not api_key:
         raise ValueError("API key is required to initialise LLM provider")
     if not model:
         raise ValueError("Model name is required")
-    
-    from .client import LLMClient
-    
+
     return LLMClient(provider=provider, api_key=api_key, model=model, **options)
 
 

@@ -1,5 +1,3 @@
-
-
 """
 LLM Cache Base Module
 
@@ -10,7 +8,6 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 import hashlib
 import json
-
 
 
 class LLMCache(ABC):
@@ -27,7 +24,9 @@ class LLMCache(ABC):
         Returns:
             A SHA256 hash string that uniquely identifies the prompt+config combination.
         """
-        serialised = json.dumps({"prompt": prompt, **config}, sort_keys=True, default=str)
+        serialised = json.dumps(
+            {"prompt": prompt, **config}, sort_keys=True, default=str
+        )
         return hashlib.sha256(serialised.encode()).hexdigest()
 
     @abstractmethod
@@ -96,7 +95,9 @@ class LLMCache(ABC):
         """
         return self.get(self._cache_key(prompt, config))
 
-    def store(self, prompt: str, config: Dict[str, Any], value: str, ttl: Optional[int] = None) -> None:
+    def store(
+        self, prompt: str, config: Dict[str, Any], value: str, ttl: Optional[int] = None
+    ) -> None:
         """Store a response in the cache by prompt and configuration.
 
         Convenience method that generates the cache key from prompt and config.

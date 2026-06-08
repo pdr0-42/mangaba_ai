@@ -36,6 +36,7 @@ class TaskOutput:
         self.agent = agent
         self.success = success
         from datetime import datetime
+
         self.timestamp = datetime.now().isoformat()
 
     def __str__(self) -> str:
@@ -104,11 +105,13 @@ class Task:
             raise TaskError("No agent assigned to this task")
 
         self.status = "running"
-        EventBus.emit(Event(
-            event_type=EventType.TASK_START,
-            source_id=self.task_id,
-            data={"description": self.description[:200], "agent": self.agent.role},
-        ))
+        EventBus.emit(
+            Event(
+                event_type=EventType.TASK_START,
+                source_id=self.task_id,
+                data={"description": self.description[:200], "agent": self.agent.role},
+            )
+        )
 
         attempts = max(1, self.retry_on_failure + 1)
         last_err: Optional[Exception] = None
@@ -144,11 +147,13 @@ class Task:
                     self.callback(self.output)
 
                 self.status = "completed"
-                EventBus.emit(Event(
-                    event_type=EventType.TASK_END,
-                    source_id=self.task_id,
-                    data={"status": "completed"},
-                ))
+                EventBus.emit(
+                    Event(
+                        event_type=EventType.TASK_END,
+                        source_id=self.task_id,
+                        data={"status": "completed"},
+                    )
+                )
                 return self.output
 
             except Exception as exc:
@@ -165,11 +170,13 @@ class Task:
             agent=self.agent.role if self.agent else "unknown",
             success=False,
         )
-        EventBus.emit(Event(
-            event_type=EventType.TASK_ERROR,
-            source_id=self.task_id,
-            data={"error": str(last_err)},
-        ))
+        EventBus.emit(
+            Event(
+                event_type=EventType.TASK_ERROR,
+                source_id=self.task_id,
+                data={"error": str(last_err)},
+            )
+        )
         raise TaskError(f"Task failed: {last_err}", cause=last_err)
 
     # ── async execution ────────────────────────────────────────────────
@@ -201,6 +208,7 @@ class Task:
     def _save_to_file(self, content: str) -> None:
         try:
             import os
+
             directory = os.path.dirname(self.output_file)
             if directory:
                 os.makedirs(directory, exist_ok=True)

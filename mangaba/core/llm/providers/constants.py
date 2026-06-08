@@ -22,7 +22,7 @@ def _resolve_provider_class(provider_name: str) -> Type[BaseLLMProvider]:
     from .anthropic import AnthropicLLMProvider
     from .hugginface import HuggingFaceLLMProvider
     from .openrouter import OpenRouterLLMProvider
-    
+
     provider_map = {
         GoogleLLMProvider.name: GoogleLLMProvider,
         OpenAILLMProvider.name: OpenAILLMProvider,
@@ -30,7 +30,7 @@ def _resolve_provider_class(provider_name: str) -> Type[BaseLLMProvider]:
         HuggingFaceLLMProvider.name: HuggingFaceLLMProvider,
         OpenRouterLLMProvider.name: OpenRouterLLMProvider,
     }
-    
+
     provider_name = provider_name.lower()
     for provider_cls in provider_map.values():
         if provider_cls.matches(provider_name):
@@ -318,7 +318,7 @@ def get_providers_dict() -> Dict[str, Type[BaseLLMProvider]]:
     from .anthropic import AnthropicLLMProvider
     from .hugginface import HuggingFaceLLMProvider
     from .openrouter import OpenRouterLLMProvider
-    
+
     return {
         GoogleLLMProvider.name: GoogleLLMProvider,
         OpenAILLMProvider.name: OpenAILLMProvider,

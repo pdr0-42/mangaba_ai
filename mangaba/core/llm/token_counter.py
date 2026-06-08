@@ -48,6 +48,7 @@ class TokenCounter:
         """
         try:
             import tiktoken  # type: ignore
+
             enc = tiktoken.encoding_for_model(model or "gpt-4o-mini")
             return len(enc.encode(text))
         except Exception:

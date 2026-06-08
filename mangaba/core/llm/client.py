@@ -1,4 +1,3 @@
-
 """
 LLM provider engine for Mangaba AI v3.0
 
@@ -6,6 +5,7 @@ Supports native function-calling (tool use), streaming, token counting
 and a unified response format across Google, OpenAI, Anthropic and
 Hugging Face.
 """
+
 from __future__ import annotations
 
 import logging
@@ -22,6 +22,7 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # High-level client
 # ---------------------------------------------------------------------------
+
 
 class LLMClient:
     """Unified high-level LLM client with tool use and streaming support."""
@@ -64,14 +65,29 @@ class LLMClient:
         Raises:
             Exception: Propagates any exception from the underlying provider.
         """
-        EventBus.emit(Event(event_type=EventType.LLM_START, data={"prompt_preview": prompt[:200], "provider": self.provider_name}))
+        EventBus.emit(
+            Event(
+                event_type=EventType.LLM_START,
+                data={"prompt_preview": prompt[:200], "provider": self.provider_name},
+            )
+        )
         try:
             resp = self._provider.generate(prompt, **kwargs)
             self._track_usage(resp.usage)
-            EventBus.emit(Event(event_type=EventType.LLM_END, data={"tokens": resp.usage.total_tokens, "finish_reason": resp.finish_reason.value}))
+            EventBus.emit(
+                Event(
+                    event_type=EventType.LLM_END,
+                    data={
+                        "tokens": resp.usage.total_tokens,
+                        "finish_reason": resp.finish_reason.value,
+                    },
+                )
+            )
             return resp
         except Exception as exc:
-            EventBus.emit(Event(event_type=EventType.LLM_ERROR, data={"error": str(exc)}))
+            EventBus.emit(
+                Event(event_type=EventType.LLM_ERROR, data={"error": str(exc)})
+            )
             raise
 
     def generate_text(self, prompt: str, **kwargs: Any) -> str:
@@ -113,20 +129,34 @@ class LLMClient:
         Raises:
             Exception: Propagates any exception from the underlying provider.
         """
-        EventBus.emit(Event(
-            event_type=EventType.LLM_START,
-            data={"mode": "tool_use", "tools_count": len(tools or []), "provider": self.provider_name},
-        ))
+        EventBus.emit(
+            Event(
+                event_type=EventType.LLM_START,
+                data={
+                    "mode": "tool_use",
+                    "tools_count": len(tools or []),
+                    "provider": self.provider_name,
+                },
+            )
+        )
         try:
             resp = self._provider.generate_with_tools(messages, tools, **kwargs)
             self._track_usage(resp.usage)
-            EventBus.emit(Event(
-                event_type=EventType.LLM_END,
-                data={"tokens": resp.usage.total_tokens, "tool_calls": len(resp.tool_calls), "finish_reason": resp.finish_reason.value},
-            ))
+            EventBus.emit(
+                Event(
+                    event_type=EventType.LLM_END,
+                    data={
+                        "tokens": resp.usage.total_tokens,
+                        "tool_calls": len(resp.tool_calls),
+                        "finish_reason": resp.finish_reason.value,
+                    },
+                )
+            )
             return resp
         except Exception as exc:
-            EventBus.emit(Event(event_type=EventType.LLM_ERROR, data={"error": str(exc)}))
+            EventBus.emit(
+                Event(event_type=EventType.LLM_ERROR, data={"error": str(exc)})
+            )
             raise
 
     # -- streaming ----------------------------------------------------------
